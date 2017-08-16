@@ -1,0 +1,177 @@
+program hliClearanceSNC
+%{
+	#define	VC       	0
+	#define TOUT		5
+	#define	RA14ON		147
+	#define HLIPNK      137
+	#define	DA14ON      91
+	#define	B31ON       95
+	#define	B30ON       187
+	#define	B30OFF      92
+	#define DA14S1ON	93 
+	#define DA14S2ON	94
+}%
+/* Declare seq variables*/
+short HLI_INIT; 
+short HLI_SEL_STAGE;
+
+short HLI_VC; 
+short HLI_VNCS1;   
+short HLI_VNCS2;  
+
+string HLI_CLR_STATS; 
+string HLI_INTLCK_STATS;
+/* Associate SNL variables with epics output pv's*/
+assign	HLI_CLR_STATS		to	"{SYS}:HLI-CLR-STATS"; 
+assign	HLI_INTLCK_STATS	to	"{SYS}:HLI-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	HLI_VC 				to 	"{SYS}:HLI-VC"; 
+assign 	HLI_VNCS1 			to  "{SYS}:HLI-VNCS1";   
+assign 	HLI_VNCS2 			to 	"{SYS}:HLI-VNCS2";
+assign 	HLI_INIT 			to 	"{SYS}:HLI-INIT";
+assign	HLI_SEL_STAGE		to	"{SYS}:HLI-SEL-STAGE";
+
+monitor	HLI_VC;
+monitor	HLI_VNCS1;
+monitor	HLI_VNCS2;
+monitor	HLI_SEL_STAGE;
+
+ss HLI_clearance_status {
+    state init {
+		when (delay(4)) {
+			initVault();
+			printf("HORIZONTAL BEAMLINE VAULT INITIALISATION COMPLETED\n");
+		} state vault_nc_stage_1	
+    }
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("HORIZONTAL BEAMLINE VAULT IN CLEARED STATE\n");
+		} 
+
+		when (HLI_VC == RA14ON) {
+			HLI_update_failed(RA14ON);
+			printf("The roof is open\n");
+
+		} state vault_nc_stage_1
+
+				
+		when (HLI_VC == DA14ON) {
+			HLI_update_failed(DA14ON);
+			printf("Door A14 was opened\n");
+		} state vault_nc_stage_1
+
+
+		when (HLI_VC == HLIPNK) {
+			HLI_update_failed(HLIPNK);
+			printf("Panic button 30 was pressed\n");
+		} state vault_nc_stage_1
+	}
+	
+	/*VAULT NOT CLEARED STAGE 1*/
+	state vault_nc_stage_1 {
+
+		when (HLI_SEL_STAGE == 3) {
+			hli_clear_underway();
+		} state vault_nc_stage_2
+
+
+		when (HLI_VNCS1 == RA14ON) {
+			HLI_update_failed(RA14ON);
+			printf("The roof is open\n");
+		} state vault_nc_stage_1
+		
+		
+		when(HLI_VNCS1 == B30ON){
+			HLI_update_report(B30ON);		
+			/*printf("Waiting for Vault Clearance\n");*/
+		}state vault_nc_stage_1
+	}
+	
+	/*VAULT NOT CLEARED STAGE 2*/
+	state vault_nc_stage_2 {
+		
+		when (HLI_SEL_STAGE == 1) {
+			HLI_status();
+		} state vault_cleared
+
+
+		when (HLI_VNCS2 == B30OFF) {
+			HLI_update_report(B30OFF);
+			printf("Watchman 30 must be released\n");
+		} state vault_nc_stage_2
+		
+		
+		when (HLI_VNCS2 == RA14ON) {
+			HLI_update_failed(RA14ON);
+			printf("The roof is open\n");
+		} state vault_nc_stage_1
+			
+		
+		when (HLI_VNCS2 == TOUT) {
+			HLI_update_failed(TOUT);
+			printf("TIME OUT ERROR: RELEASE ALL WATCHMEN\n");
+		} state vault_nc_stage_1
+		
+		when (HLI_VNCS2 == DA14S1ON) {
+			HLI_update_report(DA14S1ON);
+			printf("Door A14 switch 1 is open\n");
+		} state vault_nc_stage_2
+		
+		
+		when (HLI_VNCS2 == DA14S2ON) {
+			HLI_update_report(DA14S2ON);
+			printf("Door A14 switch 2 is open\n");
+		} state vault_nc_stage_2
+		
+		
+		when (HLI_VNCS2 == B31ON) {
+			HLI_update_report(B31ON);
+			printf("Watchman 31 must be activated\n");
+		} state vault_nc_stage_2
+
+	}	
+}
+
+void initVault(){
+	HLI_INIT = TRUE;
+	not_cleared(HLI_CLR_STATS);
+	report_error(HLI_INTLCK_STATS, 54);
+	pvPut(HLI_INIT, SYNC);
+	pvPut(HLI_CLR_STATS, SYNC);
+	pvPut(HLI_INTLCK_STATS, SYNC);
+}
+
+////////////////////////////////////////////////////////////////////////
+void HLI_update_failed(short report)
+{
+	clear_failed(HLI_CLR_STATS);
+	pvPut(HLI_CLR_STATS, SYNC);
+	report_error(HLI_INTLCK_STATS, report);
+	pvPut(HLI_INTLCK_STATS, SYNC);
+}
+/////////////////////////////////////////////////////////////////////////
+void HLI_update_report(short intlck) {
+	report_error(HLI_INTLCK_STATS, intlck);
+	pvPut(HLI_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void HLI_status()
+{  
+	cleared(HLI_CLR_STATS);
+	pvPut(HLI_CLR_STATS, SYNC); 		
+	report_error(HLI_INTLCK_STATS, 54);
+	pvPut(HLI_INTLCK_STATS, SYNC);
+}
+//////////////////////////////////////////////////////////////////////////
+void hli_clear_underway()
+{  
+	clear_underway(HLI_CLR_STATS);
+	pvPut(HLI_CLR_STATS, SYNC); 		
+}
+/**********************************************************/
+%{
+	#include "vcs_var_mes.h"
+	
+}%

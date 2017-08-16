@@ -1,0 +1,177 @@
+program bsvClearanceSNC
+%{
+	#define	VC       	0
+	#define TOUT		5
+	#define	RA15ON		147
+	#define BSVPNK      128
+	#define	DA15ON      129
+	#define	B37ON       131
+	#define	B36ON       187
+	#define	B36OFF      130
+	#define DA15S1ON	133 
+	#define DA15S2ON	132
+}%
+/* Declare seq variables*/
+short BSV_INIT; 
+short BSV_SEL_STAGE;
+
+short BSV_VC; 
+short BSV_VNCS1;   
+short BSV_VNCS2;  
+
+string BSV_CLR_STATS; 
+string BSV_INTLCK_STATS;
+/* Associate SNL variables with epics output pv's*/
+assign	BSV_CLR_STATS		to	"{SYS}:BSV-CLR-STATS"; 
+assign	BSV_INTLCK_STATS	to	"{SYS}:BSV-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	BSV_VC 				to 	"{SYS}:BSV-VC"; 
+assign 	BSV_VNCS1 			to  "{SYS}:BSV-VNCS1";   
+assign 	BSV_VNCS2 			to 	"{SYS}:BSV-VNCS2";
+assign 	BSV_INIT 			to 	"{SYS}:BSV-INIT";
+assign	BSV_SEL_STAGE		to	"{SYS}:BSV-SEL-STAGE";
+
+monitor	BSV_VC;
+monitor	BSV_VNCS1;
+monitor	BSV_VNCS2;
+monitor	BSV_SEL_STAGE;
+
+ss BSV_clearance_status {
+    state init {
+		when (delay(4)) {
+			initVault();
+			printf("BSV INITIALISATION COMPLETED\n");
+		} state vault_nc_stage_1	
+    }
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("BSV IN CLEARED STATE\n");
+		} 
+
+		when (BSV_VC == RA15ON) {
+			BSV_update_failed(RA15ON);
+			printf("The roof is open\n");
+
+		} state vault_nc_stage_1
+
+				
+		when (BSV_VC == DA15ON) {
+			BSV_update_failed(DA15ON);
+			printf("Door A15 was opened\n");
+		} state vault_nc_stage_1
+
+
+		when (BSV_VC == BSVPNK) {
+			BSV_update_failed(BSVPNK);
+			printf("Panic button 36 was pressed\n");
+		} state vault_nc_stage_1
+	}
+	
+	/*VAULT NOT CLEARED STAGE 1*/
+	state vault_nc_stage_1 {
+
+		when (BSV_SEL_STAGE == 3) {
+			bsv_clear_underway();
+		} state vault_nc_stage_2
+
+
+		when (BSV_VNCS1 == RA15ON) {
+			BSV_update_failed(RA15ON);
+			printf("The roof is open\n");
+		} state vault_nc_stage_1
+		
+		
+		when(BSV_VNCS1 == B36ON){
+			BSV_update_report(B36ON);		
+			/*printf("Waiting for Vault Clearance\n");*/
+		}state vault_nc_stage_1
+	}
+	
+	/*VAULT NOT CLEARED STAGE 2*/
+	state vault_nc_stage_2 {
+		
+		when (BSV_SEL_STAGE == 1) {
+			BSV_status();
+		} state vault_cleared
+
+
+		when (BSV_VNCS2 == B36OFF) {
+			BSV_update_report(B36OFF);
+			printf("Watchman 36 must be released\n");
+		} state vault_nc_stage_2
+		
+		
+		when (BSV_VNCS2 == RA15ON) {
+			BSV_update_failed(RA15ON);
+			printf("The roof is open\n");
+		} state vault_nc_stage_1
+			
+		
+		when (BSV_VNCS2 == TOUT) {
+			BSV_update_failed(TOUT);
+			printf("TIME OUT ERROR: RELEASE ALL WATCHMEN\n");
+		} state vault_nc_stage_1
+		
+		when (BSV_VNCS2 == DA15S1ON) {
+			BSV_update_report(DA15S1ON);
+			printf("Door A15 switch 1 is open\n");
+		} state vault_nc_stage_2
+		
+		
+		when (BSV_VNCS2 == DA15S2ON) {
+			BSV_update_report(DA15S2ON);
+			printf("Door A15 switch 2 is open\n");
+		} state vault_nc_stage_2
+		
+		
+		when (BSV_VNCS2 == B37ON) {
+			BSV_update_report(B37ON);
+			printf("Watchman 37 must be activated\n");
+		} state vault_nc_stage_2
+
+	}	
+}
+
+void initVault(){
+	BSV_INIT = TRUE;
+	not_cleared(BSV_CLR_STATS);
+	report_error(BSV_INTLCK_STATS, 54);
+	pvPut(BSV_INIT, SYNC);
+	pvPut(BSV_CLR_STATS, SYNC);
+	pvPut(BSV_INTLCK_STATS, SYNC);
+}
+
+////////////////////////////////////////////////////////////////////////
+void BSV_update_failed(short report)
+{
+	clear_failed(BSV_CLR_STATS);
+	pvPut(BSV_CLR_STATS, SYNC);
+	report_error(BSV_INTLCK_STATS, report);
+	pvPut(BSV_INTLCK_STATS, SYNC);
+}
+/////////////////////////////////////////////////////////////////////////
+void BSV_update_report(short intlck) {
+	report_error(BSV_INTLCK_STATS, intlck);
+	pvPut(BSV_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void BSV_status()
+{  
+	cleared(BSV_CLR_STATS);
+	pvPut(BSV_CLR_STATS, SYNC); 		
+	report_error(BSV_INTLCK_STATS, 54);
+	pvPut(BSV_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////////////////
+void bsv_clear_underway()
+{  
+	clear_underway(BSV_CLR_STATS);
+	pvPut(BSV_CLR_STATS, SYNC); 		
+}
+/**********************************************************/
+%{
+	#include "vcs_var_mes.h"
+	
+}%

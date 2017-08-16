@@ -1,0 +1,180 @@
+program ssccabClearanceSNC
+%{
+	#define	VC       	0
+	#define TOUT		5
+	#define SSCCABPNK   14
+	#define	G5ON		12
+	#define	G5S1ON		8
+	#define	G5S2ON		9
+	#define	B17ON       10
+	#define	B16ON       187
+	#define	B16OFF      11
+	#define	DA001AON    13
+	#define DA001AS1ON	6
+	#define DA001AS2ON	7
+}%
+/* Declare seq variables*/
+short SSCCAB_INIT; 
+short SSCCAB_SEL_STAGE;
+
+short SSCCAB_VC; 
+short SSCCAB_VNCS1;   
+short SSCCAB_VNCS2;  
+
+string SSCCAB_CLR_STATS; 
+string SSCCAB_INTLCK_STATS;
+/* Associate SNL variables with epics output pv's*/
+assign	SSCCAB_CLR_STATS		to	"{SYS}:SSCCAB-CLR-STATS"; 
+assign	SSCCAB_INTLCK_STATS		to	"{SYS}:SSCCAB-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	SSCCAB_VC 				to 	"{SYS}:SSCCAB-VC"; 
+assign 	SSCCAB_VNCS1 			to  "{SYS}:SSCCAB-VNCS1";   
+assign 	SSCCAB_VNCS2 			to 	"{SYS}:SSCCAB-VNCS2";
+assign 	SSCCAB_INIT 			to 	"{SYS}:SSCCAB-INIT";
+assign	SSCCAB_SEL_STAGE		to	"{SYS}:SSCCAB-SEL-STAGE";
+
+monitor	SSCCAB_VC;
+monitor	SSCCAB_VNCS1;
+monitor	SSCCAB_VNCS2;
+monitor	SSCCAB_SEL_STAGE;
+
+ss SSCCAB_clearance_status {
+    state init {
+		when (delay(4)) {
+			initVault();
+			printf("SSC CABLE WAY INITIALISATION COMPLETED\n");
+		} state vault_nc_stage_1	
+    }
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("SSC CABLE WAY  IN CLEARED STATE\n");
+		} 
+
+		when (SSCCAB_VC == DA001AON) {
+			SSCCAB_update_failed(DA001AON);
+			printf("Door A001A was opened\n");
+		} state vault_nc_stage_1
+			
+			
+		when (SSCCAB_VC == G5ON) {
+			SSCCAB_update_failed(G5ON);
+			printf("Gate G5 was opened\n");
+
+		} state vault_nc_stage_1
+
+			
+		when (SSCCAB_VC == SSCCABPNK) {
+			SSCCAB_update_failed(SSCCABPNK);
+			printf("Panic button 16 was pressed\n");
+		} state vault_nc_stage_1
+	}
+	
+	/*VAULT NOT CLEARED STAGE 1*/
+	state vault_nc_stage_1 {
+
+		when (SSCCAB_SEL_STAGE == 3) {
+			SSCCAB_clear_underway();
+		} state vault_nc_stage_2
+		
+			
+		when(SSCCAB_VNCS1 == B16ON){
+			SSCCAB_update_report(B16ON);		
+		}state vault_nc_stage_1
+	}
+	
+	/*VAULT NOT CLEARED STAGE 2*/
+	state vault_nc_stage_2 {
+		
+		when (SSCCAB_SEL_STAGE == 1) {
+			SSCCAB_status();
+		} state vault_cleared
+			
+
+		when (SSCCAB_VNCS2 == B16OFF) {
+			SSCCAB_update_report(B16OFF);
+			printf("Watchman 16 must be released\n");
+		} state vault_nc_stage_2
+			
+		
+		when (SSCCAB_VNCS2 == TOUT) {
+			SSCCAB_update_failed(TOUT);
+			printf("TIME OUT ERROR: RELEASE ALL WATCHMEN\n");
+		} state vault_nc_stage_1
+			
+
+					
+		when (SSCCAB_VNCS2 == DA001AS1ON) {
+			SSCCAB_update_failed(DA001AS1ON);
+			printf("Door A001A switch 1 is open\n");
+		} state vault_nc_stage_2
+		
+		
+		when (SSCCAB_VNCS2 == DA001AS2ON) {
+			SSCCAB_update_failed(DA001AS2ON);
+			printf("Door A001A switch 2 is open\n");
+		} state vault_nc_stage_2
+						
+		
+		when (SSCCAB_VNCS2 == G5S1ON) {
+			SSCCAB_update_report(G5S1ON);
+			printf("Gate G5 switch 1 is open\n");
+		} state vault_nc_stage_1
+			
+			
+		when (SSCCAB_VNCS2 == G5S2ON) {
+			SSCCAB_update_report(G5S2ON);
+			printf("Gate G5 switch 2 is open\n");
+		} state vault_nc_stage_1
+		
+		
+		when (SSCCAB_VNCS2 == B17ON) {
+			SSCCAB_update_report(B17ON);
+			printf("Watchman 17 must be activated\n");
+		} state vault_nc_stage_2
+
+	}	
+}
+
+void initVault(){
+	SSCCAB_INIT = TRUE;
+	not_cleared(SSCCAB_CLR_STATS);
+	report_error(SSCCAB_INTLCK_STATS, 54);
+	pvPut(SSCCAB_INIT, SYNC);
+	pvPut(SSCCAB_CLR_STATS, SYNC);
+	pvPut(SSCCAB_INTLCK_STATS, SYNC);
+}
+
+////////////////////////////////////////////////////////////////////////
+void SSCCAB_update_failed(short report)
+{
+	clear_failed(SSCCAB_CLR_STATS);
+	pvPut(SSCCAB_CLR_STATS, SYNC);
+	report_error(SSCCAB_INTLCK_STATS, report);
+	pvPut(SSCCAB_INTLCK_STATS, SYNC);
+}
+/////////////////////////////////////////////////////////////////////////
+void SSCCAB_update_report(short intlck) {
+	report_error(SSCCAB_INTLCK_STATS, intlck);
+	pvPut(SSCCAB_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SSCCAB_status()
+{  
+	cleared(SSCCAB_CLR_STATS);
+	pvPut(SSCCAB_CLR_STATS, SYNC); 		
+	report_error(SSCCAB_INTLCK_STATS, 54);
+	pvPut(SSCCAB_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void SSCCAB_clear_underway()
+{  
+	clear_underway(SSCCAB_CLR_STATS);
+	pvPut(SSCCAB_CLR_STATS, SYNC); 		
+}
+/**********************************************************/
+%{
+	#include "vcs_var_mes.h"
+	
+}%
