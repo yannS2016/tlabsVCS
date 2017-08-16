@@ -1,0 +1,89 @@
+info from: 
+https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging
+https://stackoverflow.com/questions/9529497/what-is-origin-in-git
+
+create a branch in git use 
+# git branch
+
+the master branch is the main branch by default.
+to switch to another branch use 
+#git checkout "branch name"
+HEAD is a pointer to the local branch you currently on: initally it is on master
+
+origin is an alias on your system for a particular remote repository
+it is the remote branch from which you clone your local branc: your git repo representing the url you initially cloned
+in my case origin is : git://github.com/yannS2016/tlabsVCS.git
+
+
+#git push origin branchname origin is the remote repo from where originated branchname
+it update your remote repo with your accepted changes from all branches
+
+ place your modified file in the staging area
+#git add
+
+upload the local changes the remonte branch
+#git commit 
+to merge you must be in the branch you want to merge from i.e master
+#git --no-ff merge will merge it with any other branch of your choice: it is master by default
+
+when doing git checkout the branch you switch to receives the HEAD pointer and only sees the last commit it was on.
+new commit in different branch are not seen, thus the two branches are in different state
+ 
+
+#git checkout master
+
+That command did two things. It moved the HEAD pointer back to point to the master branch, and it reverted the files in your working directory back to the snapshot that master points to. This also means the changes you make from this point forward will diverge from an older version of the project
+
+It essentially rewinds the work you’ve done in your testing branch so you can go in a different direction
+
+#Switching branches changes files in your working directory
+#It’s important to note that when you switch branches in Git, files in your working directory will change. If you switch to an older branch, your working directory #will be reverted to look like it did the last time you committed on that branch. If Git cannot do it cleanly, it will not let you switch at all.
+
+ Both of those changes are isolated in separate branches: you can switch back and forth between the branches and merge them together when you’re ready. And you did all that with simple branch, checkout, and commit commands
+
+You can also see this easily with the git log command. If you run 
+#git log --oneline --decorate --graph --all 
+it will print out the history of your commits, showing where your branch pointers are and how your history has diverged.
+
+to create a branch an switch at once:
+#  git checkout command with the -b switch
+
+create a branch with local name vcsDevs_v1.0 at origin=git://github.com/yannS2016/tlabsVCS.git/vcsDevs_v1.0
+# git checkout -b vcsDevs_v1.0 origin/vcsDevs_v1.0  --- will hold the c devs
+# git checkout -b vcsDevs_v1.1 --- will hold the record logic and sequencer file devs
+
+commit with inline comment
+#git commit -a -m 'added a new footer [issue 53]'
+
+
+However, before you do that, note that if your working directory or staging area has uncommitted changes that conflict with the branch you’re checking out, Git won’t let you switch branches. It’s best to have a clean working state when you switch branches
+<<<<<<< HEAD
+
+
+You’ll notice the phrase “fast-forward” in that merge. Because the commit 71820cd pointed to by the branch hotfix you merged in was directly ahead of the commit 4d67e34 you’re on
+
+
+After your super-important fix is deployed, you’re ready to switch back to the work you were doing before you were interrupted. However, first you’ll delete the hotfix branch, because you no longer need it – the master branch points at the same place. You can delete it with the -d option to git branch:
+
+#git branch -d hotfix
+Deleted branch hotfix (3a0874c).
+
+# creating git repo 
+
+echo "# vault_clearance_system" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin https://github.com/yannS2016/vault_clearance_system.git
+git push -u origin master
+# push the local rep to remote: push everything it kind overwriting remote with local
+or push an existing repository from the command line: 
+git remote add origin https://github.com/yannS2016/vault_clearance_system.git
+git push -u origin master
+
+#### IMPORTANT##########
+ to updated any remote branch push the local changes with:
+ #git checkout branchnae
+ #git push origin branchname
+=======
+>>>>>>> master
