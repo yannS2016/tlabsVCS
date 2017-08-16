@@ -1,0 +1,176 @@
+program ev3ClearanceSNC
+%{
+	#define	VC       	0
+	#define TOUT		5
+	#define	RA8ON		147
+	#define EV3PNK      136
+	#define	DA8ON       111
+	#define	B23ON       115
+	#define	B22ON       187
+	#define	B22OFF      112
+	#define DA8S1ON		113 
+	#define DA8S2ON		114
+}%
+/* Declare seq variables*/
+short EV3_INIT; 
+short EV3_SEL_STAGE;
+
+short EV3_VC; 
+short EV3_VNCS1;   
+short EV3_VNCS2;    
+string EV3_CLR_STATS; 
+string EV3_INTLCK_STATS;
+/* Associate SNL variables with epics output pv's*/
+assign	EV3_CLR_STATS		to	"{SYS}:EV3-CLR-STATS"; 
+assign	EV3_INTLCK_STATS	to	"{SYS}:EV3-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	EV3_VC 				to 	"{SYS}:EV3-VC"; 
+assign 	EV3_VNCS1 			to  "{SYS}:EV3-VNCS1";   
+assign 	EV3_VNCS2 			to 	"{SYS}:EV3-VNCS2";
+assign 	EV3_INIT 			to 	"{SYS}:EV3-INIT";
+assign	EV3_SEL_STAGE		to	"{SYS}:EV3-SEL-STAGE";
+
+monitor	EV3_VC;
+monitor	EV3_VNCS1;
+monitor	EV3_VNCS2;
+monitor	EV3_SEL_STAGE;
+
+ss ev3_clearance_status {
+    state init {
+		when (delay(4)) {
+			initVault();
+			printf("EV3 INITIALISATION COMPLETED\n");
+		} state vault_nc_stage_1	
+    }
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("EV3 IN CLEARED STATE\n");
+		} 
+
+		when (EV3_VC == RA8ON) {
+			EV3_update_failed(RA8ON);
+			printf("The roof is open\n");
+
+		} state vault_nc_stage_1
+		
+		
+		when (EV3_VC == DA8ON) {
+			EV3_update_failed(DA8ON);
+			printf("Door A8 was opened\n");
+		} state vault_nc_stage_1
+
+
+		when (EV3_VC == EV3PNK) {
+			EV3_update_failed(EV3PNK);
+			printf("Panic button 22 was pressed\n");
+		} state vault_nc_stage_1
+	}
+	
+	/*VAULT NOT CLEARED STAGE 1*/
+	state vault_nc_stage_1 {
+
+		when (EV3_SEL_STAGE == 3) {
+			EV3_clear_underway();
+		} state vault_nc_stage_2
+
+
+		when (EV3_VNCS1 == RA8ON) {
+			EV3_update_failed(RA8ON);
+			printf("The roof is open\n");
+		} state vault_nc_stage_1
+		
+		
+		when(EV3_VNCS1 == B22ON){
+			EV3_update_report(B22ON);		
+			/*printf("Waiting for Vault Clearance\n");*/
+		}state vault_nc_stage_1
+	}
+	
+	/*VAULT NOT CLEARED STAGE 2*/
+	state vault_nc_stage_2 {
+		
+		when (EV3_SEL_STAGE == 1) {
+			EV3_status();
+		} state vault_cleared
+
+
+		when (EV3_VNCS2 == B22OFF) {
+			EV3_update_report(B22OFF);
+			printf("Watchman 22 must be released\n");
+		} state vault_nc_stage_2
+		
+		
+		when (EV3_VNCS2 == RA8ON) {
+			EV3_update_failed(RA8ON);
+			printf("The roof is open\n");
+		} state vault_nc_stage_1
+
+		
+		when (EV3_VNCS2 == TOUT) {
+			EV3_update_failed(TOUT);
+			printf("TIME OUT ERROR: RELEASE ALL WATCHMEN\n");
+		} state vault_nc_stage_1
+		
+		when (EV3_VNCS2 == DA8S1ON) {
+			EV3_update_report(DA8S1ON);
+			printf("Door A8 switch 1 is open\n");
+		} state vault_nc_stage_2
+		
+		
+		when (EV3_VNCS2 == DA8S2ON) {
+			EV3_update_report(DA8S2ON);
+			printf("Door A8 switch 2 is open\n");
+		} state vault_nc_stage_2
+		
+		
+		when (EV3_VNCS2 == B23ON) {
+			EV3_update_report(B23ON);
+			printf("Watchman 23 must be activated\n");
+		} state vault_nc_stage_2
+
+	}	
+}
+
+void initVault(){
+	EV3_INIT = TRUE;
+	not_cleared(EV3_CLR_STATS);
+	report_error(EV3_INTLCK_STATS, 54);
+	pvPut(EV3_INIT, SYNC);
+	pvPut(EV3_CLR_STATS, SYNC);
+	pvPut(EV3_INTLCK_STATS, SYNC);
+}
+
+////////////////////////////////////////////////////////////////////////
+void EV3_update_failed(short report)
+{
+	clear_failed(EV3_CLR_STATS);
+	pvPut(EV3_CLR_STATS, SYNC);
+	report_error(EV3_INTLCK_STATS, report);
+	pvPut(EV3_INTLCK_STATS, SYNC);
+}
+/////////////////////////////////////////////////////////////////////////
+void EV3_update_report(short intlck) {
+	report_error(EV3_INTLCK_STATS, intlck);
+	pvPut(EV3_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void EV3_status()
+{  
+	cleared(EV3_CLR_STATS);
+	pvPut(EV3_CLR_STATS, SYNC); 		
+	report_error(EV3_INTLCK_STATS, 54);
+	pvPut(EV3_INTLCK_STATS, SYNC);
+}
+//////////////////////////////////////////////////////////////////////
+void EV3_clear_underway()
+{  
+	clear_underway(EV3_CLR_STATS);
+	pvPut(EV3_CLR_STATS, SYNC); 		
+}
+/**********************************************************/
+%{
+	#include "vcs_var_mes.h"
+	
+}%

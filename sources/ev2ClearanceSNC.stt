@@ -1,0 +1,175 @@
+program ev2ClearanceSNC
+%{
+	#define	VC       	0
+	#define TOUT		5
+	#define	RA7ON		148
+	#define EV2PNK      135
+	#define	DA7ON       106
+	#define	B21ON       110
+	#define	B20ON       187
+	#define	B20OFF      107
+	#define DA7S1ON		108 
+	#define DA7S2ON		109
+}%
+/* Declare seq variables*/
+short EV2_INIT; 
+short EV2_SEL_STAGE;
+
+short EV2_VC; 
+short EV2_VNCS1;   
+short EV2_VNCS2;    
+string EV2_CLR_STATS; 
+string EV2_INTLCK_STATS;
+/* Associate SNL variables with epics output pv's*/
+assign	EV2_CLR_STATS		to	"{SYS}:EV2-CLR-STATS"; 
+assign	EV2_INTLCK_STATS	to	"{SYS}:EV2-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	EV2_VC 				to 	"{SYS}:EV2-VC"; 
+assign 	EV2_VNCS1 			to  "{SYS}:EV2-VNCS1";   
+assign 	EV2_VNCS2 			to 	"{SYS}:EV2-VNCS2";
+assign 	EV2_INIT 			to 	"{SYS}:EV2-INIT";
+assign	EV2_SEL_STAGE		to	"{SYS}:EV2-SEL-STAGE";
+
+monitor	EV2_VC;
+monitor	EV2_VNCS1;
+monitor	EV2_VNCS2;
+monitor	EV2_SEL_STAGE;
+
+ss ev2_clearance_status {
+    state init {
+		when (delay(4)) {
+			initVault();
+			printf("EV2 INITIALISATION COMPLETED\n");
+		} state vault_nc_stage_1	
+    }
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("EV2 IN CLEARED STATE\n");
+		} 
+		
+		when (EV2_VC == RA7ON) {
+			EV2_update_failed(RA7ON);
+			printf("Experimental vault 2 roof is open\n");
+		} state vault_nc_stage_1
+		
+		
+		when (EV2_VC == DA7ON) {
+			EV2_update_failed(DA7ON);
+			printf("Door A7 was opened\n");
+		} state vault_nc_stage_1
+
+
+		when (EV2_VC == EV2PNK) {
+			EV2_update_failed(EV2PNK);
+			printf("Panic button 20 was pressed\n");
+		} state vault_nc_stage_1
+	}
+	
+	/*VAULT NOT CLEARED STAGE 1*/
+	state vault_nc_stage_1 {
+
+		when (EV2_SEL_STAGE == 3) {
+			EV2_clear_underway();
+		} state vault_nc_stage_2
+
+
+		when (EV2_VNCS1 == RA7ON) {
+			EV2_update_failed(RA7ON);
+			printf("Experimental vault 2 roof is open\n");
+		} state vault_nc_stage_1
+		
+		
+		when(EV2_VNCS1 == B20ON){
+			EV2_update_report(B20ON);		
+			/*printf("Waiting for Vault Clearance\n");*/
+		}state vault_nc_stage_1
+	}
+	
+	/*VAULT NOT CLEARED STAGE 2*/
+	state vault_nc_stage_2 {
+		
+		when (EV2_SEL_STAGE == 1) {
+			EV2_status();
+		} state vault_cleared
+
+
+		when (EV2_VNCS2 == B20OFF) {
+			EV2_update_report(B20OFF);
+			printf("Watchman 20 must be released\n");
+		} state vault_nc_stage_2
+		
+		
+		when (EV2_VNCS2 == RA7ON) {
+			EV2_update_failed(RA7ON);
+			printf("Experimental vault 2 roof is open\n");
+		} state vault_nc_stage_1
+			
+		
+		when (EV2_VNCS2 == TOUT) {
+			EV2_update_failed(TOUT);
+			printf("TIME OUT ERROR: RELEASE ALL WATCHMEN\n");
+		} state vault_nc_stage_1
+		
+		when (EV2_VNCS2 == DA7S1ON) {
+			EV2_update_report(DA7S1ON);
+			printf("Door A7 switch 1 is open\n");
+		} state vault_nc_stage_2
+		
+		
+		when (EV2_VNCS2 == DA7S2ON) {
+			EV2_update_report(DA7S2ON);
+			printf("Door A7 switch 2 is open\n");
+		} state vault_nc_stage_2
+		
+		
+		when (EV2_VNCS2 == B21ON) {
+			EV2_update_report(B21ON);
+			printf("Watchman 21 must be activated\n");
+		} state vault_nc_stage_2
+
+	}	
+}
+
+void initVault(){
+	EV2_INIT = TRUE;
+	not_cleared(EV2_CLR_STATS);
+	report_error(EV2_INTLCK_STATS, 54);
+	pvPut(EV2_INIT, SYNC);
+	pvPut(EV2_CLR_STATS, SYNC);
+	pvPut(EV2_INTLCK_STATS, SYNC);
+}
+
+////////////////////////////////////////////////////////////////////////
+void EV2_update_failed(short report)
+{
+	clear_failed(EV2_CLR_STATS);
+	pvPut(EV2_CLR_STATS, SYNC);
+	report_error(EV2_INTLCK_STATS, report);
+	pvPut(EV2_INTLCK_STATS, SYNC);
+}
+/////////////////////////////////////////////////////////////////////////
+void EV2_update_report(short intlck) {
+	report_error(EV2_INTLCK_STATS, intlck);
+	pvPut(EV2_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void EV2_status()
+{  
+	cleared(EV2_CLR_STATS);
+	pvPut(EV2_CLR_STATS, SYNC); 		
+	report_error(EV2_INTLCK_STATS, 54);
+	pvPut(EV2_INTLCK_STATS, SYNC);
+}
+//////////////////////////////////////////////////////////////////////
+void EV2_clear_underway()
+{  
+	clear_underway(EV2_CLR_STATS);
+	pvPut(EV2_CLR_STATS, SYNC); 		
+}
+/**********************************************************/
+%{
+	#include "vcs_var_mes.h"
+	
+}%

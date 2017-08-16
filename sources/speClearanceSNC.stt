@@ -1,0 +1,177 @@
+program speClearanceSNC
+%{
+	#define	VC       	0
+	#define TOUT		5
+	#define	RA9ON		147
+	#define SPEPNK      116
+	#define	DA9ON       117
+	#define	B25ON       119
+	#define	B24ON       187
+	#define	B24OFF      118
+	#define DA9S1ON		121 
+	#define DA9S2ON		120
+}%
+/* Declare seq variables*/
+short SPE_INIT; 
+short SPE_SEL_STAGE;
+
+short SPE_VC; 
+short SPE_VNCS1;   
+short SPE_VNCS2;  
+
+string SPE_CLR_STATS; 
+string SPE_INTLCK_STATS;
+/* Associate SNL variables with epics output pv's*/
+assign	SPE_CLR_STATS		to	"{SYS}:SPE-CLR-STATS"; 
+assign	SPE_INTLCK_STATS	to	"{SYS}:SPE-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	SPE_VC 				to 	"{SYS}:SPE-VC"; 
+assign 	SPE_VNCS1 			to  "{SYS}:SPE-VNCS1";   
+assign 	SPE_VNCS2 			to 	"{SYS}:SPE-VNCS2";
+assign 	SPE_INIT 			to 	"{SYS}:SPE-INIT";
+assign	SPE_SEL_STAGE		to	"{SYS}:SPE-SEL-STAGE";
+
+monitor	SPE_VC;
+monitor	SPE_VNCS1;
+monitor	SPE_VNCS2;
+monitor	SPE_SEL_STAGE;
+
+ss SPE_clearance_status {
+    state init {
+		when (delay(4)) {
+			initVault();
+			printf("SPECTROMETER VAULT INITIALISATION COMPLETED\n");
+		} state vault_nc_stage_1	
+    }
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("SPECTROMETER VAULT VAULT IN CLEARED STATE\n");
+		} 
+
+		when (SPE_VC == RA9ON) {
+			SPE_update_failed(RA9ON);
+			printf("The roof is open\n");
+
+		} state vault_nc_stage_1
+
+				
+		when (SPE_VC == DA9ON) {
+			SPE_update_failed(DA9ON);
+			printf("Door A9 was opened\n");
+		} state vault_nc_stage_1
+
+
+		when (SPE_VC == SPEPNK) {
+			SPE_update_failed(SPEPNK);
+			printf("Panic button 24 was pressed\n");
+		} state vault_nc_stage_1
+	}
+	
+	/*VAULT NOT CLEARED STAGE 1*/
+	state vault_nc_stage_1 {
+
+		when (SPE_SEL_STAGE == 3) {
+			SPE_clear_underway();
+		} state vault_nc_stage_2
+
+
+		when (SPE_VNCS1 == RA9ON) {
+			SPE_update_failed(RA9ON);
+			printf("The roof is open\n");
+		} state vault_nc_stage_1
+		
+		
+		when(SPE_VNCS1 == B24ON){
+			SPE_update_report(B24ON);		
+			/*printf("Waiting for Vault Clearance\n");*/
+		}state vault_nc_stage_1
+	}
+	
+	/*VAULT NOT CLEARED STAGE 2*/
+	state vault_nc_stage_2 {
+		
+		when (SPE_SEL_STAGE == 1) {
+			SPE_status();
+		} state vault_cleared
+
+
+		when (SPE_VNCS2 == B24OFF) {
+			SPE_update_report(B24OFF);
+			printf("Watchman 24 must be released\n");
+		} state vault_nc_stage_2
+		
+		
+		when (SPE_VNCS2 == RA9ON) {
+			SPE_update_failed(RA9ON);
+			printf("The roof is open\n");
+		} state vault_nc_stage_1
+			
+		
+		when (SPE_VNCS2 == TOUT) {
+			SPE_update_failed(TOUT);
+			printf("TIME OUT ERROR: RELEASE ALL WATCHMEN\n");
+		} state vault_nc_stage_1
+		
+		when (SPE_VNCS2 == DA9S1ON) {
+			SPE_update_report(DA9S1ON);
+			printf("Door A9 switch 1 is open\n");
+		} state vault_nc_stage_2
+		
+		
+		when (SPE_VNCS2 == DA9S2ON) {
+			SPE_update_report(DA9S2ON);
+			printf("Door A9 switch 2 is open\n");
+		} state vault_nc_stage_2
+		
+		
+		when (SPE_VNCS2 == B25ON) {
+			SPE_update_report(B25ON);
+			printf("Watchman 25 must be activated\n");
+		} state vault_nc_stage_2
+
+	}	
+}
+
+void initVault(){
+	SPE_INIT = TRUE;
+	not_cleared(SPE_CLR_STATS);
+	report_error(SPE_INTLCK_STATS, 54);
+	pvPut(SPE_INIT, SYNC);
+	pvPut(SPE_CLR_STATS, SYNC);
+	pvPut(SPE_INTLCK_STATS, SYNC);
+}
+
+////////////////////////////////////////////////////////////////////////
+void SPE_update_failed(short report)
+{
+	clear_failed(SPE_CLR_STATS);
+	pvPut(SPE_CLR_STATS, SYNC);
+	report_error(SPE_INTLCK_STATS, report);
+	pvPut(SPE_INTLCK_STATS, SYNC);
+}
+/////////////////////////////////////////////////////////////////////////
+void SPE_update_report(short intlck) {
+	report_error(SPE_INTLCK_STATS, intlck);
+	pvPut(SPE_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SPE_status()
+{  
+	cleared(SPE_CLR_STATS);
+	pvPut(SPE_CLR_STATS, SYNC); 		
+	report_error(SPE_INTLCK_STATS, 54);
+	pvPut(SPE_INTLCK_STATS, SYNC);
+}
+//////////////////////////////////////////////////////////////////////////
+void SPE_clear_underway()
+{  
+	clear_underway(SPE_CLR_STATS);
+	pvPut(SPE_CLR_STATS, SYNC); 		
+}
+/**********************************************************/
+%{
+	#include "vcs_var_mes.h"
+	
+}%

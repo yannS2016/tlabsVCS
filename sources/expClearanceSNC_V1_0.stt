@@ -1,0 +1,563 @@
+program expClearanceSNC //("SYS=VCS")
+/*
+	System : Vault clearance
+	Porgram: Experimental vault clearance operator update 
+  	Date:	 Tue 01 Aug 2017 15:48:53 SAST 
+  	Author:	 Yann Mandza
+*/
+%{
+	#include "vcs_var_mes.h"
+	#define ERROR 		"\033[31;1m"	// red background
+	#define OK 			"\033[33;1m" 	// yellow background
+	#define CLR			"\033[32;1m"    // green background
+	#define DEF 		"\033[0m"    	// white background
+	#define RA12ON 		146  
+	#define	DA12ON		67 
+	#define	DA12OFF		74
+	#define	G9ON		150  
+	#define	G9OFF		152   
+	#define	G10ON		151  
+	#define	G10OFF		153          
+      
+	#define	EXPPNK 		18 
+	#define B28bON		79 
+	#define B28bOFF		73
+	#define B28aON		78 
+	#define B28aOFF		72
+	#define B27ON		77 
+	#define B27OFF		71
+	#define B29OFF		76 
+
+	 
+	#define EXPTOUT		4 
+}%
+
+/* Declare seq output variable */
+
+short switch_RF_A12_CLSD;			
+short switch_I_EXP_A12;
+short switch_II_EXP_A12;   
+short switch_G9_EXP_A12;  
+short switch_G10_EXP_A12;
+short WS_button_EXP_26;  
+short WS_button_EXP_27;
+short WS_button_EXP_28a;
+short WS_button_EXP_28b;  
+short WS_button_EXP_29; 
+
+short CL8_EXP; 
+short CS8_EXP;  
+short EXP_SNC_CLR; 
+ 
+short LED_WS_EXP_26;  
+short LED_WS_EXP_27;  
+short LED_WS_EXP_28a;     
+    
+short LED_WS_EXP_28b; 
+short LED_WS_EXP_29;
+
+string EXP_CLR_STATS; 
+string EXP_INTLCK_STATS;
+
+short watchman_EXP_26_active, watchman_EXP_27_active,  watchman_EXP_28a_active, watchman_EXP_28b_active, watchman_EXP_29_active,G10_A12_Closed; 
+short EXP_COUNTER;
+short EXP_TIMEOUT;
+
+/* Associate SNL variables with epics input pv's*/
+assign	CS8_EXP				to	"{SYS}:CS8-EXP"; 
+assign	CL8_EXP				to	"{SYS}:CL8-EXP";  
+assign	EXP_SNC_CLR			to	"{SYS}:EXP-SNC-CLR";       
+assign	LED_WS_EXP_26		to	"{SYS}:LED-WS-EXP-26";  
+assign	LED_WS_EXP_27		to	"{SYS}:LED-WS-EXP-27" ; 
+assign	LED_WS_EXP_28a		to	"{SYS}:LED-WS-EXP-28a";
+assign	LED_WS_EXP_28b		to	"{SYS}:LED-WS-EXP-28b"; 
+assign	LED_WS_EXP_29		to	"{SYS}:LED-WS-EXP-29"; 
+assign	EXP_CLR_STATS		to	"{SYS}:EXP-CLR-STATS"; 
+assign	EXP_INTLCK_STATS	to	"{SYS}:EXP-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign	switch_RF_A12_CLSD	to	"{SYS}:SW-RF-A12-CLSD";      
+assign	switch_I_EXP_A12	to	"{SYS}:SW-I-EXP-A12";        
+assign	switch_II_EXP_A12	to	"{SYS}:SW-II-EXP-A12"; 
+assign	switch_G9_EXP_A12	to	"{SYS}:SW-G9-EXP-A12";  
+assign	switch_G10_EXP_A12	to	"{SYS}:SW-G10-EXP-A12";      
+assign	WS_button_EXP_26	to	"{SYS}:WS-BUT-EXP-26"; 
+assign	WS_button_EXP_27	to	"{SYS}:WS-BUT-EXP-27"; 
+assign	WS_button_EXP_28a	to	"{SYS}:WS-BUT-EXP-28a";
+assign	WS_button_EXP_28b	to	"{SYS}:WS-BUT-EXP-28b";
+assign	WS_button_EXP_29	to	"{SYS}:WS-BUT-EXP-29";
+
+assign	EXP_COUNTER				to	"{SYS}:EXP-COUNTER";
+assign	EXP_TIMEOUT				to	"{SYS}:EXP-TIMEOUT";
+assign	watchman_EXP_26_active	to	"{SYS}:WATCHMAN-EXP-26-ACT";
+
+
+/**/
+monitor switch_RF_A12_CLSD;			
+monitor switch_I_EXP_A12;
+monitor switch_II_EXP_A12;   
+monitor switch_G9_EXP_A12;  
+monitor switch_G10_EXP_A12;
+monitor WS_button_EXP_26;  
+monitor WS_button_EXP_27;
+monitor WS_button_EXP_28a;
+monitor WS_button_EXP_28b;  
+monitor WS_button_EXP_29; 
+
+monitor EXP_COUNTER;
+monitor EXP_TIMEOUT;
+monitor watchman_EXP_26_active;
+
+
+short initialised = FALSE;
+
+short OP_flag1    = FALSE;
+short OP_flag2    = FALSE;
+short OP_flag3	  = FALSE;
+short OP_flag4    = FALSE;
+short OP_flag5    = FALSE;
+short OP_flag6	  = FALSE;
+short OP_flag7	  = FALSE;
+
+short A12_panic_but_pressed = FALSE;
+
+short clear_stage = 1;
+
+ss exp_vault_proc {
+
+	state init {
+		option -e;
+		entry {
+		
+			if(pvConnectCount() ==  pvAssignCount())
+			{
+				if(!initialised){
+					resetVault();
+					initialised = TRUE;
+				}
+			} // the else might not be neccesary as the epics shell detect this problem
+		}
+		when (delay(1)) {
+			if(initialised)
+	  			printf("%s\nEXP INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_26_status
+	}
+/*-----------------------------------------------------------------------------------------------------------------*/
+	state vault_clear { // we enter this state from init or when all clearance clear_stages are completed
+
+		option -e;
+		option -x;
+		entry {
+
+			printf("%s\nEXPERIMENTAL VAULT IN CLEAR STATE%s\n",CLR,DEF);
+		}
+
+		when(switch_RF_A12_CLSD) { // roof was opened
+			update_fail(RA12ON);
+			
+		} state watchman_26_status 
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		when(switch_I_EXP_A12  || switch_II_EXP_A12) { // Door A12 was opened
+
+			resetVault(); // reset vault outputs
+			report_error(EXP_INTLCK_STATS, DA12ON);
+			pvPut(EXP_INTLCK_STATS, SYNC);
+			
+		} state watchman_26_status
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		when(switch_G9_EXP_A12) { // Gate G9 was opened
+
+			resetVault(); // reset vault outputs
+			report_error(EXP_INTLCK_STATS, G9ON);
+			pvPut(EXP_INTLCK_STATS, SYNC);
+			
+		} state watchman_26_status
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		when(switch_G10_EXP_A12) { // Gate G10 was opened
+
+			resetVault(); // reset vault outputs
+			report_error(EXP_INTLCK_STATS, G10ON);
+			pvPut(EXP_INTLCK_STATS, SYNC);
+			
+		} state watchman_26_status
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	    when(!WS_button_EXP_27 || !WS_button_EXP_26 || !WS_button_EXP_28a || !WS_button_EXP_28b) { // Door A12 was opened
+
+			resetVault(); // reset vault outputs
+			report_error(EXP_INTLCK_STATS, EXPPNK);
+			pvPut(EXP_INTLCK_STATS, SYNC);
+			A12_panic_but_pressed =  TRUE;
+			printf("%sEXP CLEAR FAILED: PANIC CONDITION OCCURED%s\n",ERROR,DEF);
+		} state watchman_26_status
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		exit {
+
+			printf("%sEXP CLEAR FAILED: WAITING FOR VAULT CLEARANCE%s\n", ERROR,DEF);
+		}
+	}
+	/*------------------------------------------Stage 1 of clearance---------------------------------------------------*/
+	
+	state watchman_26_status { // The area is not cleared
+
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+		when(WS_button_EXP_26 && A12_panic_but_pressed) { 
+			if(!OP_flag1) {
+				OP_flag1 = TRUE;
+				A12_panic_but_pressed =  FALSE;
+			}
+		} state watchman_26_status
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		when(!WS_button_EXP_26 && !watchman_EXP_26_active && !A12_panic_but_pressed) { 
+			if(OP_flag1) {
+				printf("%sEXP WATCHMAN 26 ACTIVATED: CLEARANCE UNDERWAY%s\n",OK,DEF);
+				OP_flag1 = FALSE;
+			}
+
+		} state roof_A12_status
+
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+		when(!WS_button_EXP_26 && watchman_EXP_26_active) { // when we execute this both the but_26 ia being pressed  both roof and gate G9 are closed
+			if(!OP_flag2) {
+				printf("%sEXP CLEARANCE UNDERWAY: RELEASE WATCHMAN 26 %s\n",OK,DEF);
+				OP_flag2 = TRUE;
+			}
+
+		} state watchman_26_status
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		when(WS_button_EXP_26 && watchman_EXP_26_active) { 
+
+		} state roof_A12_status
+	}
+	/*-----------------------------------------------------------------------------------------------------------------*/
+	state roof_A12_status {
+		
+		when(switch_RF_A12_CLSD) {
+			if(!OP_flag3) {	
+		 		update_fail(146);										// G10_trans_1
+				printf("%sEXP CLEAR FAILED: ROOF A12 WAS OPENED%s\n",ERROR,DEF);
+				OP_flag3 = TRUE;
+				OP_flag5 = FALSE;
+
+			}
+			
+		} state watchman_26_status // roof was opened go back to testing watchman 26
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+		when(!switch_RF_A12_CLSD && !watchman_EXP_26_active) {				// G10_trans_2
+		
+			if(!OP_flag4) {
+				printf("%sEXP ROOF A12 CLOSED: CLEARANCE UNDERWAY%s\n",OK,DEF);
+				OP_flag4 = TRUE;
+			}
+			
+		} state switch_G9_status
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// this is executed as result of G9_trans_2 //
+		when(!switch_RF_A12_CLSD && watchman_EXP_26_active) { 				// G10_trans_3
+		
+			printf("%sEXP CLEARANCE STAGE 2%s\n", OK,DEF);
+			
+		} state exp_timer_status
+		
+	}
+	/*-----------------------------------------------------------------------------------------------------------------*/
+	state switch_G9_status {
+
+		option -x;
+
+		when(switch_G9_EXP_A12 ) { 											// G9_trans_1
+			if(!OP_flag5) {	
+				if(!watchman_EXP_26_active) {
+					update_fail(G9OFF);
+					printf("%sEXP CLEARANCE UNDERWAY: CLOSE GATE G9%s\n",ERROR,DEF);
+				}
+				else {
+					update_fail(G9ON);
+					printf("%sEXP CLEAR FAILED: GATE G9 WAS OPENED%s\n",ERROR,DEF);
+				}
+				OP_flag5 = TRUE;
+				OP_flag3 = FALSE;
+			}
+		} state watchman_26_status // test watchman 26 again
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// This is executed as a result of G10_trans_2 //
+		when(!switch_G9_EXP_A12 && !watchman_EXP_26_active) { 				// G9_trans_2
+		
+			printf("%sEXP CLEARANCE UNDERWAY: GATE G9 CLOSED%s\n",OK,DEF);
+			
+			update_stage1_outputs(); /* Update first stage outputs*/
+ 
+		}state watchman_26_status // here we already in stage 2
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// This is executed as a result of timer_trans_2 //
+		when(!switch_G9_EXP_A12 && watchman_EXP_26_active) { 				// G9_trans_3
+		
+			//printf("%sCLEARANCE UNDERWAY: STAGE 2 %s\n",OK,DEF);
+ 
+		}state switch_G10_status
+	}
+	/*--------------------------- Stage 2 of clearance  --------------------------------------------------------------*/
+	
+	state exp_timer_status {
+	
+		when(EXP_TIMEOUT) {   												// timer_trans_1
+			update_fail(EXPTOUT);
+			printf("%sEXP CLEAR FAILED: VAULT TIMEOUT%s\n",ERROR,DEF);		
+		
+		}state watchman_26_status // restart vault clearance
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// this is executed as result of G9_trans_3 //
+		when (!EXP_TIMEOUT) {												// timer_trans_2
+			
+		} state switch_G9_status  // this gate must be closed before we continu
+	
+	}   												
+	/*-------------------------------------------------------------------------------------------------------------*/
+	state switch_G10_status {
+	
+		when(switch_RF_A12_CLSD || switch_G9_EXP_A12 || EXP_TIMEOUT) {
+			OP_flag3 = FALSE;
+			OP_flag5 = FALSE;
+			printf("%sEXP CLEAR FAILED: TIMEOUT|ROOF A12|GATE G9%s\n",ERROR,DEF);	
+		
+		} state roof_A12_status
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+			
+		when(switch_G10_EXP_A12 && G10_A12_Closed) {
+			update_fail(G10ON);
+			printf("%sEXP CLEAR FAILED: GATE G10 WAS OPENED%s\n",ERROR,DEF);	
+		}state watchman_26_status
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+		when (switch_G10_EXP_A12 && !G10_A12_Closed) {
+			if(!OP_flag6) {
+				update_report(G10OFF);
+				printf("%sEXP CLEAR UNDERWAY: CLOSE GATE G10 %s\n",OK,DEF);
+				OP_flag6 =  TRUE;
+			}
+
+		} state switch_G10_status
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		when(!switch_G10_EXP_A12) {
+		
+			G10_A12_Closed = TRUE;
+		
+		} state  watchman_28b_status
+	}
+	/*-------------------------------------------------------------------------------------------------------------*/
+	state watchman_28b_status {
+	
+		when(switch_RF_A12_CLSD || switch_G9_EXP_A12 || EXP_TIMEOUT || switch_G10_EXP_A12) {
+			printf("%sEXP CLEAR FAILED: TIMEOUT|ROOF A12|GATE G9|GATE G10%s\n",ERROR,DEF);	
+		} state roof_A12_status
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+		when(!WS_button_EXP_28b && !watchman_EXP_28b_active) {
+			if(OP_flag7){
+				update_report(B28bON);
+				LED_WS_EXP_28b	= TRUE; 
+				pvPut(LED_WS_EXP_28b, SYNC);
+				watchman_EXP_28b_active =  TRUE;
+				printf("%sEXP CLEARANCE UNDERWAY: RELEASE WATCHMAN 28b%s\n",OK,DEF);
+				OP_flag7 =  FALSE;
+			}	
+				
+		} state watchman_28a_status // next state
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		when(WS_button_EXP_28b) {
+			if(!OP_flag7) {
+				update_report(B28bOFF);
+				printf("%sEXP CLEARANCE UNDERWAY: WATCHMAN 28b MUST BE ACTIVATED%s\n",OK,DEF);	
+				OP_flag7 =  TRUE;
+			}
+		} state watchman_28b_status
+	}
+	/*-------------------------------------------------------------------------------------------------------------*/
+	 state watchman_28a_status {
+	 
+		when(switch_RF_A12_CLSD || switch_G9_EXP_A12 || EXP_TIMEOUT || switch_G10_EXP_A12) {
+			printf("%sEXP CLEAR FAILED: TIMEOUT|ROOF A12|GATE G9|GATE G10%s\n",ERROR,DEF);	
+		} state roof_A12_status	 
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		when(!WS_button_EXP_28a && !watchman_EXP_28a_active) {
+			if(OP_flag7) {
+				update_report(B28aON);
+				LED_WS_EXP_28a	= TRUE; 
+				pvPut(LED_WS_EXP_28a, SYNC);
+				watchman_EXP_28a_active =  TRUE;	
+				printf("%sEXP CLEARANCE UNDERWAY: RELEASE WATCHMAN 28a%s\n",OK,DEF);
+				OP_flag7 =  FALSE;
+			}
+				
+		} state watchman_27_status	// next state
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+		when(WS_button_EXP_28a) {
+			if(!OP_flag7) {
+				update_report(B28aOFF);
+				printf("%sEXP CLEARANCE UNDERWAY: WATCHMAN 28a MUST BE ACTIVATED%s\n",OK,DEF);	
+				OP_flag7 = TRUE;
+			}
+		} state watchman_28a_status			
+	 }
+	 /*-------------------------------------------------------------------------------------------------------------*/
+	 state watchman_27_status {
+	 
+		when(switch_RF_A12_CLSD || switch_G9_EXP_A12 || EXP_TIMEOUT || switch_G10_EXP_A12) {
+			printf("%sEXP CLEAR FAILED: TIMEOUT|ROOF A12|GATE G9|GATE G10%s\n",ERROR,DEF);	
+		} state roof_A12_status	 
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		when(!WS_button_EXP_27 && !watchman_EXP_27_active) {
+			if(OP_flag7) {
+				update_report(B27ON);
+				LED_WS_EXP_27	= TRUE; 
+				pvPut(LED_WS_EXP_27, SYNC);
+				watchman_EXP_27_active =  TRUE;	
+				printf("%sEXP CLEARANCE UNDERWAY: RELEASE WATCHMAN 27%s\n",OK,DEF);
+				OP_flag7 =  FALSE;
+			}
+				
+		} state door_A12_status // next state	
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+		when(WS_button_EXP_27) {
+			if(!OP_flag7) {
+				update_report(B27OFF);
+				printf("%sEXP CLEARANCE UNDERWAY: WATCHMAN 27 MUST BE ACTIVATED%s\n",OK,DEF);
+				OP_flag7 =  TRUE;	
+			}
+		} state watchman_27_status			
+	 }	
+	 /*-------------------------------------------------------------------------------------------------------------*/
+	 state door_A12_status {
+		when(switch_RF_A12_CLSD || switch_G9_EXP_A12 || EXP_TIMEOUT || switch_G10_EXP_A12) {
+			printf("%sEXP CLEAR FAILED: TIMEOUT|ROOF A12|GATE G9|GATE G10%s\n",ERROR,DEF);	
+		} state roof_A12_status
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+	 	when(switch_I_EXP_A12 && switch_II_EXP_A12) {
+	 		if(!OP_flag7) {
+				update_report(DA12OFF);
+				printf("%sEXP CLEARANCE UNDERWAY: WAITING ON A12 TO CLOSE%s\n",OK,DEF);
+				OP_flag7 =  TRUE;
+			}
+	 	} state door_A12_status
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+	 	when(!switch_I_EXP_A12 && !switch_II_EXP_A12) {
+
+	 	} state watchman_29_status // next state
+	 } 
+	 /*-------------------------------------------------------------------------------------------------------------*/
+	 state watchman_29_status {
+	 
+		when(switch_RF_A12_CLSD || switch_G9_EXP_A12 || EXP_TIMEOUT || switch_G10_EXP_A12) {
+			printf("%sEXP CLEAR FAILED: TIMEOUT|ROOF A12|GATE G9|GATE G10%s\n",ERROR,DEF);	
+		} state roof_A12_status	 
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		when(!WS_button_EXP_29) {
+			update_stage2_outputs();
+
+		} state vault_clear // next state	
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+		when(WS_button_EXP_29) {
+			if(OP_flag7) {
+				update_report(B29OFF);
+				printf("%sEXP CLEARANCE UNDERWAY: WATCHMAN 29 MUST BE ACTIVATED%s\n",OK,DEF);
+				OP_flag7 = FALSE;
+			}	
+		} state watchman_29_status			
+	 }
+}
+
+void resetVars()
+{
+	not_cleared(EXP_CLR_STATS); 		// initial vault status
+	report_error(EXP_INTLCK_STATS, 50); // initial interlock
+	CS8_EXP			= FALSE;      
+	CL8_EXP			= FALSE;        
+	LED_WS_EXP_26	= FALSE;  
+	LED_WS_EXP_27	= FALSE;  
+	LED_WS_EXP_28a	= FALSE;      
+	EXP_SNC_CLR		= FALSE;     
+	LED_WS_EXP_28b	= FALSE; 
+	LED_WS_EXP_29	= FALSE;
+	EXP_COUNTER		= FALSE; //reset counter
+
+	G10_A12_Closed	= FALSE;
+	OP_flag1    	= FALSE;
+	OP_flag2    	= FALSE;
+	OP_flag3	  	= FALSE;
+	OP_flag4    	= FALSE;
+	OP_flag5    	= FALSE;
+	OP_flag6	  	= FALSE;
+	OP_flag7	  	= FALSE;
+	watchman_EXP_26_active  = FALSE;
+	watchman_EXP_27_active  = FALSE;
+	watchman_EXP_28a_active = FALSE;
+	watchman_EXP_28b_active = FALSE;
+	watchman_EXP_29_active  = FALSE;
+}
+void update_stage1_outputs()
+{
+
+	watchman_EXP_26_active = TRUE;
+	pvPut(watchman_EXP_26_active, SYNC);
+	
+	CS8_EXP			= TRUE;      
+	CL8_EXP			= TRUE;        
+	LED_WS_EXP_26	= TRUE; 
+	
+	pvPut(CS8_EXP, SYNC);
+	pvPut(CL8_EXP, SYNC);
+	pvPut(LED_WS_EXP_26, SYNC);
+	
+	update_report(68);
+	clear_underway(EXP_CLR_STATS);
+	pvPut(EXP_CLR_STATS, SYNC);
+	clear_stage = 2;
+
+}
+
+void update_stage2_outputs()
+{  
+	resetVault(); 				// reset vault outputs
+	cleared(EXP_CLR_STATS);
+	pvPut(EXP_CLR_STATS, SYNC); 		
+	LED_WS_EXP_29	= TRUE; 
+	EXP_SNC_CLR		= TRUE; 
+	pvPut(LED_WS_EXP_29, SYNC);
+	pvPut(EXP_SNC_CLR, SYNC);
+	report_error(EXP_INTLCK_STATS, 50);
+	pvPut(EXP_INTLCK_STATS, SYNC);
+
+}
+void update_report(short intlck) {
+	report_error(EXP_INTLCK_STATS, intlck);
+	pvPut(EXP_INTLCK_STATS, SYNC);
+}
+
+void update_fail(short report)
+{
+	resetVault(); // reset vault outputs
+	clear_failed(EXP_CLR_STATS);
+	pvPut(EXP_CLR_STATS, SYNC);
+	report_error(EXP_INTLCK_STATS, report);
+	pvPut(EXP_INTLCK_STATS, SYNC);
+	//pvPut(EXP_CLR_STATS, SYNC);
+
+}
+
+void resetVault()
+{
+	resetVars();
+	pvPut(CS8_EXP, SYNC);
+	pvPut(CL8_EXP, SYNC);
+	pvPut(EXP_SNC_CLR, SYNC);
+	pvPut(LED_WS_EXP_26, SYNC);
+	pvPut(LED_WS_EXP_27, SYNC);
+	pvPut(LED_WS_EXP_28a, SYNC);
+	pvPut(LED_WS_EXP_28b, SYNC);
+	pvPut(LED_WS_EXP_29, SYNC);
+	pvPut(EXP_CLR_STATS, SYNC);
+	pvPut(EXP_INTLCK_STATS, SYNC);
+	pvPut(EXP_COUNTER, SYNC);
+	pvPut(watchman_EXP_26_active, SYNC);
+
+}
+

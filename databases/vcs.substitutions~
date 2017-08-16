@@ -1,0 +1,11 @@
+###########################################################################
+#                        Vault clearance substitution file                         #
+############################################################################
+# EV1NCS1: Ev1 clearance is underway and is in stage 1
+# EV1NCS2: EV1 clearance is underway and is in stage 2
+# EV1S0:   EV1 is in clear stage
+# EV1NC:   EV1 has not entered any clear stage
+file "db/vcs_ev1.template" {
+pattern {   SYS   EV1S0	  EV1NCS1   EV1NCS2   EV1NC  EV1S1OK   EV1S2OK  EV1FLGON	B19ON   RA6ON	RA7ON   DA6ON   DA6S2ON     DA6S1ON   EV1TOUT   VCOK	EV1PNK  OUTON    RSTEV1  DN    SCAN }
+        {   VCS   1       2         3         -1     106       151      -2          109     152     153     105     108         107       6         0       138     1        2       3     ".2 second"}    
+}

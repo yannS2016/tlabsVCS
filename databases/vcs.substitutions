@@ -1,0 +1,57 @@
+###########################################################################
+#                        Vault clearance substitution file                         #
+############################################################################
+# S1: EV1 clearance is underway and is in stage 1
+# S2: EV1 clearance is underway and is in stage 2
+# S0:   EV1 is in clear stage
+# PNK:   EV1 has not entered any clear stage
+
+file "db/vcs_ev1.template" {
+pattern {	SYS	 S0  S1  S2	 PNK   TOUT		INITFAIL	 VCOK	B18ON  	B18OFF		B19ON	RA6ON		RA7ON		DA6ON		DA6S1ON  DA6S2ON   EV1PNK	ON	OFF   EV1TOUT   SCAN    }
+        {   VCS  1   2   3	 4	   5		-1	     	 0		187    	102			105     147     	148     	101     	103      104       134      1   0     120       ".2 second"}    
+}
+
+file "db/vcs_ev2.template" {
+pattern {	SYS	 S0  S1  S2	 PNK   TOUT		INITFAIL	 VCOK	B20ON  	B20OFF		B21ON	RA7ON		DA7ON		DA7S1ON  	DA7S2ON   EV2PNK	ON		OFF   EV2TOUT   SCAN    }
+        {   VCS  1   2   3	 4	   5		-1	     	 0		187    	107			110     148     	106     	108      	109       135      	1   	0     120       ".2 second"}    
+}
+
+
+file "db/vcs_ev3.template" {
+pattern {	SYS	 S0  S1  S2	 PNK   TOUT		INITFAIL	 VCOK	B22ON  	B22OFF		B23ON	RA8ON		DA8ON		DA8S1ON  	DA8S2ON   EV3PNK	ON		OFF   EV3TOUT   SCAN    }
+        {   VCS  1   2   3	 4	   5		-1	     	 0		187    	112			115     147     	111     	113      	114       136      	1   	0     120       ".2 second"}    
+}
+
+
+file "db/vcs_bsv.template" {
+pattern {	SYS	 S0  S1  S2	 PNK   TOUT		INITFAIL	 VCOK	B36ON  	B36OFF		B37ON	RA15ON		DA15ON		DA15S1ON  	DA15S2ON   BSVPNK	ON		OFF   BSVTOUT   SCAN    }
+        {   VCS  1   2   3	 4	   5		-1	     	 0		187    	130			131     147     	129     	133      	132        128      1   	0     120       ".2 second"}    
+}
+
+
+file "db/vcs_hli.template" {
+pattern {	SYS	 S0  S1  S2	 PNK   TOUT		INITFAIL	 VCOK	B30ON  	B30OFF		B31ON	RA14ON		DA14ON		DA14S1ON  	DA14S2ON   HLIPNK	ON		OFF   HLITOUT   SCAN    }
+        {   VCS  1   2   3	 4	   5		-1	     	 0		187    	92			95      147     	91      	93      	94         137      1   	0     120       ".2 second"}    
+}
+
+
+file "db/vcs_spe.template" {
+pattern {	SYS	 S0  S1  S2	 PNK   TOUT		INITFAIL	 VCOK	B24ON  	B24OFF		B25ON	RA9ON		DA9ON		DA9S1ON  	DA9S2ON   SPEPNK	ON		OFF   SPETOUT   SCAN    }
+        {   VCS  1   2   3	 4	   5		-1	     	 0		187    	118			119     147     	117      	121      	120       116       1   	0     120       ".2 second"}    
+}
+
+
+file "db/vcs_vli.template" {
+pattern {	SYS	 S0  S1  S2	 PNK   TOUT		INITFAIL	 VCOK	B32ON  	B32OFF		B33ON	G4ON	G4S1ON	G4S2ON		DA004ON		DA004S1ON  	DA004S2ON   VLIPNK	ON		OFF   VLITOUT   SCAN    }
+        {   VCS  1   2   3	 4	   5		-1	     	 0		187    	97			100     82		83     	84      	96     		98			99			138		1   	0     120       ".2 second"}    
+}
+
+file "db/vcs_a13a.template" {
+pattern {	SYS	 S0  S1  S2	 PNK   TOUT		INITFAIL	 VCOK	B9aON  	B9aOFF		B9bON		G5AON	G5AS1ON	 G5AS2ON	A13APNK		ON		OFF   A13ATOUT   SCAN    }
+        {   VCS  1   2   3	 4	   5		-1	     	 0		187    	141			142     	140		144      143      	139     	1   	0     120       ".2 second"}    
+}
+
+file "db/vcs_ssc_cable.template" {
+pattern {	SYS	 S0  S1  S2	 PNK   TOUT		INITFAIL	 VCOK	B16ON  	B16OFF	B17ON	A001AON		A001AS2ON	A001AS1ON	G5ON	G5S1ON	G5S2ON		SSCCABPNK		ON		OFF   SSCTOUT   SCAN    }
+        {   VCS  1   2   3	 4	   5		-1	     	 0		187    	11		10     	13		    7			6			12		8		9			14     			1   	0     120       ".2 second"}    
+}
