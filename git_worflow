@@ -47,6 +47,13 @@ it will print out the history of your commits, showing where your branch pointer
 
 to create a branch an switch at once:
 #  git checkout command with the -b switch
+
 create a branch with local name vcsDevs_v1.0 at origin=git://github.com/yannS2016/tlabsVCS.git/vcsDevs_v1.0
 # git checkout -b vcsDevs_v1.0 origin/vcsDevs_v1.0  --- will hold the c devs
-# git checkout -b vcsDevs_v1.1 origin/vcsDevs_v1.1  --- will hold the record logic and sequencer file devs
+# git checkout -b vcsDevs_v1.1 --- will hold the record logic and sequencer file devs
+
+commit with inline comment
+#git commit -a -m 'added a new footer [issue 53]'
+
+
+However, before you do that, note that if your working directory or staging area has uncommitted changes that conflict with the branch you’re checking out, Git won’t let you switch branches. It’s best to have a clean working state when you switch branches
