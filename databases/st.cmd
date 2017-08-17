@@ -27,14 +27,14 @@ iocInit
 
 ## Start any sequence programs
 
-seq ev1ClearanceSNC, "SYS=VCS"
-seq ev2ClearanceSNC, "SYS=VCS"
-seq ev3ClearanceSNC, "SYS=VCS"
-seq bsvClearanceSNC, "SYS=VCS"
-seq hliClearanceSNC, "SYS=VCS"
-seq speClearanceSNC, "SYS=VCS"
-seq vliClearanceSNC, "SYS=VCS"
-seq a13aClearanceSNC, "SYS=VCS"
-seq ssccabClearanceSNC, "SYS=VCS"
+#seq ev1ClearanceSNC, "SYS=VCS"
+#seq ev2ClearanceSNC, "SYS=VCS"
+#seq ev3ClearanceSNC, "SYS=VCS"
+#seq bsvClearanceSNC, "SYS=VCS"
+#seq hliClearanceSNC, "SYS=VCS"
+#seq speClearanceSNC, "SYS=VCS"
+#seq vliClearanceSNC, "SYS=VCS"
+#seq a13aClearanceSNC, "SYS=VCS"
+#seq ssccabClearanceSNC, "SYS=VCS"
 #seq  sncExample ,"SYS=VCS"
 #seq expClearanceSNC, "SYS=VCS" 
