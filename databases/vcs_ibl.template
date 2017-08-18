@@ -1,0 +1,426 @@
+############ SELECT THE NEXT PROCESSING BRANCH ##################
+record(calc, "$(SYS):IBL-SEL-STAGE") {
+  field(DESC, "Select processing branch")
+  field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
+  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(INITFAIL)")
+  field(INPA, "$(SYS):IBL-INIT")
+##IF BUTTON 9 or  8  IS STILL PRESSED PNK IS ACTIVE##
+  field(INPB, "$(SYS):IBL-PNK") 
+  field(INPC, "$(SYS):IBL-SNC-CLR")
+## THIS FLAG ENSURE WE ONLY RESPOND TO A SINGLE EVENT ON BUT 9 and 8##
+  field(INPD, "$(SYS):WATCHMAN-IBL-9-ACT.VAL")
+  field(FLNK, "$(SYS):IBL-PROC-STAGE")
+}
+## THIS RECORDS PROPAGATE PROCESSING ##
+record(fanout, "$(SYS):IBL-PROC-STAGE") {
+  field(SCAN, "Passive")
+  field(SELM, "Specified")
+  field(SELL, "$(SYS):IBL-SEL-STAGE")
+  field(LNK1, "$(SYS):IBL-VC")
+  field(LNK2, "$(SYS):IBL-VNCS1 PP")
+  field(LNK3, "$(SYS):IBL-VNCS3 PP")
+  field(LNK4, "$(SYS):IBL-PNK")
+}
+##################################################################################
+# monitor status of inputs which may cause clearance faillure
+# SIGNAL TO SYS: IBL-VC?IBL-SNC-CLR && (HARDWARE STATUS RECORDS):FALSE
+record(calcout, "$(SYS):IBL-VC") { 
+  field(DESC, "IBL Vault clear stage")
+  field(SCAN, "Passive")
+  field(CALC, "!A?B?!C?!D?E?$(IBLPNK):$(VCOK):$(DA13ON):$(GA1AON):$(A13AON):$(RA13ON)")
+# IN LIVE APP USE A FLNK FROM  SW-I-IBL-A1A OR SW-I-IBL-A1A (SCAN=Intr) TO PROCESS THIS RECORD
+# AND ACCES IT HERE WITH NPP OR ACCES IT WITH PP BUT USE NPP ON ITS INPUTS
+  field(INPA, "$(SYS):SW-RF-A13-CLSD.VAL PP")
+  field(INPB, "$(SYS):A13A-SNC-CLR.VAL PP")  
+  field(INPC, "$(SYS):IBL-GA1A-CLSD.VAL PP")
+  field(INPD, "$(SYS):IBL-DA13-CLSD.VAL PP")
+	  
+  field(INPE, "$(SYS):IBL-PNK.VAL PP")
+  field(OUT,  "$(SYS):RST-IBL.PROC PP")  
+  field(OOPT, "When Non-zero")
+  field(PINI, "YES")
+  field(VAL, "1") 
+}
+####################### RESET VAULT #################
+record(seq, "$(SYS):RST-IBL") { # MAY BE HANDLE BY SEQ
+  field(SCAN, "Passive")
+  field(DOL1, "0")
+  field(DOL2, "0")
+  field(DOL3, "0")
+  field(DOL4, "0")
+  field(DOL5, "0")
+  field(DOL6, "0")
+  field(DOL7, "0")
+  field(DOL8, "0")
+  field(DOL9, "0")
+  field(DOLA, "0")
+  field(LNK1, "$(SYS):IBL-SNC-CLR.VAL PP")
+  field(LNK2, "$(SYS):LED-WS-IBL-9.VAL PP")
+  field(LNK3, "$(SYS):LED-WS-IBL-8.VAL PP")
+  field(LNK4, "$(SYS):LED-WS-IBL-7.VAL PP")
+  field(LNK5, "$(SYS):CS5-IBL.VAL PP")
+  field(LNK6, "$(SYS):CL5-IBL.VAL PP")
+  field(LNK7, "$(SYS):IBL-COUNTER.VAL PP")
+  field(LNK8, "$(SYS):WATCHMAN-IBL-9-ACT.VAL")
+  field(LNK9, "$(SYS):WATCHMAN-IBL-8-ACT.VAL")
+  field(LNKA, "$(SYS):WATCHMAN-IBL-7-ACT.VAL")
+  field(SELM, "All")
+}
+########################################################################
+# formula to monitor status of inputs and set output in stage 1
+record(calc, "$(SYS):IBL-VNCS1") {
+  field(DESC, "Vault clearance stage 1")
+  field(SCAN, "Passive")
+  field(FLNK, "$(SYS):IBLS1-PROC-OUTS") 
+  field(CALC, "!A?!B?C?$(VCOK):$(A13AON):$(RA13ON):$(B9ON)")
+  field(INPA, "$(SYS):WS-BUT-IBL-9.VAL")
+  field(INPB, "$(SYS):SW-RF-A13-CLSD.VAL")
+  field(INPC, "$(SYS):A13A-SNC-CLR.VAL PP")    	  
+  field(PINI, "YES")
+}
+########################################################################
+record(fanout, "$(SYS):IBLS1-PROC-OUTS") {
+  field(SCAN, "Passive")
+  field(SELM, "Specified")
+  field(SELL, "$(SYS):IBLS1-OUT-STS.VAL PP")
+  field(LNK1, "$(SYS):IBLS1-WRT-OUTS PP")
+  field(LNK2, "$(SYS):RST-IBL PP")
+}
+
+# IF IBLS1-OUT-STS.VAL IS NON-ZERO RESET THE VAULT
+# OTHERWISE PROCESS STAGE 1 OUTPUTS
+record(calc, "$(SYS):IBLS1-OUT-STS") { 
+  field(SCAN, "Passive")
+  field(CALC, "!A?$(S0):$(S1)")
+  field(INPA, "$(SYS):IBL-VNCS1.VAL NPP")  
+}
+
+record(seq, "$(SYS):IBLS1-WRT-OUTS") { # MAY BE HANDLED BY SEQ
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DOL4, "0")
+  field(DOL5, "1")
+  field(LNK1, "$(SYS):CS5-IBL.VAL PP")
+  field(LNK2, "$(SYS):CL5-IBL.VAL PP")
+  field(LNK3, "$(SYS):LED-WS-IBL-9.VAL PP")
+  field(LNK4, "$(SYS):IBL-COUNTER.VAL PP")
+  field(LNK5, "$(SYS):WATCHMAN-IBL-9-ACT.VAL PP")
+  field(SCAN, "Passive")
+  field(SELM, "All")
+}
+
+##################################################################
+# 
+# !E||F IS USED FOR 2  CONDITION
+# B8ON IS NOT RETURN AFTER B8 IS PRESSED AND RELEASED
+# IBL-VNCS2 RETURN 0 SO WE CAN PROCEED TO STAGE 3.
+#
+record(calcout, "$(SYS):IBL-VNCS2") {
+  field(DESC, "Vault clearance stage 2")
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "A?!B?C?!D?!E?!F?!G?!H?(!I||J)?$(VCOK):$(B8ON):$(GA1AS4ON):$(GA1AS3ON):$(GA1AS2ON):$(GA1AS1ON):$(TOUT):$(A13AON):$(RA13ON):$(B9OFF)")	  
+  field(INPA, "$(SYS):IBL-WATCH-9-RLSD.VAL PP")	  
+  field(INPB, "$(SYS):SW-RF-A13-CLSD.VAL")
+  field(INPC, "$(SYS):A13A-SNC-CLR.VAL PP") 
+  field(INPD, "$(SYS):IBL-TIMEOUT.VAL")	   
+  field(INPE, "$(SYS):SW-I-SSC-A1A.VAL")
+  field(INPF, "$(SYS):SW-II-SSC-A1A.VAL")
+  field(INPG, "$(SYS):SW-III-SSC-A1A.VAL")
+  field(INPH, "$(SYS):SW-IV-SSC-A1A.VAL")	  
+  field(INPI, "$(SYS):WS-BUT-IBL-8.VAL")
+  field(INPJ, "$(SYS):WATCHMAN-IBL-8-ACT.VAL")	  
+  field(OUT,  "$(SYS):IBLS2-WRT-OUTS.PROC PP")  
+  field(OOPT, "When Zero") 
+  field(VAL, "1")
+}
+
+# THIS RECORDS IS PROCESSED ONLY WHEN IBL-VNCS2 RETURN 0
+# THAT IS IBL INTERLOCKS ARE CORRECT IN STAGE 2 SUB 1
+
+record(seq, "$(SYS):IBLS2-WRT-OUTS") {
+  field(SELM, "All")
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(LNK1, "$(SYS):WATCHMAN-IBL-8-ACT.VAL PP")
+  field(LNK2, "$(SYS):LED-WS-IBL-8.VAL PP")
+  field(SCAN, "Passive")
+}
+##########################################################################
+# STAGE 3 IS INNER TO STAGE 2 
+# WE CAN ACCESS STAGE 2 FAIL CONDITION THIS WAY BY RETURN ITS ORELATED PV IBL-VNCS2 VALUE
+# WHEN NOT 0. THUS B IS EITHER TOUT OR RA13S1ON OR RA13S2ON
+record(calcout, "$(SYS):IBL-VNCS3") {
+  field(DESC, "Vault clearance stage 3")
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(FLNK, "$(SYS):IBLS3-OUT-STS")
+  field(CALC, "!A?B?!C?!D?(!E&&!F)?$(VCOK):$(B7ON):$(DA13S2ON):$(DA13S1ON):$(B8OFF):A")		  
+  field(INPA, "$(SYS):IBL-VNCS2.VAL.VAL PP")
+  field(INPB, "$(SYS):IBL-WATCH-8-RLSD.VAL PP") # THIS MUST BE CALLED IN PP MODE	 	  
+  field(INPC, "$(SYS):SW-I-IBL-A13.VAL PP")
+  field(INPD, "$(SYS):SW-II-IBL-A13.VAL PP")
+  field(INPE, "$(SYS):WS-BUT-IBL-7.VAL PP")	  
+  field(INPF, "$(SYS):WATCHMAN-IBL-7-ACT.VAL PP")
+  field(OUT,  "$(SYS):IBLS3-WRT-OUTS.PROC PP")  
+  field(OOPT, "When Zero") 
+  field(VAL, "1")
+}
+
+# IF PREVIOUS INTERLOCKS(ROOF A13 OR TOUT OR DOOR A1A) CHANGED THEIR STATE
+# RESET THE VAULT, OTHERWISE DOOR A13 NEEDS TO BE CLOSED
+# OR PRESS WATCHMAN 7
+# OR RELEASE WATCHMAN 8
+record(calcout, "$(SYS):IBLS3-OUT-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "A=$(GA1AS1ON)||A=$(GA1AS2ON)||A=$(GA1AS3ON)||A=$(GA1AS4ON)||A=$(TOUT)||A=$(RA13ON)?$(ON):$(OFF)")
+  field(INPA, "$(SYS):IBL-VNCS3.VAL PP")
+  field(OUT,  "$(SYS):RST-IBL.PROC PP")  
+  field(OOPT, "When Non-zero") 
+  field(VAL, "0")
+}
+
+# THIS RECORDS IS PROCESSED ONLY WHEN IBL-VNCS2 RETRUN 0
+# THAT IS IBL INTERLOCKS ARE CORRECT IN STAGE 2 SUB 1	
+record(seq, "$(SYS):IBLS3-WRT-OUTS") {
+  field(SELM, "All")
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DOL4, "1")
+  field(DLY2, "0.02")
+  field(LNK1, "$(SYS):RST-IBL.PROC PP")
+  field(LNK2, "$(SYS):WATCHMAN-IBL-7-ACT.VAL PP")
+  field(LNK3, "$(SYS):IBL-SNC-CLR.VAL PP")
+  field(LNK4, "$(SYS):LED-WS-IBL-7.VAL PP")
+  field(SCAN, "Passive")
+}
+
+##########################################################################
+# WATCHMAN 9 RELEASED
+record(calc, "$(SYS):IBL-WATCH-9-RLSD") {
+  field(CALC, "A&&B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-IBL-9.VAL")
+  field(INPB, "$(SYS):WATCHMAN-IBL-9-ACT.VAL")
+}
+#####################################################################
+# WATCHMAN 8 RELEASED	
+record(calc, "$(SYS):IBL-WATCH-8-RLSD") {
+  field(CALC, "A&&B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-IBL-8.VAL")
+  field(INPB, "$(SYS):WATCHMAN-IBL-8-ACT.VAL")
+}
+#####################################################################
+# GATE A1A CLOSED
+record(calc, "$(SYS):IBL-GA1A-CLSD") {
+  field(CALC, "!A&&!B&&!C&&!D?$(OFF):$(ON)")
+  field(INPA, "$(SYS):SW-I-SSC-A1A.VAL")
+  field(INPB, "$(SYS):SW-II-SSC-A1A.VAL")
+  field(INPC, "$(SYS):SW-III-SSC-A1A.VAL")
+  field(INPD, "$(SYS):SW-IV-SSC-A1A.VAL")
+}
+#######################################################################
+#  RECOVER FROM PANIQUE 
+record(calc, "$(SYS):IBL-PNK") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A||!B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-IBL-9.VAL")
+  field(INPB, "$(SYS):WS-BUT-IBL-8.VAL")
+  field(VAL, "0")
+}
+
+#####################################################################
+# DOOR A13 CLOSED
+record(calc, "$(SYS):IBL-DA13-CLSD") {
+  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(INPA, "$(SYS):SW-I-IBL-A13.VAL")
+  field(INPB, "$(SYS):SW-II-IBL-A13.VAL")
+}
+##################################################################
+# TIMER PROCEDURE
+record(calc, "$(SYS):IBL-COUNTER") {
+  field(SCAN, "Passive")
+  field(CALC, "B?A+1:0")
+  field(INPA, "$(SYS):IBL-COUNTER.VAL")
+  field(INPB, "$(SYS):WATCHMAN-IBL-9-ACT.VAL")
+}
+record(calc, "$(SYS):IBL-TIMEOUT") {
+  field(SCAN, "1 second")
+  field(CALC, "A>=$(IBLTOUT)?$(ON):$(OFF)")
+  field(INPA, "$(SYS):IBL-COUNTER.VAL PP")
+}
+########################### Outputs ##################################
+
+record(bo, "$(SYS):IBL-SNC-CLR") {
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-IBL-9") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-IBL-8") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-IBL-7") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):CS5-IBL") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):CL5-IBL") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(stringout, "$(SYS):IBL-CLR-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+
+record(stringout, "$(SYS):IBL-INTLCK-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+################ INPUTS ###############################
+########  INIT THIS RECORD TO FALSE ######
+record(bo, "$(SYS):WATCHMAN-IBL-9-ACT") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "0")
+}
+
+record(bo, "$(SYS):WATCHMAN-IBL-8-ACT") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "0")
+}
+
+record(bo, "$(SYS):WATCHMAN-IBL-7-ACT") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "0")
+}
+
+record(bi, "$(SYS):WS-BUT-IBL-9") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):WS-BUT-IBL-8") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):WS-BUT-IBL-7") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-I-IBL-A13") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-II-IBL-A13") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+
+record(bi, "$(SYS):SW-I-SSC-A1A") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-II-SSC-A1A") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+record(bi, "$(SYS):SW-III-SSC-A1A") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+record(bi, "$(SYS):SW-IV-SSC-A1A") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+### THIS GATE IS NAMED AFTER VAULT VLI
+record(bi, "$(SYS):SW-RF-A13-CLSD") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+
+## THIS RECORDS MUST BE SET FROM THE SEQ ##
+record(bi, "$(SYS):IBL-INIT") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}

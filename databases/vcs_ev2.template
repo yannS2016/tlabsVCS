@@ -97,7 +97,7 @@ record(calc, "$(SYS):EV2-VNCS1") {
 
 # IF EV2S1-OUT-STS.VAL IS NON-ZERO RESET THE VAULT
 # OTHERWISE PROCESS STAGE 1 OUTPUTS
-record(calcout, "$(SYS):EV2S1-OUT-STS") { 
+record(calc, "$(SYS):EV2S1-OUT-STS") { 
   field(SCAN, "Passive")
   field(CALC, "!A?$(S0):$(S1)")
   field(INPA, "$(SYS):EV2-VNCS1.VAL NPP")  

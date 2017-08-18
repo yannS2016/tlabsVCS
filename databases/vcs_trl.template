@@ -352,11 +352,3 @@ record(bi, "$(SYS):TRL-INIT") {
   field(ZNAM, "OFF")
   field(ONAM, "ON")
 }
-
-record(bi, "$(SYS):WS-BUT-TRL-34b") {
-  field(SCAN, "Passive")
-  field(VAL, "1")
-  field(PINI, "YES")
-  field(ZNAM, "OFF")
-  field(ONAM, "ON")
-}
