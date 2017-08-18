@@ -142,7 +142,7 @@ record(calcout, "$(SYS):EXP-VNCS2") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(FLNK, "$(SYS):EXPS2-OUT-STS")
-  field(CALC, "A?!B?!C?!D?!E?!F||G?$(VCOK):$(B28bON):E:$(G9OFF):$(TOUT):$(RA12ON):$(B26OFF)")	  
+  field(CALC, "A?!B?!C?!D?!E?!F||G?$(VCOK):$(B28bON):E:$(G9ON):$(TOUT):$(RA12ON):$(B26OFF)")	  
   field(INPA, "$(SYS):EXP-WATCH-26-RLSD.VAL PP") # THIS MUST BE CALLED IN PP	  
   field(INPB, "$(SYS):SW-RF-A12-CLSD.VAL")
   field(INPC, "$(SYS):EXP-TIMEOUT.VAL PP") # THIS MUST BE CALLED IN PP
@@ -183,6 +183,7 @@ record(seq, "$(SYS):EXPS2-WRT-OUTS") {
 # RESET THE VAULT, OTHERWISE DOOR A12 NEEDS TO BE CLOSED
 # OR PRESS WATCHMAN 28a
 # OR RELEASE WATCHMAN 28b
+
 record(calcout, "$(SYS):EXPS2-OUT-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
