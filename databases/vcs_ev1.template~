@@ -2,7 +2,7 @@
 record(calc, "$(SYS):EV1-SEL-STAGE") {
   field(DESC, "Select processing branch")
   field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
-  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(INITFAIL)")
+  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(FAIL)")
   field(INPA, "$(SYS):EV1-INIT")
 ##IF BUTTON 18 IS STILL PRESSED PNK IS ACTIVE##
   field(INPB, "$(SYS):EV1-PNK") 
@@ -83,33 +83,37 @@ record(calc, "$(SYS):EV1-PNK") {
   field(INPA, "$(SYS):WS-BUT-EV1-18.VAL")
   field(VAL, "0")
 }
-# formula to monitor status of inputs and set output in stage 1
-record(calc, "$(SYS):EV1-VNCS1") {
+###############################################################################################
+# PB1: if the vault is left not clear we will be  uneccessarly writing to output everytime
+# 	   we process this record: version 2 of the code will address that
+# Note: this is not problematic unless we dealing with SPC1  or SPC2 or SSC which share outputs
+#		between basement and ground floor
+record(calcout, "$(SYS):EV1-VNCS1") {
   field(DESC, "Vault clearance stage 1")
   field(SCAN, "Passive")
-  field(FLNK, "$(SYS):EV1S1-PROC-OUTS") 
+  field(FLNK, "$(SYS):EV1S1-OUT-STS") 
   field(CALC, "!A?!B?!C?$(VCOK):$(RA7ON):$(RA6ON):$(B18OFF)")
   field(INPA, "$(SYS):WS-BUT-EV1-18.VAL")
   field(INPB, "$(SYS):SW-RF-A6-CLSD.VAL")
-  field(INPC, "$(SYS):SW-RF-A7-CLSD.VAL")  
+  field(INPC, "$(SYS):SW-RF-A7-CLSD.VAL")
+  field(OUT,  "$(SYS):EV1S1-WRT-OUTS.PROC PP")  
+  field(OOPT, "When Zero")  
   field(PINI, "YES")
-  field(VAL, "1")  
+
 }
 ####################### STAGE 1 OUTPUTS STATUS  #################
 
-# IF EV1S1-OUT-STS.VAL IS NON-ZERO RESET THE VAULT
-# OTHERWISE PROCESS STAGE 1 OUTPUTS
-record(calc, "$(SYS):EV1S1-OUT-STS") { 
+# DO NOT CHANGE OUTPUTS STATE UNLESS B18 IS ACTIVATED WITH
+# ROOF A6 AND A7 BEING CLOSED
+# 
+record(calcout, "$(SYS):EV1S1-OUT-STS") {
   field(SCAN, "Passive")
-  field(CALC, "!A?$(S0):$(S1)")
-  field(INPA, "$(SYS):EV1-VNCS1.VAL NPP")  
-}
-record(fanout, "$(SYS):EV1S1-PROC-OUTS") {
-  field(SCAN, "Passive")
-  field(SELM, "Specified")
-  field(SELL, "$(SYS):EV1S1-OUT-STS.VAL PP")
-  field(LNK1, "$(SYS):EV1S1-WRT-OUTS PP")
-  field(LNK2, "$(SYS):RST-EV1 PP")
+  field(PINI, "YES")
+  field(CALC, "A=$(B18OFF)?$(ON):$(OFF)")
+  field(INPA, "$(SYS):EV1-VNCS1.VAL")
+  field(OUT,  "$(SYS):RST-EV1.PROC PP")  
+  field(OOPT, "When Non-zero") 
+  field(VAL, "0")
 }
 
 record(seq, "$(SYS):EV1S1-WRT-OUTS") { # HANDLE BY SEQ
@@ -146,7 +150,6 @@ record(calcout, "$(SYS):EV1-VNCS2") {
   field(INPG, "$(SYS):WS-BUT-EV1-19.VAL")
   field(OUT,  "$(SYS):EV1S2-WRT-OUTS.PROC PP")  
   field(OOPT, "When Zero") 
-  field(VAL, "1")
 }
 
 ####################### STAGE 2 OUTPUTS STATUS  #################

@@ -2,7 +2,7 @@
 record(calc, "$(SYS):IBL-SEL-STAGE") {
   field(DESC, "Select processing branch")
   field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
-  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(INITFAIL)")
+  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(FAIL)")
   field(INPA, "$(SYS):IBL-INIT")
 ##IF BUTTON 9 or  8  IS STILL PRESSED PNK IS ACTIVE##
   field(INPB, "$(SYS):IBL-PNK") 
@@ -72,7 +72,7 @@ record(calc, "$(SYS):IBL-VNCS1") {
   field(DESC, "Vault clearance stage 1")
   field(SCAN, "Passive")
   field(FLNK, "$(SYS):IBLS1-PROC-OUTS") 
-  field(CALC, "!A?!B?C?$(VCOK):$(A13AON):$(RA13ON):$(B9ON)")
+  field(CALC, "!A?!B?C?$(VCOK):$(A13AON):$(RA13ON):$(B9OFF)")
   field(INPA, "$(SYS):WS-BUT-IBL-9.VAL")
   field(INPB, "$(SYS):SW-RF-A13-CLSD.VAL")
   field(INPC, "$(SYS):A13A-SNC-CLR.VAL PP")    	  
@@ -120,7 +120,7 @@ record(calcout, "$(SYS):IBL-VNCS2") {
   field(DESC, "Vault clearance stage 2")
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "A?!B?C?!D?!E?!F?!G?!H?(!I||J)?$(VCOK):$(B8ON):$(GA1AS4ON):$(GA1AS3ON):$(GA1AS2ON):$(GA1AS1ON):$(TOUT):$(A13AON):$(RA13ON):$(B9OFF)")	  
+  field(CALC, "A?!B?C?!D?!E?!F?!G?!H?(!I||J)?$(VCOK):$(B8OFF):$(GA1AS4ON):$(GA1AS3ON):$(GA1AS2ON):$(GA1AS1ON):$(TOUT):$(A13AON):$(RA13ON):$(B9ON)")	  
   field(INPA, "$(SYS):IBL-WATCH-9-RLSD.VAL PP")	  
   field(INPB, "$(SYS):SW-RF-A13-CLSD.VAL")
   field(INPC, "$(SYS):A13A-SNC-CLR.VAL PP") 
@@ -156,7 +156,7 @@ record(calcout, "$(SYS):IBL-VNCS3") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(FLNK, "$(SYS):IBLS3-OUT-STS")
-  field(CALC, "!A?B?!C?!D?(!E&&!F)?$(VCOK):$(B7ON):$(DA13S2ON):$(DA13S1ON):$(B8OFF):A")		  
+  field(CALC, "!A?B?!C?!D?(!E&&!F)?$(VCOK):$(B7OFF):$(DA13S2ON):$(DA13S1ON):$(B8ON):A")		  
   field(INPA, "$(SYS):IBL-VNCS2.VAL.VAL PP")
   field(INPB, "$(SYS):IBL-WATCH-8-RLSD.VAL PP") # THIS MUST BE CALLED IN PP MODE	 	  
   field(INPC, "$(SYS):SW-I-IBL-A13.VAL PP")
