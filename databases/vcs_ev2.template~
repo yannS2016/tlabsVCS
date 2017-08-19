@@ -2,7 +2,7 @@
 record(calc, "$(SYS):EV2-SEL-STAGE") {
   field(DESC, "Select processing branch")
   field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
-  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(FAIL)")
+  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(INITFAIL)")
   field(INPA, "$(SYS):EV2-INIT")
 ##IF BUTTON 20 IS STILL PRESSED PNK IS ACTIVE##
   field(INPB, "$(SYS):EV2-PNK") 

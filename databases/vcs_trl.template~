@@ -2,7 +2,7 @@
 record(calc, "$(SYS):TRL-SEL-STAGE") {
   field(DESC, "Select processing branch")
   field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
-  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(FAIL)")
+  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(INITFAIL)")
   field(INPA, "$(SYS):TRL-INIT")
 ##IF BUTTON 34a or  34b  IS STILL PRESSED PNK IS ACTIVE##
   field(INPB, "$(SYS):TRL-PNK") 
@@ -75,7 +75,7 @@ record(calc, "$(SYS):TRL-PNK") {
 record(calcout, "$(SYS):TRL-VNCS1") {
   field(DESC, "Vault clearance stage 1")
   field(SCAN, "Passive")
-  field(CALC, "!A?$(VCOK):$(B34aOFF)")
+  field(CALC, "!A?$(VCOK):$(B34aON)")
   field(INPA, "$(SYS):WS-BUT-TRL-34a.VAL")
   field(OUT,  "$(SYS):TRLS1-WRT-OUTS.PROC PP")  
   field(OOPT, "When Zero") 
@@ -104,7 +104,7 @@ record(calcout, "$(SYS):TRL-VNCS2") {
   field(PINI, "YES")
 #  field(FLNK, "$(SYS):TRLS2-OUT-STS")
 # CONTINUE CLEARANCE STAGE 2 SUB 1
-  field(CALC, "A?!B?!C?!D?(!E||F)?$(VCOK):$(B34bOFF):$(G4S2ON):$(G4S1ON):$(TOUT):$(B34aON)")	  
+  field(CALC, "A?!B?!C?!D?(!E||F)?$(VCOK):$(B34bON):$(G4S2ON):$(G4S1ON):$(TOUT):$(B34aOFF)")	  
   field(INPA, "$(SYS):TRL-WATCH-34a-RLSD.VAL PP")
   field(INPB, "$(SYS):TRL-TIMEOUT.VAL")
   field(INPC, "$(SYS):SW-I-VLI-G4.VAL")
@@ -138,7 +138,7 @@ record(calcout, "$(SYS):TRL-VNCS3") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(FLNK, "$(SYS):TRLS3-OUT-STS")
-  field(CALC, "!A?B?!C?!D?(!E&&!F)?$(VCOK):$(B35OFF):$(DA004AS2ON):$(DA004AS1ON):$(B34bON):A")	  
+  field(CALC, "!A?B?!C?!D?(!E&&!F)?$(VCOK):$(B35ON):$(DA004AS2ON):$(DA004AS1ON):$(B34bOFF):A")	  
   field(INPA, "$(SYS):TRL-VNCS2.VAL.VAL PP")
   field(INPB, "$(SYS):TRL-WATCH-34b-RLSD.VAL PP") # THIS MUST BE CALLED IN PP MODE
 	 

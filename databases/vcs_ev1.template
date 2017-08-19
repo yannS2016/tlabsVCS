@@ -2,7 +2,7 @@
 record(calc, "$(SYS):EV1-SEL-STAGE") {
   field(DESC, "Select processing branch")
   field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
-  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(INITFAIL)")
+  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(FAIL)")
   field(INPA, "$(SYS):EV1-INIT")
 ##IF BUTTON 18 IS STILL PRESSED PNK IS ACTIVE##
   field(INPB, "$(SYS):EV1-PNK") 
@@ -88,7 +88,7 @@ record(calc, "$(SYS):EV1-VNCS1") {
   field(DESC, "Vault clearance stage 1")
   field(SCAN, "Passive")
   field(FLNK, "$(SYS):EV1S1-PROC-OUTS") 
-  field(CALC, "!A?!B?!C?$(VCOK):$(RA7ON):$(RA6ON):$(B18ON)")
+  field(CALC, "!A?!B?!C?$(VCOK):$(RA7ON):$(RA6ON):$(B18OFF)")
   field(INPA, "$(SYS):WS-BUT-EV1-18.VAL")
   field(INPB, "$(SYS):SW-RF-A6-CLSD.VAL")
   field(INPC, "$(SYS):SW-RF-A7-CLSD.VAL")  
@@ -130,12 +130,13 @@ record(seq, "$(SYS):EV1S1-WRT-OUTS") { # HANDLE BY SEQ
 ####################################################################################################
 ## IF WATCHMAN 18 RELEASE CONTINUE CLEARANCE
 ## WE TEST IT IN "EV1-WATCH-18-RLSD" RECORD
+
 record(calcout, "$(SYS):EV1-VNCS2") {
   field(DESC, "Vault clearance stage 2")
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(FLNK, "$(SYS):EV1S2-OUT-STS") 
-  field(CALC, "A?!B?!C?!D?!E?!F?!G?$(VCOK):$(B19ON):$(DA6S2ON):$(DA6S1ON):$(TOUT):$(RA7ON):$(RA6ON):$(B18OFF)")
+  field(CALC, "A?!B?!C?!D?!E?!F?!G?$(VCOK):$(B19OFF):$(DA6S2ON):$(DA6S1ON):$(TOUT):$(RA7ON):$(RA6ON):$(B18ON)")
   field(INPA, "$(SYS):EV1-WATCH-18-RLSD.VAL PP")
   field(INPB, "$(SYS):SW-RF-A6-CLSD.VAL")
   field(INPC, "$(SYS):SW-RF-A7-CLSD.VAL")
@@ -157,7 +158,7 @@ record(calcout, "$(SYS):EV1-VNCS2") {
 record(calcout, "$(SYS):EV1S2-OUT-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "A=$(B18OFF)||A=$(B19ON)||A=$(DA6S2ON)||A=$(DA6S1ON)?$(OFF):$(ON)")
+  field(CALC, "A=$(B18ON)||A=$(B19OFF)||A=$(DA6S2ON)||A=$(DA6S1ON)?$(OFF):$(ON)")
   field(INPA, "$(SYS):EV1-VNCS2.VAL")
   field(OUT,  "$(SYS):RST-EV1.PROC PP")  
   field(OOPT, "When Non-zero") 

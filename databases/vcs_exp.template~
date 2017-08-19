@@ -2,7 +2,7 @@
 record(calc, "$(SYS):EXP-SEL-STAGE") {
   field(DESC, "Select processing branch")
   field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
-  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(FAIL)")
+  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(INITFAIL)")
   field(INPA, "$(SYS):EXP-INIT")
 ##IF BUTTON 26 or  28b  IS STILL PRESSED PNK IS ACTIVE##
   field(INPB, "$(SYS):EXP-PNK") 
@@ -93,7 +93,7 @@ record(calc, "$(SYS):EXP-VNCS1") {
   field(DESC, "Vault clearance stage 1")
   field(SCAN, "Passive")
   field(FLNK, "$(SYS):EXPS1-PROC-OUTS") 
-  field(CALC, "!A?!B?!C?$(VCOK):$(G9ON):$(RA12ON):$(B26OFF)")
+  field(CALC, "!A?!B?!C?$(VCOK):$(G9ON):$(RA12ON):$(B26ON)")
   field(INPA, "$(SYS):WS-BUT-EXP-26.VAL")
   field(INPB, "$(SYS):SW-RF-A12-CLSD.VAL")
   field(INPC, "$(SYS):SW-G9-EXP-A12.VAL PP")    	  
@@ -142,7 +142,7 @@ record(calcout, "$(SYS):EXP-VNCS2") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(FLNK, "$(SYS):EXPS2-OUT-STS")
-  field(CALC, "A?!B?!C?!D?!E?!F||G?$(VCOK):$(B28bOFF):E:$(G9ON):$(TOUT):$(RA12ON):$(B26ON)")	  
+  field(CALC, "A?!B?!C?!D?!E?!F||G?$(VCOK):$(B28bON):E:$(G9ON):$(TOUT):$(RA12ON):$(B26OFF)")	  
   field(INPA, "$(SYS):EXP-WATCH-26-RLSD.VAL PP") # THIS MUST BE CALLED IN PP	  
   field(INPB, "$(SYS):SW-RF-A12-CLSD.VAL")
   field(INPC, "$(SYS):EXP-TIMEOUT.VAL PP") # THIS MUST BE CALLED IN PP
@@ -200,7 +200,7 @@ record(calcout, "$(SYS):EXP-VNCS3") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   #field(FLNK, "$(SYS):EXPS3-OUT-STS")
-  field(CALC, "!A?B?(!C||D)?$(VCOK):$(B28aOFF):$(B28bON):A")		  
+  field(CALC, "!A?B?(!C||D)?$(VCOK):$(B28aON):$(B28bOFF):A")		  
   field(INPA, "$(SYS):EXP-VNCS2.VAL.VAL PP")
   field(INPB, "$(SYS):EXP-WATCH-28b-RLSD.VAL PP") # THIS MUST BE CALLED IN PP MODE	 	  
  
@@ -227,7 +227,7 @@ record(calcout, "$(SYS):EXP-VNCS4") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   #field(FLNK, "$(SYS):EXPS4-OUT-STS")
-  field(CALC, "!A?B?(!C||D)?$(VCOK):$(B27OFF):$(B28aON):A")		  
+  field(CALC, "!A?B?(!C||D)?$(VCOK):$(B27ON):$(B28aOFF):A")		  
   field(INPA, "$(SYS):EXP-VNCS3.VAL.VAL PP")
   field(INPB, "$(SYS):EXP-WATCH-28a-RLSD.VAL PP") # THIS MUST BE CALLED IN PP MODE	 	  
  
@@ -255,7 +255,7 @@ record(calcout, "$(SYS):EXP-VNCS5") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   #field(FLNK, "$(SYS):EXPS5-OUT-STS")
-  field(CALC, "!A?B?!C?!D?!E?$(VCOK):$(B29OFF):$(DA12S2ON):$(DA12S1ON):$(B27ON):A")		  
+  field(CALC, "!A?B?!C?!D?!E?$(VCOK):$(B29ON):$(DA12S2ON):$(DA12S1ON):$(B27OFF):A")		  
   field(INPA, "$(SYS):EXP-VNCS4.VAL.VAL PP")
   field(INPB, "$(SYS):EXP-WATCH-27-RLSD.VAL PP") # THIS MUST BE CALLED IN PP MODE	 	  
   field(INPC, "$(SYS):SW-I-EXP-A12.VAL PP")

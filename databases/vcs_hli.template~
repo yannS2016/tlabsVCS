@@ -2,7 +2,7 @@
 record(calc, "$(SYS):HLI-SEL-STAGE") {
   field(DESC, "Select processing branch")
   field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
-  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(FAIL)")
+  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(INITFAIL)")
   field(INPA, "$(SYS):HLI-INIT")
 ##IF BUTTON 30 IS STILL PRESSED PNK IS ACTIVE##
   field(INPB, "$(SYS):HLI-PNK") 
@@ -87,7 +87,7 @@ record(calc, "$(SYS):HLI-VNCS1") {
   field(DESC, "Vault clearance stage 1")
   field(SCAN, "Passive")
   field(FLNK, "$(SYS):HLIS1-PROC-OUTS") 
-  field(CALC, "!A?!B?$(VCOK):$(RA14ON):$(B30OFF)")
+  field(CALC, "!A?!B?$(VCOK):$(RA14ON):$(B30ON)")
   field(INPA, "$(SYS):WS-BUT-HLI-30.VAL")
   field(INPB, "$(SYS):SW-RF-A14-CLSD.VAL")
   field(PINI, "YES")
@@ -133,7 +133,7 @@ record(calcout, "$(SYS):HLI-VNCS2") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(FLNK, "$(SYS):HLIS2-OUT-STS") 
-  field(CALC, "A?!B?!C?!D?!E?!F?$(VCOK):$(B31OFF):$(DA14S2ON):$(DA14S1ON):$(TOUT):$(RA14ON):$(B30ON)")
+  field(CALC, "A?!B?!C?!D?!E?!F?$(VCOK):$(B31ON):$(DA14S2ON):$(DA14S1ON):$(TOUT):$(RA14ON):$(B30OFF)")
   field(INPA, "$(SYS):HLI-WATCH-30-RLSD.VAL PP")
   field(INPB, "$(SYS):SW-RF-A14-CLSD.VAL")
   field(INPC, "$(SYS):HLI-TIMEOUT.VAL")
@@ -154,7 +154,7 @@ record(calcout, "$(SYS):HLI-VNCS2") {
 record(calcout, "$(SYS):HLIS2-OUT-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "A=$(B30ON)||A=$(B31OFF)||A=$(DA14S2ON)||A=$(DA14S1ON)?$(OFF):$(ON)")
+  field(CALC, "A=$(B30OFF)||A=$(B31ON)||A=$(DA14S2ON)||A=$(DA14S1ON)?$(OFF):$(ON)")
   field(INPA, "$(SYS):HLI-VNCS2.VAL")
   field(OUT,  "$(SYS):RST-HLI.PROC PP")  
   field(OOPT, "When Non-zero") 

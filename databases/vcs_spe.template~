@@ -2,7 +2,7 @@
 record(calc, "$(SYS):SPE-SEL-STAGE") {
   field(DESC, "Select processing branch")
   field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
-  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(FAIL)")
+  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(INITFAIL)")
   field(INPA, "$(SYS):SPE-INIT")
 ##IF BUTTON 24 IS STILL PRESSED PNK IS ACTIVE##
   field(INPB, "$(SYS):SPE-PNK") 
@@ -87,7 +87,7 @@ record(calc, "$(SYS):SPE-VNCS1") {
   field(DESC, "Vault clearance stage 1")
   field(SCAN, "Passive")
   field(FLNK, "$(SYS):SPES1-PROC-OUTS") 
-  field(CALC, "!A?!B?$(VCOK):$(RA9ON):$(B24OFF)")
+  field(CALC, "!A?!B?$(VCOK):$(RA9ON):$(B24ON)")
   field(INPA, "$(SYS):WS-BUT-SPE-24.VAL")
   field(INPB, "$(SYS):SW-RF-A9-CLSD.VAL")
   field(PINI, "YES")
@@ -133,7 +133,7 @@ record(calcout, "$(SYS):SPE-VNCS2") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(FLNK, "$(SYS):SPES2-OUT-STS") 
-  field(CALC, "A?!B?!C?!D?!E?!F?$(VCOK):$(B25OFF):$(DA9S2ON):$(DA9S1ON):$(TOUT):$(RA9ON):$(B24ON)")
+  field(CALC, "A?!B?!C?!D?!E?!F?$(VCOK):$(B25ON):$(DA9S2ON):$(DA9S1ON):$(TOUT):$(RA9ON):$(B24OFF)")
   field(INPA, "$(SYS):SPE-WATCH-24-RLSD.VAL PP")
   field(INPB, "$(SYS):SW-RF-A9-CLSD.VAL")
   field(INPC, "$(SYS):SPE-TIMEOUT.VAL")
