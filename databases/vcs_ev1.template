@@ -6,7 +6,7 @@ record(calc, "$(SYS):EV1-SEL-STAGE") {
   field(INPA, "$(SYS):EV1-INIT")
 ##IF BUTTON 18 IS STILL PRESSED PNK IS ACTIVE##
   field(INPB, "$(SYS):EV1-PNK") 
-  field(INPC, "$(SYS):EV1-SNC-CLR")
+  field(INPC, "$(SYS):EV1-CLR")
 ## THIS FLAG ENSURE WE ONLY RESPOND TO A SINGLE EVENT ON BUT 18##
 ## IF SET WE IN STAGE 2 OF CLEARANCE OTHERWISE WE IN STAGE 1## 
   field(INPD, "$(SYS):WATCHMAN-EV1-18-ACT.VAL")
@@ -24,7 +24,7 @@ record(fanout, "$(SYS):EV1-PROC-STAGE") {
 }
 ##################################################################################
 # monitor status of inputs which may cause clearance faillure
-# SIGNAL TO SYS: EV1-VC?EV1-SNC-CLR && (HARDWARE STATUS RECORDS):FALSE
+# SIGNAL TO SYS: EV1-VC?EV1-CLR && (HARDWARE STATUS RECORDS):FALSE
 record(calcout, "$(SYS):EV1-VC") { 
   field(DESC, "EV1 Vault clear stage")
   field(SCAN, "Passive")
@@ -52,7 +52,7 @@ record(seq, "$(SYS):RST-EV1") { # HANDLE BY SEQ
   field(DOL7, "0")
   field(LNK1, "$(SYS):CS9-EV1.VAL PP")
   field(LNK2, "$(SYS):CL9-EV1.VAL PP")
-  field(LNK3, "$(SYS):EV1-SNC-CLR.VAL PP")
+  field(LNK3, "$(SYS):EV1-CLR.VAL PP")
   field(LNK4, "$(SYS):LED-WS-EV1-18.VAL PP")
   field(LNK5, "$(SYS):LED-WS-EV1-19.VAL PP")
   field(LNK6, "$(SYS):EV1-COUNTER.VAL PP")
@@ -79,7 +79,7 @@ record(calcout, "$(SYS):EV1-VNCS1") {
 record(calcout, "$(SYS):EV1S1-OUT-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "A=$(B18OFF)?$(OFF):$(ON)")
+  field(CALC, "A=$(B18OFF)?$(ON):$(OFF)")
   field(INPA, "$(SYS):EV1-VNCS2.VAL")
   field(OUT,  "$(SYS):RST-EV1.PROC PP")  
   field(OOPT, "When Non-zero") 
@@ -148,7 +148,7 @@ record(seq, "$(SYS):EV1S2-WRT-OUTS") {
   field(DOL3, "1")
   field(DLY2, "0.02")
   field(LNK1, "$(SYS):RST-EV1.PROC PP")
-  field(LNK2, "$(SYS):EV1-SNC-CLR.VAL PP")
+  field(LNK2, "$(SYS):EV1-CLR.VAL PP")
   field(LNK3, "$(SYS):LED-WS-EV1-19.VAL PP")
   field(SCAN, "Passive")
 }
@@ -205,7 +205,7 @@ record(bo, "$(SYS):CL9-EV1") {
   field(ONAM, "ON")
 }
 
-record(bo, "$(SYS):EV1-SNC-CLR") {
+record(bo, "$(SYS):EV1-CLR") {
   field(VAL, "0")
   field(PINI, "YES")
   field(ZNAM, "OFF")

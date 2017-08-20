@@ -68,46 +68,37 @@ record(seq, "$(SYS):RST-SPC1GF") { # HANDLE BY SEQ
   field(LNK3, "$(SYS):SPC1-GF-CLR.VAL PP")
   field(LNK4, "$(SYS):LED-WS-SPC1-40.VAL PP")
   field(LNK5, "$(SYS):LED-WS-SPC1-41.VAL PP")
- # field(LNK6, "$(SYS):SPC1GF-COUNTER.VAL PP")
+  field(LNK6, "$(SYS):SPC1GF-COUNTER.VAL PP")
   field(LNK7, "$(SYS):WATCHMAN-SPC1-40-ACT.VAL")
   field(SELM, "All")
 }
-#################### RECOVER FROM PANIQUE ################
 
-record(calc, "$(SYS):SPC1GF-PNK") {
-  field(SCAN, "Passive")
-  field(PINI, "YES")
-  field(CALC, "!A?$(ON):$(OFF)")
-  field(INPA, "$(SYS):WS-BUT-SPC1-40.VAL")
-  field(VAL, "0")
-}
 ###############################################################
-record(calc, "$(SYS):SPC1GF-VNCS1") {
+# ONLY CHNAGE OUTS STATE WHEN B40 IS PRESSED WHILE ROOF
+# A2 AND DOOR A2 ARE CLOSED: THIS ENSURE WE DONT UNECCESSARLY WRITE TO OUTS
+
+record(calcout, "$(SYS):SPC1GF-VNCS1") {
   field(DESC, "Vault clearance stage 1")
   field(SCAN, "Passive")
-  field(FLNK, "$(SYS):SPC1GFS1-PROC-OUTS") 
+  field(FLNK, "$(SYS):SPC1GFS1-OUT-STS") 
   field(CALC, "!A?!B?!C?$(VCOK):$(DA2ON):$(RA2ON):$(B40OFF)")
   field(INPA, "$(SYS):WS-BUT-SPC1-40.VAL")
   field(INPB, "$(SYS):SW-RF-A2-CLSD.VAL")
-  field(INPC, "$(SYS):SPC1-DA2-CLSD.VAL PP") # ALWAYS USE PP  
+  field(INPC, "$(SYS):SPC1-DA2-CLSD.VAL PP") # ALWAYS USE PP 
+  field(OUT,  "$(SYS):SPC1GFS1-WRT-OUTS.PROC PP")  
+  field(OOPT, "When Zero") 
   field(PINI, "YES")
-  field(VAL, "1")  
+
 }
 ########################################################
-
-# IF SPC1GFS1-OUT-STS.VAL IS NON-ZERO RESET THE VAULT
-# OTHERWISE PROCESS STAGE 1 OUTPUTS
-record(calcout, "$(SYS):SPC1GFS1-OUT-STS") { 
+record(calcout, "$(SYS):SPC1GFS1-OUT-STS") {
   field(SCAN, "Passive")
-  field(CALC, "!A?$(S0):$(S1)")
-  field(INPA, "$(SYS):SPC1GF-VNCS1.VAL NPP")  
-}
-record(fanout, "$(SYS):SPC1GFS1-PROC-OUTS") {
-  field(SCAN, "Passive")
-  field(SELM, "Specified")
-  field(SELL, "$(SYS):SPC1GFS1-OUT-STS.VAL PP")
-  field(LNK1, "$(SYS):SPC1GFS1-WRT-OUTS PP")
-  field(LNK2, "$(SYS):RST-SPC1GF PP")
+  field(PINI, "YES")
+  field(CALC, "A=$(RA2ON)||A=$(DA2ON)?$(ON):$(OFF)")
+  field(INPA, "$(SYS):SPC1GF-VNCS1.VAL")
+  field(OUT,  "$(SYS):RST-SPC1GF.PROC PP")  
+  field(OOPT, "When Non-zero") 
+  field(VAL, "0")
 }
 
 record(seq, "$(SYS):SPC1GFS1-WRT-OUTS") { # HANDLE BY SEQ
@@ -172,6 +163,16 @@ record(seq, "$(SYS):SPC1GFS2-WRT-OUTS") {
   field(LNK3, "$(SYS):LED-WS-SPC1-41.VAL PP")
   field(SCAN, "Passive")
 }
+#################### RECOVER FROM PANIQUE ################
+
+record(calc, "$(SYS):SPC1GF-PNK") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-SPC1-40.VAL")
+  field(VAL, "0")
+}
+
 #################### WATCHMAN 40 RELEASE ##############################
 record(calc, "$(SYS):SPC1-WATCH-40-RLSD") {
   field(CALC, "A&&B?$(ON):$(OFF)")

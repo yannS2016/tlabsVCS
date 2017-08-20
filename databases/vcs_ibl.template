@@ -149,7 +149,7 @@ record(seq, "$(SYS):IBLS2-WRT-OUTS") {
 }
 ##########################################################################
 # STAGE 3 IS INNER TO STAGE 2 
-# WE CAN ACCESS STAGE 2 FAIL CONDITION THIS WAY BY RETURN ITS ORELATED PV IBL-VNCS2 VALUE
+# WE CAN ACCESS STAGE 2 FAIL CONDITION THIS WAY BY RETURN  IBL-VNCS2 VALUE
 # WHEN NOT 0. THUS B IS EITHER TOUT OR RA13S1ON OR RA13S2ON
 record(calcout, "$(SYS):IBL-VNCS3") {
   field(DESC, "Vault clearance stage 3")

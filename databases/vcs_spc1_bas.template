@@ -68,37 +68,37 @@ record(seq, "$(SYS):RST-SPC1BAS") { # HANDLE BY SEQ
   field(LNK3, "$(SYS):SPC1-CLR.VAL PP")
   field(LNK4, "$(SYS):LED-WS-SPC1-42.VAL PP")
   field(LNK5, "$(SYS):LED-WS-SPC1-43.VAL PP")
-  field(LNK6, "$(SYS):SPC1-COUNTER.VAL PP")
+  field(LNK6, "$(SYS):SPC1BAS-COUNTER.VAL PP")
   field(LNK7, "$(SYS):WATCHMAN-SPC1-42-ACT.VAL")
   field(SELM, "All")
 }
 ###############################################################
-record(calc, "$(SYS):SPC1BAS-VNCS1") {
+record(calcout, "$(SYS):SPC1BAS-VNCS1") {
   field(DESC, "Vault clearance stage 1")
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(FLNK, "$(SYS):SPC1BASS1-PROC-OUTS") 
+  field(FLNK, "$(SYS):SPC1BASS1-OUT-STS") 
   field(CALC, "!A?!B?C?!D?!E?$(VCOK):$(DA005AON):$(DA001ON):$(A005ON):$(RA2ON):$(B42OFF)")
   field(INPA, "$(SYS):WS-BUT-SPC1-42.VAL")
   field(INPB, "$(SYS):SW-RF-A2-CLSD.VAL")
   field(INPC, "$(SYS):SPC1-GF-CLR.VAL NPP")# SPC1 GROUND FLOOR MUST BE CLEARED
   field(INPD, "$(SYS):SPC1-DA001-CLSD.VAL PP") 
-  field(INPE, "$(SYS):SPC1-DA005A-CLSD.VAL PP")   
+  field(INPE, "$(SYS):SPC1-DA005A-CLSD.VAL PP")
+  field(OUT,  "$(SYS):SPC1BASS1-WRT-OUTS.PROC PP")  
+  field(OOPT, "When Zero")   
 }
 ########################################################
-# IF SPC1BASS1-OUT-STS.VAL IS NON-ZERO RESET THE VAULT
-# OTHERWISE PROCESS STAGE 1 OUTPUTS
-record(calcout, "$(SYS):SPC1BASS1-OUT-STS") { 
+# ONLY CHNAGE OUTS STATE WHEN B40 IS PRESSED WHILE ROOF
+# A2 AND DOOR A2 ARE CLOSED: THIS ENSURE WE DONT UNECCESSARLY WRITE TO OUTS
+
+record(calcout, "$(SYS):SPC1BASS1-OUT-STS") {
   field(SCAN, "Passive")
-  field(CALC, "!A?$(S0):$(S1)")
-  field(INPA, "$(SYS):SPC1BAS-VNCS1.VAL NPP")  
-}
-record(fanout, "$(SYS):SPC1BASS1-PROC-OUTS") {
-  field(SCAN, "Passive")
-  field(SELM, "Specified")
-  field(SELL, "$(SYS):SPC1BASS1-OUT-STS.VAL PP")
-  field(LNK1, "$(SYS):SPC1BASS1-WRT-OUTS PP")
-  field(LNK2, "$(SYS):RST-SPC1BAS PP")
+  field(PINI, "YES")
+  field(CALC, "A=$(RA2ON)||A=$(A005ON)||A=$(DA001ON)||A=$(DA005AON)?$(ON):$(OFF)")
+  field(INPA, "$(SYS):SPC1BAS-VNCS1.VAL")
+  field(OUT,  "$(SYS):RST-SPC1BAS.PROC PP")  
+  field(OOPT, "When Non-zero") 
+  field(VAL, "0")
 }
 
 record(seq, "$(SYS):SPC1BASS1-WRT-OUTS") { # MAY BE HANDLED BY SEQ
@@ -110,7 +110,7 @@ record(seq, "$(SYS):SPC1BASS1-WRT-OUTS") { # MAY BE HANDLED BY SEQ
   field(LNK1, "$(SYS):CS1-SPC1.VAL PP")
   field(LNK2, "$(SYS):CL1-SPC1.VAL PP")
   field(LNK3, "$(SYS):LED-WS-SPC1-42.VAL PP")
-#  field(LNK4, "$(SYS):SPC1-COUNTER.VAL PP")
+  field(LNK4, "$(SYS):SPC1-COUNTER.VAL PP")
   field(LNK5, "$(SYS):WATCHMAN-SPC1-42-ACT.VAL PP")
   field(SCAN, "Passive")
   field(SELM, "All")
