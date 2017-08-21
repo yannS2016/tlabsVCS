@@ -157,10 +157,13 @@ record(seq, "$(SYS):SPC1GFS2-WRT-OUTS") {
   field(DOL1, "1")
   field(DOL2, "1")
   field(DOL3, "1")
+  field(DOL3, "1")
+  field(DOL4, "1")
   field(DLY2, "0.02")
   field(LNK1, "$(SYS):RST-SPC1GF.PROC PP")
   field(LNK2, "$(SYS):SPC1-GF-CLR.VAL PP")
   field(LNK3, "$(SYS):LED-WS-SPC1-41.VAL PP")
+  field(LNK4, "$(SYS):SPC1L-INIT.VAL PP")# PREVENT LOW VAULT FROM PROCESSING SHARED OUTPUTS
   field(SCAN, "Passive")
 }
 #################### RECOVER FROM PANIQUE ################

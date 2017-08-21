@@ -33,6 +33,7 @@
 # $(VID)ON:     Clearance signal fromm a dependancy vault: i.e: A13AON ; a13a is a dependancy vault for IBL vault
 
 #########################################################################################################################
+
 file "db/vcs_spc1_gf.template" {
 pattern 
 {	SYS	 S0  S1  S2	 PNK   TOUT  FAIL  	VCOK	B40OFF  	B40ON		B41OFF		RA2ON		DA2ON		G7ON    	G7OFF 		SPC1PNK	  	ON   	OFF   	SPC1TOUT   	SCAN    }
@@ -49,16 +50,23 @@ pattern
 
 file "db/vcs_spc2_bas.template" {
 pattern 
-{  SYS	 S0  S1  S2	 PNK  	TOUT   FAIL  	VCOK  	B44OFF   B44ON	  B45OFF	DA007ON     G6ON	G6OFF 	SPC2PNK	 	ON	 OFF   SPC2TOUT   SCAN}
-{  VCS   1   2   3	 4	  	5      5	   	0	 	1   	 158	  160       156         155     159     157      	1    0     120       ".2 second"}    
+{  SYS	 S0  S1  S2	 PNK  	TOUT   FAIL  	VCOK  	B44OFF   B44ON	  B45OFF	DA007ON     G6ON	G6OFF 	SPC2LPNK	 	ON	 OFF   SPC2TOUT   SCAN}
+{  VCS   1   2   3	 4	  	5      5	   	0	 	1   	 158	  160       156         155     159     157      	    1    0     120       ".2 second"}    
+}
+
+file "db/vcs_spc2_gf.template" {
+pattern 
+{  SYS	 S0  S1  S2	 PNK  TOUT  FAIL  VCOK  A007ON   B46OFF   B46ON	   B47OFF	B47ON 	B48OFF	 RA3ON	  DA3aON   G6aON	DA3ON    DA3OFF   SPC2PNK  ON  OFF   SPC2TOUT   SCAN}
+{  VCS   1   2   3	 4	  5     5	  0	    -2       1   	  165	   169	    168	    166		 147      170      164      163      167      19       1   0     120       ".2 second"}    
 }
 
 
 file "db/vcs_spc2_gf.template" {
 pattern 
-{  SYS	 S0  S1  S2	 PNK  TOUT  FAIL  VCOK  A007ON   B46OFF   B46ON	   B47OFF	B47ON 	B48OFF	 RA3ON	  DA3aON   G6aON	DA3ON    DA3OFF   SPC1PNK	 ON	 OFF   SPC1TOUT   SCAN}
+{  SYS	 S0  S1  S2	 PNK  TOUT  FAIL  VCOK  A007ON   B46OFF   B46ON	   B47OFF	B47ON 	B48OFF	 RA3ON	  DA3aON   G6aON	DA3ON    DA3OFF   SPC2PNK  ON  OFF   SPC2TOUT   SCAN}
 {  VCS   1   2   3	 4	  5     5	  0	    -2       1   	  165	   169	    168	    166		 147      170      164      163      167      19       1   0     120       ".2 second"}    
 }
+
 
 
 file "db/vcs_ev1.template" {
@@ -141,6 +149,5 @@ pattern
 { SYS  S0 S1  S2  PNK TOUT  FAIL  VCOK  RA12ON  B26OFF  B26ON  B28bOFF  B28bOFN  B28aOFF  B28aON  B27OFF  B27OFN  B29OFF  DA12ON  DA12S1ON  DA12S2ON  G9ON  G9OFF G10ON  G10OFF EXPPNK ON OFF EXPTOUT SCAN }
 { VCS  1  2   3   4   5     5     0	    147     187     69	   74       80	     73	      79	  72	  78	  77	  68	  75	    76        153   151   152    154    19     1  0   120  ".2 second"}    
 }
-
 
 

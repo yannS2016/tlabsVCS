@@ -5,7 +5,7 @@ record(calc, "$(SYS):SPC2L-SEL-STAGE") {
   field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(FAIL)")
   field(INPA, "$(SYS):SPC2L-INIT NPP")
 ##IF BUTTON 44 IS STILL PRESSED PNK IS ACTIVE##
-  field(INPB, "$(SYS):SPC2L-PNK") 
+  field(INPB, "$(SYS):SPC2L-PNK NPP") 
   field(INPC, "$(SYS):SPC2L-CLR NPP")
 ## THIS FLAG ENSURE WE ONLY RESPOND TO A SINGLE EVENT ON BUT 44##
 ## IF SET WE IN STAGE 2 OF CLEARANCE OTHERWISE WE IN STAGE 1## 
@@ -29,7 +29,7 @@ record(fanout, "$(SYS):SPC2L-PROC-STAGE") {
 record(calcout, "$(SYS):SPC2L-VC") { 
   field(DESC, "SPC2L Vault clear stage")
   field(SCAN, "Passive")
-  field(CALC, "!A?!B?C?$(SPC2PNK):$(VCOK):$(DA007ON):$(G6ON)")
+  field(CALC, "!A?!B?C?$(SPC2LPNK):$(VCOK):$(DA007ON):$(G6ON)")
   field(INPA, "$(SYS):SW-I-SPC2-G6.VAL NPP")
   field(INPB, "$(SYS):SPC2-DA007-CLSD.VAL PP") 
   field(INPC, "$(SYS):SPC2L-PNK.VAL PP")
@@ -49,6 +49,7 @@ record(seq, "$(SYS):RST-SPC2L") { # HANDLE BY SEQ
   field(DOL5, "0")
   field(DOL6, "0")
   field(DOL7, "0")
+  #field(DOL8, "0")
   field(LNK1, "$(SYS):CS14-SPC2.VAL PP")
   field(LNK2, "$(SYS):CL14-SPC2.VAL PP")
   field(LNK3, "$(SYS):SPC2L-CLR.VAL PP")
@@ -56,6 +57,7 @@ record(seq, "$(SYS):RST-SPC2L") { # HANDLE BY SEQ
   field(LNK5, "$(SYS):LED-WS-SPC2-45.VAL PP")
   field(LNK6, "$(SYS):SPC2L-COUNTER.VAL PP")
   field(LNK7, "$(SYS):WATCHMAN-SPC2-44-ACT.VAL")
+  #field(LNK8, "$(SYS):SPC2GF-INIT.VAL PP") # PREVENT GF VAULT CLEARANCE
   field(SELM, "All")
 }
 ###############################################################
@@ -134,15 +136,22 @@ record(calcout, "$(SYS):SPC2LS2-OUT-STS") {
 }
 # THIS RECORDS IS PROCESSED ONLY WHEN SPC2L-VNCS2 RETRUN 0
 # THAT IS SPC2L INTERLOCKS ARE CORRECT IN STAGE 2
+
+# OUTPUT RACE CONDITIONS OCCUR WHEN SPC2GF AND SPC2LOW ARE IN CONCURRENT CLEARANCE
+# TO PREVENT THIS, INIT SPC2GF ONLY AFTER SPC2LOW WAS CLEARED
+
+  
 record(seq, "$(SYS):SPC2LS2-WRT-OUTS") {
   field(SELM, "All")
   field(DOL1, "1")
   field(DOL2, "1")
   field(DOL3, "1")
+  field(DOL4, "1")
   field(DLY2, "0.02")
   field(LNK1, "$(SYS):RST-SPC2L.PROC PP")
   field(LNK2, "$(SYS):SPC2L-CLR.VAL PP")
   field(LNK3, "$(SYS):LED-WS-SPC2-45.VAL PP")
+  field(LNK4, "$(SYS):SPC2GF-INIT.VAL PP") # PREVENT GF VAULT FROM PROCESSING SHARED OUTPUTS
   field(SCAN, "Passive")
 }
 ########################## TIMER PROCEDURE #############################
@@ -181,108 +190,102 @@ record(calc, "$(SYS):SPC2-DA007-CLSD") {
 
 record(bo, "$(SYS):CS14-SPC2") {
   field(SCAN, "Passive")
-  field(VAL, "0")
-  field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")
 }
 
 record(bo, "$(SYS):CL14-SPC2") {
   field(SCAN, "Passive")
-  field(VAL, "0")
-  field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")
 }
 
 record(bo, "$(SYS):SPC2L-CLR") {
-  field(VAL, "0")
-  field(PINI, "YES")
+  field(SCAN, "Passive")
   field(ZNAM, "OFF")
   field(ONAM, "ON")
 }
 
 record(bo, "$(SYS):LED-WS-SPC2-44") {
   field(SCAN, "Passive")
-  field(VAL, "0")
-  field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")
 }
 
 record(bo, "$(SYS):LED-WS-SPC2-45") {
   field(SCAN, "Passive")
-  field(VAL, "0")
-  field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")
 }
 
 record(stringout, "$(SYS):SPC2L-CLR-STATS") {
   field(SCAN, "Passive")
+  field(PINI, "YES")
   field(OMSL, "supervisory")
+  field(VAL, "")
 }
 
 record(stringout, "$(SYS):SPC2L-INTLCK-STATS") {
   field(SCAN, "Passive")
+  field(PINI, "YES")
   field(OMSL, "supervisory")
+  field(VAL, "")
 }
 ################ INPUTS ###############################
 ########  INIT THIS RECORD TO FALSE ######
 record(bo, "$(SYS):WATCHMAN-SPC2-44-ACT") {
   field(SCAN, "Passive")
-  field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")
-  field(VAL, "0")
 }
 
 record(bi, "$(SYS):WS-BUT-SPC2-44") {
   field(SCAN, "Passive")
-  field(VAL, "1")
   field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")
+  field(VAL, "1")
 }
 
 record(bi, "$(SYS):WS-BUT-SPC2-45") {
   field(SCAN, "Passive")
-  field(VAL, "1")
   field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")
+  field(VAL, "1")
 }
 
 record(bi, "$(SYS):SW-I-SPC2-G6") {
   field(SCAN, "Passive")
-  field(VAL, "1")
   field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")
+  field(VAL, "1")
 }
 
 record(bi, "$(SYS):SW-I-SPC2-A007") {
   field(SCAN, "Passive")
-  field(VAL, "1")
   field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")
+  field(VAL, "1")
 }
 
 record(bi, "$(SYS):SW-II-SPC2-A007") {
   field(SCAN, "Passive")
-  field(VAL, "1")
   field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")
+  field(VAL, "1")
 }
 
 ## THIS RECORDS MUST BE SET FROM THE SEQ ##
 record(bi, "$(SYS):SPC2L-INIT") {
   field(SCAN, "Passive")
-  field(VAL, "0")
   field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")
+  field(VAL, "0")
 }
+
 
