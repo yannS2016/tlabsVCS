@@ -6,7 +6,7 @@ record(calc, "$(SYS):SSCCAB-SEL-STAGE") {
   field(INPA, "$(SYS):SSCCAB-INIT")
 ##IF BUTTON 16 IS STILL PRESSED PNK IS ACTIVE##
   field(INPB, "$(SYS):SSCCAB-PNK") 
-  field(INPC, "$(SYS):SSCCAB-SNC-CLR")
+  field(INPC, "$(SYS):SSCCAB-CLR")
 ## THIS FLAG ENSURE WE ONLY RESPOND TO A SINGLE EVENT ON BUT 16##
 ## IF SET WE IN STAGE 2 OF CLEARANCE OTHERWISE WE IN STAGE 1## 
   field(INPD, "$(SYS):WATCHMAN-SSC-16-ACT.VAL")
@@ -28,7 +28,7 @@ record(fanout, "$(SYS):SSCCAB-PROC-STAGE") {
 record(calcout, "$(SYS):SSCCAB-VC") { 
   field(DESC, "SSCCAB Vault clear stage")
   field(SCAN, "Passive")
-  field(CALC, "!A?!B?C?$(CABPNK):$(VCOK):$(G5ON):$(A001AON)")
+  field(CALC, "!A?!B?C?$(CABPNK):$(VCOK):$(G5ON):$(DA001AON)")
 # IN LIVE APP USE A FLNK FROM  SW-I-SSC-A001A OR SW-I-SSC-A001A (SCAN=Intr) TO PROCESS THIS RECORD
 # AND ACCES IT HERE WITH NPP OR ACCES IT WITH PP BUT USE NPP ON ITS INPUTS
   field(INPA, "$(SYS):SSC-A001A-CLSD.VAL PP")  
@@ -86,7 +86,7 @@ record(calcout, "$(SYS):SSCCAB-VNCS1") {
   field(CALC, "!A?$(VCOK):$(B16OFF)")
   field(INPA, "$(SYS):WS-BUT-SSC-16.VAL")
   field(OUT,  "$(SYS):SSCCABS1-WRT-OUTS.PROC PP")  
-  field(OOPT, "When Zero") 
+  field(OOPT, "Transition To Zero") 
   field(VAL, "1")  
 }
 ####################### STAGE 1 OUTPUTS STATUS  #################
@@ -110,16 +110,16 @@ record(calcout, "$(SYS):SSCCAB-VNCS2") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(FLNK, "$(SYS):SSCCABS2-OUT-STS") 
-  field(CALC, "A?!B?!C?!D?!E?!F?!G?$(VCOK):$(B17OFF):$(G5S2ON):$(G5S1ON):$(A001AS2ON):$(A001AS1ON):$(TOUT):$(B16ON)")
+  field(CALC, "A?!B?!C?!D?!E?!F?!G?$(VCOK):$(B17OFF):$(G5S2ON):$(G5S1ON):$(DA001AS2ON):$(DA001AS1ON):$(TOUT):$(B16ON)")
   field(INPA, "$(SYS):SSC-WATCH-16-RLSD.VAL PP")
   field(INPB, "$(SYS):SSCCAB-TIMEOUT.VAL")
-  field(INPC, "$(SYS):SW-I-SSC-A001A.VAL PP")
-  field(INPD, "$(SYS):SW-II-SSC-A001A.VAL PP")
+  field(INPC, "$(SYS):SW-I-SSC-A001A.VAL NPP")
+  field(INPD, "$(SYS):SW-II-SSC-A001A.VAL NPP")
   field(INPE, "$(SYS):SW-I-SSC-G5.VAL")
   field(INPF, "$(SYS):SW-II-SSC-G5.VAL")
   field(INPG, "$(SYS):WS-BUT-SSC-17.VAL")
   field(OUT,  "$(SYS):SSCCABS2-WRT-OUTS.PROC PP")  
-  field(OOPT, "When Zero") 
+  field(OOPT, "Transition To Zero") 
   field(VAL, "1")
 }
 
@@ -132,7 +132,7 @@ record(calcout, "$(SYS):SSCCAB-VNCS2") {
 record(calcout, "$(SYS):SSCCABS2-OUT-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "A=$(TOUT)||A=$(A001AS2ON)||A=$(A001AS1ON)?$(ON):$(OFF)")
+  field(CALC, "A=$(TOUT)||A=$(DA001AS2ON)||A=$(DA001AS1ON)?$(ON):$(OFF)")
   field(INPA, "$(SYS):SSCCAB-VNCS2.VAL")
   field(OUT,  "$(SYS):RST-SSCCAB.PROC PP")  
   field(OOPT, "When Non-zero") 
@@ -147,7 +147,7 @@ record(seq, "$(SYS):SSCCABS2-WRT-OUTS") {
   field(DOL3, "1")
   field(DLY2, "0.02")
   field(LNK1, "$(SYS):RST-SSCCAB.PROC PP")
-  field(LNK2, "$(SYS):SSCCAB-SNC-CLR.VAL PP")
+  field(LNK2, "$(SYS):SSCCAB-CLR.VAL PP")
   field(LNK3, "$(SYS):LED-WS-SSC-17.VAL PP")
   field(SCAN, "Passive")
 }
@@ -182,7 +182,7 @@ record(calc, "$(SYS):SSCCAB-TIMEOUT") {
   field(INPA, "$(SYS):SSCCAB-COUNTER.VAL PP")
 }
 ########################### Outputs ##################################
-record(bo, "$(SYS):SSCCAB-SNC-CLR") {
+record(bo, "$(SYS):SSCCAB-CLR") {
   field(VAL, "0")
   field(PINI, "YES")
   field(ZNAM, "OFF")

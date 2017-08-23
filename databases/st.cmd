@@ -35,6 +35,7 @@ iocInit
 #seq speClearanceSNC, "SYS=VCS"
 #seq vliClearanceSNC, "SYS=VCS"
 #seq a13aClearanceSNC, "SYS=VCS"
-#seq ssccabClearanceSNC, "SYS=VCS"
+seq ssccabClearanceSNC, "SYS=VCS"
+seq ssclClearanceSNC, "SYS=VCS"
 #seq  sncExample ,"SYS=VCS"
 #seq expClearanceSNC, "SYS=VCS" 
