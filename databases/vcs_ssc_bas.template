@@ -105,10 +105,11 @@ record(calcout, "$(SYS):SSCL-FAIL-COND") {
 
 record(calc, "$(SYS):SSCL-WTCH-FAIL") {
   field(SCAN, "Passive")
-  field(CALC, "A=$(W1ON)||B=C=$(W4ON)?$(ON):$(OFF)")
+  field(CALC, "!C?$(VCOK):A=$(W1ON)||B=$(W4ON)||C=$(W4ON)?$(ON):$(OFF)")
   field(INPA, "$(SYS):SSC-W1-STS.VAL NPP")
   field(INPB, "$(SYS):SSC-W4S1-STS.VAL NPP") 
-  field(INPC, "$(SYS):SSC-W4S1-STS.VAL NPP") 
+  field(INPC, "$(SYS):SSC-W4S2-STS.VAL NPP") 
+  field(INPC, "$(SYS):SSCL-INIT.VAL NPP") 
 }
 
 ##########################################################################
@@ -140,13 +141,7 @@ record(calcout, "$(SYS):SSC-W1-STS") {
   field(OUT,  "$(SYS):SSCW1-WRT-OUTS.PROC PP")  
   field(OOPT, "Transition To Zero")
 }
-#record(calcout, "$(SYS):SSCW1-OUT-STS") {
-#  field(SCAN, "Passive")
-#  field(CALC, "A=$(W1ON)?$(ON):$(OFF)")
-#  field(INPA, "$(SYS):SSC-W1-STS.VAL")
-#  field(OUT,  "$(SYS):RST-SSCL.PROC PP")  
-#  field(OOPT, "When Non-zero") 
-#}
+
 
 record(seq, "$(SYS):SSCW1-WRT-OUTS") { # MAY BE HANDLED BY SEQ
   field(DOL1, "1")
@@ -218,7 +213,7 @@ record(calcout, "$(SYS):SSC-W4S1-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(FLNK, "$(SYS):SSCL-FAIL-COND")  
-  field(CALC, "!A?B?!E?!C?$(VCOK):D?$(W4ON):$(B4OFF):E:$(B3ON):A")
+  field(CALC, "!A?B?!E?!C?$(VCOK):D?$(W4ON):$(B4OFF):$(FAIL):$(B3ON):A")
   field(INPA, "$(SYS):SSC-W3-STS PP")   
   field(INPB, "$(SYS):SSC-W3-RLSD.VAL PP") # WATCHMAN 3 MUST BE RELEASED  
   field(INPC, "$(SYS):WS-BUT-SSC-4.VAL NPP")
@@ -247,7 +242,7 @@ record(calc, "$(SYS):SSCL-VNCS2") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(CALC, "A?$(VCOK):A") 
-  field(INPC, "$(SYS):SSC-W6-STS.VAL PP")    
+  field(INPA, "$(SYS):SSC-W4S2-STS.VAL PP")    
 }
 ##########################################################################
 # VCOK: Release watchman 4 & 5
@@ -258,9 +253,11 @@ record(calc, "$(SYS):SSCL-VNCS2") {
 record(calc, "$(SYS):SSC-W4S2-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!A?$(VCOK):!B?$(W4ON):$(B5ON)") #!A?!B?$(VCOK):B:D?!C?$(B5ON):E:$(W4ON)
+  field(FLNK, "$(SYS):SSC-W5-STS")
+  field(CALC, "!C?!A?$(VCOK):!B?$(W4ON):$(B5ON):$(FAIL)") #!A?$(VCOK):!B?$(W4ON):$(B5ON)
   field(INPA, "$(SYS):WS-BUT-SSC-4.VAL NPP")
   field(INPB, "$(SYS):WATCHMAN-SSC-5-ACT.VAL") 
+  field(INPC, "$(SYS):SSCL-FAIL-COND.VAL PP") 
 }
 #######################################################################
 # VCOK: Release watchman 4 & 5
@@ -269,9 +266,9 @@ record(calc, "$(SYS):SSC-W4S2-STS") {
 record(calcout, "$(SYS):SSC-W5-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!A?!B?$(VCOK):B&&C?$(B4ON):$(B5OFF):A") #!A?!B?$(VCOK):B&&C?$(B4ON):$(B5OFF)
+  field(FLNK, "$(SYS):SSC-W6-STS") 
+  field(CALC, "!A?!B?$(VCOK):B&&C?$(B4ON):$(B5OFF):A") #!A?!B?$(VCOK):B&&C?$(B4ON):$(B5OFF):A
   field(INPA, "$(SYS):SSC-W4S2-STS.VAL PP")   
-  
   field(INPB, "$(SYS):WS-BUT-SSC-5.VAL.VAL") # PRESSED W5
   field(INPC, "$(SYS):WATCHMAN-SSC-5-ACT.VAL.VAL") # PRESSED W5
   field(OUT,  "$(SYS):SSCW5-WRT-OUTS.PROC PP")  
@@ -291,10 +288,11 @@ record(seq, "$(SYS):SSCW5-WRT-OUTS") { # MAY BE HANDLED BY SEQ
 record(calcout, "$(SYS):SSC-W6-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!A?!B?!C?$(VCOK):$(B6OFF):$(G2ON):A")
-  field(INPA, "$(SYS):SSC-W5-STS.VAL PP") 
-  field(INPB, "$(SYS):SSC-G2-CLSD.VAL PP")
-  field(INPC, "$(SYS):WS-BUT-SSC-6.VAL.VAL")
+  field(CALC, "A?B?!C?!D?$(VCOK):$(B6OFF):$(G2ON):$(B4ON):$(B5ON)")  # !C?!D?$(VCOK):$(B6OFF):$(G2ON)
+  field(INPA, "$(SYS):SSC-W4-RLSD.VAL PP") 
+  field(INPB, "$(SYS):SSC-W5-RLSD.VAL PP") 
+  field(INPC, "$(SYS):SSC-G2-CLSD.VAL PP")
+  field(INPD, "$(SYS):WS-BUT-SSC-6.VAL.VAL")
   field(OUT,  "$(SYS):SSCLW6-WRT-OUTS.PROC PP")  
   field(OOPT, "Transition To Zero")
 }
@@ -633,3 +631,4 @@ record(bi, "$(SYS):SSCL-INIT") {
   field(ZNAM, "OFF")
   field(ONAM, "ON")
 }
+
