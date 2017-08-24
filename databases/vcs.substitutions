@@ -36,15 +36,15 @@
 
 file "db/vcs_ssc_cable.template" {
 pattern 
-{	SYS	 	S0 	S1 	S2	PNK	  TOUT	FAIL  	VCOK  	B16OFF  	B16ON		B17OFF		DA001AON	  	DA001AS2ON	 	DA001AS1ON		G5ON  	G5S1ON  G5S2ON  	CABPNK  ON  OFF   SSCTOUT   SCAN }
-{   VCS  	1   2   3	4	  5	    5	 	0		187     	11	   		10     		13		  	    7			 	6				12	  	8		9		  	14      1   0     120     	".2 second"} 
+{	SYS	 	S0 	S1 	S2	PNK	  TOUT	NI  FAIL   VCOK  	B16OFF  	B16ON		B17OFF		DA001AON	  	DA001AS2ON	 	DA001AS1ON		G5ON  	G5S1ON  G5S2ON  	CABPNK   ON  OFF   COUT      SCAN }
+{   VCS  	1   2   3	4	  5	    6   -1 	   0		187     	11	   		10     		13		  	    7			 	6				12	  	8		9		  	14       1   0     120     	".2 second"} 
 }
 
 
 file "db/vcs_ssc_bas.template" {
 pattern 
-{ SYS  S0 S1  S2  PNK TOUT  FAIL VCOK  A001AON  DA001ON  DA001S1ON  DA001S2ON  G1ON  G1S1ON  G1S2ON  G2ON  G2OFF  B1OFF  B1ON  W1ON  B2OFF  B2ON  B3OFF  B3ON  B4OFF  B4ON  W4ON  B5OFF  B5ON B6OFF  SSCPNK ON OFF SSCTOUT  SCAN }
-{ VCS  1  2   3   4   5     5    0	   15       16       22	        23         17	 24	     25	     18	   32	  1	     37	   20	 21     35    26     36    27     30    29    28     33   34     19     1  0   50 ".1 second"} 
+{ SYS S0 S1 S2 PNK TOUT  NI  FAIL VCOK  A001AON  DA001ON  DA001S1ON  DA001S2ON  G1ON  G1S1ON  G1S2ON  G2ON  G2OFF  B1OFF  B1ON  W1ON  B2OFF  B2ON  B3OFF  B3ON  B4OFF  B4ON  W4ON  B5OFF  B5ON B6OFF  SSCPNK ON OFF COUT  SCAN }
+{ VCS  1  2   3   4   5  6  -1    0	   15       16       22	        23         17	 24	     25	     18	   32	  1	     37	   20	 21     35    26     36    27     30    29    28     33   34     19     1  0   50 ".1 second"} 
 }
 
 

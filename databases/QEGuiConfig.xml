@@ -6,18 +6,18 @@
   </Component>
   <Component Name="QEGuiMainWindow_0">
    <Identity id="0">
-    <Title>QEGui ssc_cable</Title>
+    <Title>QEGui SSC-CAB-template</Title>
    </Identity>
-   <Geometry Y="705" Width="593" X="320" Height="390"/>
+   <Geometry X="21" Y="517" Height="466" Width="576"/>
    <State Flags="0"/>
-   <Gui Name="/epics/vcsDisplays/ssc_cable.ui" CurrentGui="1" ID="QEGui_window_0_form_0">
-    <Title>QEGui ssc_cable</Title>
+   <Gui Name="/home/eit/VCSIOC/vcs/SSC-CAB-template.ui" ID="QEGui_window_0_form_0" CurrentGui="1">
+    <Title>QEGui SSC-CAB-template</Title>
     <Presentation>Central</Presentation>
    </Gui>
-   <Gui Name="/epics/vcsDisplays/SSC_bas.ui" ID="QEGui_window_0_form_1">
+   <Gui Name="/home/eit/VCSIOC/vcs/SSC_bas.ui" ID="QEGui_window_0_form_1">
     <Title>QEGui SSC_bas</Title>
     <Presentation>Dock</Presentation>
-    <Docking Features="7" Y="115" Width="747" X="893" Floating="1" AllowedAreas="15" Hidden="1" Height="840" Area="1"/>
+    <Docking X="1133" Y="162" Height="842" Floating="1" Features="7" AllowedAreas="15" Area="1" Hidden="1" Width="736"/>
    </Gui>
   </Component>
   <Component Name="QEGui_window_0_form_0_QEForm"/>
