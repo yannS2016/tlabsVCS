@@ -1,8 +1,13 @@
 ############ SELECT THE NEXT PROCESSING BRANCH ##################
 record(calc, "$(SYS):SSCL-SEL-STAGE") {
   field(DESC, "Select processing branch")
+<<<<<<< HEAD
   field(SCAN, "$(SCAN)") 						# THIS RECORD INIT PROCESSING
   field(CALC, "A?!B?C?$(S0):$(S1):$(PNK):$(NI)")
+=======
+  field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
+  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(NI)")
+>>>>>>> af4f20086dfa9b37ef6d58d960f02ee48292733a
   field(INPA, "$(SYS):SSCL-INIT")
   field(INPB, "$(SYS):SSCL-PNK") 
   field(INPC, "$(SYS):SSCL-CLR")
@@ -130,6 +135,7 @@ record(calc, "$(SYS):SSCL-VNC") {
 record(calcout, "$(SYS):SSC-W1-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES") 
+<<<<<<< HEAD
   #field(FLNK, "$(SYS):SSCW1-PROC-STG")
   field(CALC, "!A?!B?!C?$(VCOK):E:!D?!C?$(B1NP):$(W1ON):F:$(FAIL)") 
   field(INPA, "$(SYS):SSCL-FAIL-COND.VAL PP") 
@@ -138,6 +144,15 @@ record(calcout, "$(SYS):SSC-W1-STS") {
   field(INPD, "$(SYS):WATCHMAN-SSC-4-ACT.VAL")
   field(INPE, "$(SYS):SSC-W2-STS PP") # 33
   field(INPF, "$(SYS):SSC-W5-STS PP") # 33
+=======
+  field(CALC, "!A?!F?$(VCOK):$(FAIL):B&&!E?$(W1ON):$(B1OFF)") #!A?!F?$(VCOK):F:B&&!E?$(W1ON):$(B1OFF)
+  field(INPA, "$(SYS):WS-BUT-SSC-1.VAL NPP")
+  field(INPB, "$(SYS):WATCHMAN-SSC-1-ACT.VAL") 
+  field(INPC, "$(SYS):WATCHMAN-SSC-2-ACT.VAL") 
+  field(INPD, "$(SYS):WATCHMAN-SSC-3-ACT.VAL") 
+  field(INPE, "$(SYS):WATCHMAN-SSC-4-ACT.VAL") 
+  field(INPF, "$(SYS):SSCL-FAIL-COND.VAL PP")  
+>>>>>>> af4f20086dfa9b37ef6d58d960f02ee48292733a
   field(OUT,  "$(SYS):SSCW1-WRT-OUTS.PROC PP")  
   field(OOPT, "Transition To Zero")
 }
@@ -239,6 +254,39 @@ record(seq, "$(SYS):SSCW4-WRT-OUTS") {
   field(SCAN, "Passive")
   field(SELM, "All")
 }
+<<<<<<< HEAD
+=======
+
+##############################################################################
+# B : SEE RECORD SSCL-FAIL-COND
+# C : SEE RECORD SSC-W4-STS
+
+record(calc, "$(SYS):SSCL-VNCS2") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "A?$(VCOK):A") 
+  field(INPA, "$(SYS):SSC-W4S2-STS.VAL PP")    
+}
+##########################################################################
+# VCOK: Release watchman 4 & 5
+# B5ON: Watchman 5 must be released
+# W4ON:Watchman 4 was released too soon
+# B : SEE SSC-W4-STS
+
+record(calc, "$(SYS):SSC-W4S2-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?B?!C?F:!E?$(W4ON):!D?$(B5ON):G:$(B1ON):$(FAIL)") #!A?$(VCOK):!B?$(W4ON):$(B5ON)
+  field(INPA, "$(SYS):SSCL-FAIL-COND.VAL PP") 
+  field(INPB, "$(SYS):SSC-W1-RLSD.VAL PP")  
+  field(INPC, "$(SYS):WS-BUT-SSC-4.VAL NPP")
+  field(INPD, "$(SYS):WS-BUT-SSC-5.VAL NPP")
+  field(INPE, "$(SYS):WATCHMAN-SSC-5-ACT.VAL PP")
+  field(INPF, "$(SYS):SSC-W5-STS.VAL PP")
+  field(INPG, "$(SYS):SSC-W6-STS.VAL PP")   
+
+}
+>>>>>>> af4f20086dfa9b37ef6d58d960f02ee48292733a
 #######################################################################
 # VCOK: Release watchman 4 & 5 -- GOTO RELEASED W5
 # B4ON: Watchman 4 must be released
@@ -246,10 +294,16 @@ record(seq, "$(SYS):SSCW4-WRT-OUTS") {
 record(calcout, "$(SYS):SSC-W5-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
+<<<<<<< HEAD
   field(CALC, "!A?!B?$(VCOK):!C?$(B5OFF):$(B4ON):A")   
   field(INPA, "$(SYS):WS-BUT-SSC-4")
   field(INPB, "$(SYS):WS-BUT-SSC-5.VAL") 
   field(INPC, "$(SYS):WATCHMAN-SSC-5-ACT.VAL") 
+=======
+  field(CALC, "!A?$(VCOK):B?$(B4ON):$(B5OFF)")   
+  field(INPA, "$(SYS):WS-BUT-SSC-5.VAL.VAL") 
+  field(INPB, "$(SYS):WATCHMAN-SSC-5-ACT.VAL") 
+>>>>>>> af4f20086dfa9b37ef6d58d960f02ee48292733a
   field(OUT,  "$(SYS):SSCW5-WRT-OUTS.PROC PP")  
   field(OOPT, "Transition To Zero")
 }
@@ -269,11 +323,17 @@ record(seq, "$(SYS):SSCW5-WRT-OUTS") { # MAY BE HANDLED BY SEQ
 record(calcout, "$(SYS):SSC-W6-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
+<<<<<<< HEAD
   field(CALC, "!C?A&&B&&!D?$(VCOK):$(B6OFF):$(G2OFF)") 
   field(INPA, "$(SYS):SSC-W4-RLSD.VAL PP")
   field(INPB, "$(SYS):SSC-W5-RLSD.VAL PP")
   field(INPC, "$(SYS):SSC-G2-CLSD.VAL PP")
   field(INPD, "$(SYS):WS-BUT-SSC-6.VAL")
+=======
+  field(CALC, "!A?!B?$(VCOK):$(B6OFF):$(G2ON)")  
+  field(INPA, "$(SYS):SSC-G2-CLSD.VAL PP")
+  field(INPB, "$(SYS):WS-BUT-SSC-6.VAL.VAL")
+>>>>>>> af4f20086dfa9b37ef6d58d960f02ee48292733a
   field(OUT,  "$(SYS):SSCLW6-WRT-OUTS.PROC PP")  
   field(OOPT, "Transition To Zero")
 }

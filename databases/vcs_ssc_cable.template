@@ -2,7 +2,7 @@
 record(calc, "$(SYS):SSCCAB-SEL-STAGE") {
   field(DESC, "Select processing branch")
   field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
-  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(FAIL)")
+  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(NI)")
   field(INPA, "$(SYS):SSCCAB-INIT")
 ##IF BUTTON 16 IS STILL PRESSED PNK IS ACTIVE##
   field(INPB, "$(SYS):SSCCAB-PNK") 
@@ -165,7 +165,7 @@ record(calc, "$(SYS):SSCCAB-COUNTER") {
 }
 record(calc, "$(SYS):SSCCAB-TIMEOUT") {
   field(SCAN, "1 second")
-  field(CALC, "A>=$(SSCTOUT)?$(ON):$(OFF)")
+  field(CALC, "A>=$(COUT)?$(ON):$(OFF)")
   field(INPA, "$(SYS):SSCCAB-COUNTER.VAL PP")
 }
 ########################### Outputs ##################################
