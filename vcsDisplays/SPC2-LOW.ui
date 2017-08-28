@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>694</width>
-    <height>565</height>
+    <width>648</width>
+    <height>437</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -50,7 +50,7 @@
           </font>
          </property>
          <property name="text">
-          <string>A005-SPC1 Basement</string>
+          <string>A007-SPC2 Basement</string>
          </property>
         </widget>
        </item>
@@ -62,7 +62,7 @@
             <set>Qt::AlignCenter</set>
            </property>
            <property name="variable" stdset="0">
-            <string>VCS:SPC1-LOW-CLR-STATS</string>
+            <string>VCS:SPC2-LOW-CLR-STATS</string>
            </property>
            <property name="format" stdset="0">
             <enum>QELineEdit::Default</enum>
@@ -75,7 +75,7 @@
             <set>Qt::AlignCenter</set>
            </property>
            <property name="variable" stdset="0">
-            <string>VCS:SPC1-LOW-INTLCKS-STATS</string>
+            <string>VCS:SPC2-LOW-INTLCK-STATS</string>
            </property>
           </widget>
          </item>
@@ -105,13 +105,13 @@
        <item>
         <widget class="QERadioButton" name="qeradiobutton_3">
          <property name="text">
-          <string>switch_roof_A2_Closed</string>
+          <string>switch_I_SPC2_A007</string>
          </property>
          <property name="autoExclusive">
           <bool>false</bool>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:SW-RF-A2-CLSD</string>
+          <string>VCS:SW-I-SPC2-A007</string>
          </property>
          <property name="format" stdset="0">
           <enum>QERadioButton::LocalEnumeration</enum>
@@ -125,15 +125,15 @@
         </widget>
        </item>
        <item>
-        <widget class="QERadioButton" name="qeradiobutton_6">
+        <widget class="QERadioButton" name="qeradiobutton_5">
          <property name="text">
-          <string>switch_I_SPC1_A001</string>
+          <string>switch_II_SPC2_A007</string>
          </property>
          <property name="autoExclusive">
           <bool>false</bool>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:SW-I-SPC1-A001</string>
+          <string>VCS:SW-II-SPC2-A007</string>
          </property>
          <property name="format" stdset="0">
           <enum>QERadioButton::LocalEnumeration</enum>
@@ -147,112 +147,21 @@
         </widget>
        </item>
        <item>
-        <widget class="QERadioButton" name="qeradiobutton_7">
+        <widget class="QERadioButton" name="qeradiobutton_4">
          <property name="text">
-          <string>switch_II_SPC1_A001</string>
-         </property>
-         <property name="autoExclusive">
-          <bool>false</bool>
+          <string>switch_I_SPC2_G6</string>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:SW-II-SPC1-A001</string>
+          <string>VCS:SW-I-SPC2-G6</string>
          </property>
          <property name="format" stdset="0">
           <enum>QERadioButton::LocalEnumeration</enum>
          </property>
          <property name="pressText">
-          <string>0</string>
-         </property>
-         <property name="releaseText">
           <string>1</string>
          </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QERadioButton" name="qeradiobutton_8">
-         <property name="text">
-          <string>switch_I_SPC1_A005A</string>
-         </property>
-         <property name="autoExclusive">
-          <bool>false</bool>
-         </property>
-         <property name="variable" stdset="0">
-          <string>VCS:SW-I-SPC1-A005A</string>
-         </property>
-         <property name="format" stdset="0">
-          <enum>QERadioButton::LocalEnumeration</enum>
-         </property>
-         <property name="pressText">
-          <string>0</string>
-         </property>
          <property name="releaseText">
-          <string>1</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QERadioButton" name="qeradiobutton_9">
-         <property name="text">
-          <string>switch_II_SPC1_A005A</string>
-         </property>
-         <property name="autoExclusive">
-          <bool>false</bool>
-         </property>
-         <property name="variable" stdset="0">
-          <string>VCS:SW-II-SPC1-A005A</string>
-         </property>
-         <property name="format" stdset="0">
-          <enum>QERadioButton::LocalEnumeration</enum>
-         </property>
-         <property name="pressText">
           <string>0</string>
-         </property>
-         <property name="releaseText">
-          <string>1</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QERadioButton" name="qeradiobutton_10">
-         <property name="text">
-          <string>switch_I_SPC1_A005</string>
-         </property>
-         <property name="autoExclusive">
-          <bool>false</bool>
-         </property>
-         <property name="variable" stdset="0">
-          <string>VCS:SW-I-SPC1-A005</string>
-         </property>
-         <property name="format" stdset="0">
-          <enum>QERadioButton::LocalEnumeration</enum>
-         </property>
-         <property name="pressText">
-          <string>0</string>
-         </property>
-         <property name="releaseText">
-          <string>1</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QERadioButton" name="qeradiobutton_11">
-         <property name="text">
-          <string>switch_II_SPC1_A005</string>
-         </property>
-         <property name="autoExclusive">
-          <bool>false</bool>
-         </property>
-         <property name="variable" stdset="0">
-          <string>VCS:SW-II-SPC1-A005</string>
-         </property>
-         <property name="format" stdset="0">
-          <enum>QERadioButton::LocalEnumeration</enum>
-         </property>
-         <property name="pressText">
-          <string>0</string>
-         </property>
-         <property name="releaseText">
-          <string>1</string>
          </property>
         </widget>
        </item>
@@ -282,7 +191,7 @@
           </size>
          </property>
          <property name="text">
-          <string>SPC1_low_clear</string>
+          <string>SPC2_low_clear</string>
          </property>
         </widget>
        </item>
@@ -314,7 +223,7 @@
           </color>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:SPC1-CLEAR</string>
+          <string>VCS:SPC2-LOW-CLEAR</string>
          </property>
         </widget>
        </item>
@@ -338,37 +247,12 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_10">
      <item>
-      <widget class="QEPushButton" name="qepushbutton_5">
+      <widget class="QEPushButton" name="qepushbutton">
        <property name="text">
-        <string>WS_button_SPC1_42</string>
+        <string>WS_button_SPC2_44</string>
        </property>
        <property name="variable" stdset="0">
-        <string>VCS:WS-BUT-SPC1-42</string>
-       </property>
-       <property name="writeOnPress">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnRelease">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnClick">
-        <bool>false</bool>
-       </property>
-       <property name="pressText">
-        <string>0</string>
-       </property>
-       <property name="releaseText">
-        <string>1</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QEPushButton" name="qepushbutton_4">
-       <property name="text">
-        <string>WS_button_SPC1_43</string>
-       </property>
-       <property name="variable" stdset="0">
-        <string>VCS:WS-BUT-SPC1-43</string>
+        <string>VCS:WS-BUT-SPC2-44</string>
        </property>
        <property name="writeOnPress">
         <bool>true</bool>
@@ -390,10 +274,10 @@
      <item>
       <widget class="QEPushButton" name="qepushbutton_3">
        <property name="text">
-        <string>WS_button_SPC1_41</string>
+        <string>WS_button_SPC2_45</string>
        </property>
        <property name="variable" stdset="0">
-        <string>VCS:WS-BUT-SPC1-41</string>
+        <string>VCS:WS-BUT-SPC2-45</string>
        </property>
        <property name="writeOnPress">
         <bool>true</bool>
@@ -438,7 +322,7 @@
         </size>
        </property>
        <property name="text">
-        <string>CS1_SPC1</string>
+        <string>SPC2_CS14</string>
        </property>
       </widget>
      </item>
@@ -470,7 +354,7 @@
         </color>
        </property>
        <property name="variable" stdset="0">
-        <string>VCS:CS1-SPC1</string>
+        <string>VCS:CS14-SPC2</string>
        </property>
        <property name="variableSubstitutions" stdset="0">
         <string/>
@@ -490,7 +374,7 @@
         </size>
        </property>
        <property name="text">
-        <string>CL1_SPC1</string>
+        <string>SPC2_CL14</string>
        </property>
       </widget>
      </item>
@@ -522,7 +406,7 @@
         </color>
        </property>
        <property name="variable" stdset="0">
-        <string>VCS:CL1-SPC1</string>
+        <string>VCS:CL14-SPC2</string>
        </property>
        <property name="variableSubstitutions" stdset="0">
         <string/>
@@ -532,9 +416,9 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_15">
+    <layout class="QHBoxLayout" name="horizontalLayout_11">
      <item>
-      <widget class="QLabel" name="label_14">
+      <widget class="QLabel" name="label_10">
        <property name="maximumSize">
         <size>
          <width>16777215</width>
@@ -542,12 +426,12 @@
         </size>
        </property>
        <property name="text">
-        <string>LED_WS_SPC1_42</string>
+        <string>LED_WS_SPC2_44</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QEBitStatus" name="qebitstatus_10">
+      <widget class="QEBitStatus" name="qebitstatus_6">
        <property name="minimumSize">
         <size>
          <width>61</width>
@@ -574,7 +458,7 @@
         </color>
        </property>
        <property name="variable" stdset="0">
-        <string>VCS:LED-WS-SPC1-42</string>
+        <string>VCS:LED-WS-SPC2-44</string>
        </property>
        <property name="variableSubstitutions" stdset="0">
         <string/>
@@ -584,9 +468,9 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_19">
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
      <item>
-      <widget class="QLabel" name="label_18">
+      <widget class="QLabel" name="label_7">
        <property name="maximumSize">
         <size>
          <width>16777215</width>
@@ -594,12 +478,12 @@
         </size>
        </property>
        <property name="text">
-        <string>LED_WS_SPC1_43</string>
+        <string>LED_WS_SPC2_45</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QEBitStatus" name="qebitstatus_14">
+      <widget class="QEBitStatus" name="qebitstatus_4">
        <property name="minimumSize">
         <size>
          <width>61</width>
@@ -626,7 +510,7 @@
         </color>
        </property>
        <property name="variable" stdset="0">
-        <string>VCS:LED-WS-SPC1-43</string>
+        <string>VCS:LED-WS-SPC2-45</string>
        </property>
        <property name="variableSubstitutions" stdset="0">
         <string/>

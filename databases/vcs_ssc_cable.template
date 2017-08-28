@@ -47,7 +47,7 @@ record(seq, "$(SYS):RST-SSCCAB") { # HANDLE BY SEQ
   field(DOL3, "0")
   field(DOL4, "0")
   field(DOL5, "0")
-  field(LNK1, "$(SYS):SSCCAB-SNC-CLR.VAL PP")
+  field(LNK1, "$(SYS):SSCCAB-CLR.VAL PP")
   field(LNK2, "$(SYS):LED-WS-SSC-16.VAL PP")
   field(LNK3, "$(SYS):LED-WS-SSC-17.VAL PP")
   field(LNK4, "$(SYS):SSCCAB-COUNTER.VAL PP")
@@ -55,19 +55,6 @@ record(seq, "$(SYS):RST-SSCCAB") { # HANDLE BY SEQ
   field(SELM, "All")
 }
 
-#record(dfanout, "$(SYS):RST-SSCCAB") { 
-#  field(SCAN, "Passive")
-#  field(SELM, "All")
-#  field(OMSL, "supervisory")
-#  field(DOL,  "1")
-#  field(OUTA, "$(SYS):CS7-SSCCAB.VAL PP")
-#  field(OUTB, "$(SYS):CL7-SSCCAB.VAL PP")
-#  field(OUTC, "$(SYS):SSCCAB-SNC-CLR.VAL PP")
-#  field(OUTD, "$(SYS):LED-WS-SSC-16.VAL PP")
-#  field(OUTE, "$(SYS):LED-WS-SSC-17.VAL PP")
-#  field(OUTF, "$(SYS):SSCCAB-COUNTER.VAL PP")
-#  field(OUTG, "$(SYS):WATCHMAN-SSC-16-ACT.VAL")
-#}
 
 #################### RECOVER FROM PANIQUE ################
 
