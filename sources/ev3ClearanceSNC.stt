@@ -1,5 +1,8 @@
 program ev3ClearanceSNC
 %{
+/**********************************************************/
+	#include "vcs_var_mes.h"
+/**********************************************************/
 	#define	VC       	0
 	#define TOUT		5
 	#define	RA8ON		147
@@ -170,7 +173,3 @@ void EV3_clear_underway()
 	pvPut(EV3_CLR_STATS, SYNC); 		
 }
 /**********************************************************/
-%{
-	#include "vcs_var_mes.h"
-	
-}%

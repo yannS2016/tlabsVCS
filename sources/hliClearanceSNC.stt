@@ -1,5 +1,8 @@
 program hliClearanceSNC
 %{
+/**********************************************************/
+	#include "vcs_var_mes.h"
+/**********************************************************/
 	#define	VC       	0
 	#define TOUT		5
 	#define	RA14ON		147
@@ -170,8 +173,3 @@ void hli_clear_underway()
 	clear_underway(HLI_CLR_STATS);
 	pvPut(HLI_CLR_STATS, SYNC); 		
 }
-/**********************************************************/
-%{
-	#include "vcs_var_mes.h"
-	
-}%

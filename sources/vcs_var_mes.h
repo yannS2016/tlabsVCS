@@ -7,6 +7,10 @@
 #define VCS_PROC_H
  
 #define CLEAR_TIME 600 //~ 2 minute (600 x scan time)
+#define ERROR 		"\033[31;1m"	// red background
+#define OK 			"\033[33;1m" 	// yellow background
+#define CLR			"\033[32;1m"    // green background
+#define DEF 		"\033[0m"    	// white background
 
 static const char* mes_array[188] = {     
 		"    CLEARED   ", 						// 0

@@ -1,5 +1,8 @@
 program ev2ClearanceSNC
 %{
+/**********************************************************/
+	#include "vcs_var_mes.h"
+/**********************************************************/
 	#define	VC       	0
 	#define TOUT		5
 	#define	RA7ON		148
@@ -168,8 +171,3 @@ void EV2_clear_underway()
 	clear_underway(EV2_CLR_STATS);
 	pvPut(EV2_CLR_STATS, SYNC); 		
 }
-/**********************************************************/
-%{
-	#include "vcs_var_mes.h"
-	
-}%

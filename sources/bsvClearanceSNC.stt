@@ -1,5 +1,8 @@
 program bsvClearanceSNC
 %{
+/**********************************************************/
+	#include "vcs_var_mes.h"
+/**********************************************************/
 	#define	VC       	0
 	#define TOUT		5
 	#define	RA15ON		147
@@ -170,8 +173,3 @@ void bsv_clear_underway()
 	clear_underway(BSV_CLR_STATS);
 	pvPut(BSV_CLR_STATS, SYNC); 		
 }
-/**********************************************************/
-%{
-	#include "vcs_var_mes.h"
-	
-}%

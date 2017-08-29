@@ -1,5 +1,8 @@
 program a13aClearanceSNC
 %{
+/**********************************************************/
+	#include "vcs_var_mes.h"
+/**********************************************************/
 	#define	VC       	0
 	#define TOUT		5
 	#define A13APNK     139
@@ -153,8 +156,3 @@ void A13A_clear_underway()
 	clear_underway(A13A_CLR_STATS);
 	pvPut(A13A_CLR_STATS, SYNC); 		
 }
-/**********************************************************/
-%{
-	#include "vcs_var_mes.h"
-	
-}%

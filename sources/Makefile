@@ -61,7 +61,7 @@ ifneq ($(SNCSEQ),)
     vcs_SNCFLAGS += +r
     vcs_DBD += vcs_snc.dbd
     vcsSupport_SRCS += ev1ClearanceSNC.stt ev2ClearanceSNC.stt  ev3ClearanceSNC.stt bsvClearanceSNC.stt  hliClearanceSNC.stt  speClearanceSNC.stt  vliClearanceSNC.stt 
-    vcsSupport_SRCS += a13aClearanceSNC.stt  ssccabClearanceSNC.stt
+    vcsSupport_SRCS += a13aClearanceSNC.stt  ssccabClearanceSNC.stt  sscbasClearanceSNC.stt iblClearanceSNC.stt
     vcsSupport_LIBS += seq pv
     vcs_LIBS += seq pv
 

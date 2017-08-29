@@ -1,5 +1,8 @@
 program vliClearanceSNC
 %{
+/**********************************************************/
+	#include "vcs_var_mes.h"
+/**********************************************************/
 	#define	VC       	0
 	#define TOUT		5
 	#define VLIPNK      138
@@ -173,8 +176,3 @@ void VLI_clear_underway()
 	clear_underway(VLI_CLR_STATS);
 	pvPut(VLI_CLR_STATS, SYNC); 		
 }
-/**********************************************************/
-%{
-	#include "vcs_var_mes.h"
-	
-}%

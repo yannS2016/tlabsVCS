@@ -1,5 +1,8 @@
 program ev1ClearanceSNC
 %{
+/**********************************************************/
+	#include "vcs_var_mes.h"
+/**********************************************************/
 	#define	VC       	0
 	#define TOUT		5
 	#define	RA6ON       147
@@ -191,10 +194,7 @@ void ev1_clear_underway()
 }
 /**********************************************************/
 %{
-	#include "vcs_var_mes.h"
-/**********************************************************/
 
-/**********************************************************/
 inline void cleared(string vault_status) {   
     strcpy(vault_status, mes_array[0]); // Area cleared  
 }
