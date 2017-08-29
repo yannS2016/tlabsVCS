@@ -339,7 +339,7 @@
           </color>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:IBL-SNC-CLR</string>
+          <string>VCS:IBL-CLR</string>
          </property>
         </widget>
        </item>
@@ -363,21 +363,18 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_10">
      <item>
-      <widget class="QEPushButton" name="qepushbutton">
+      <widget class="QERadioButton" name="qeradiobutton_9">
        <property name="text">
         <string>WS_buttonIBL_9</string>
+       </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
        </property>
        <property name="variable" stdset="0">
         <string>VCS:WS-BUT-IBL-9</string>
        </property>
-       <property name="writeOnPress">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnRelease">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnClick">
-        <bool>false</bool>
+       <property name="format" stdset="0">
+        <enum>QERadioButton::Integer</enum>
        </property>
        <property name="pressText">
         <string>0</string>
@@ -388,21 +385,18 @@
       </widget>
      </item>
      <item>
-      <widget class="QEPushButton" name="qepushbutton_3">
+      <widget class="QERadioButton" name="qeradiobutton_10">
        <property name="text">
-        <string>WS_button_IBL_8</string>
+        <string>WS_buttonIBL_8</string>
+       </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
        </property>
        <property name="variable" stdset="0">
         <string>VCS:WS-BUT-IBL-8</string>
        </property>
-       <property name="writeOnPress">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnRelease">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnClick">
-        <bool>false</bool>
+       <property name="format" stdset="0">
+        <enum>QERadioButton::Integer</enum>
        </property>
        <property name="pressText">
         <string>0</string>
@@ -413,21 +407,18 @@
       </widget>
      </item>
      <item>
-      <widget class="QEPushButton" name="qepushbutton_4">
+      <widget class="QERadioButton" name="qeradiobutton_11">
        <property name="text">
-        <string>WS_button_IBL_7</string>
+        <string>WS_buttonIBL_7</string>
+       </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
        </property>
        <property name="variable" stdset="0">
         <string>VCS:WS-BUT-IBL-7</string>
        </property>
-       <property name="writeOnPress">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnRelease">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnClick">
-        <bool>false</bool>
+       <property name="format" stdset="0">
+        <enum>QERadioButton::Integer</enum>
        </property>
        <property name="pressText">
         <string>0</string>
@@ -715,11 +706,6 @@
    <class>QELineEdit</class>
    <extends>QLineEdit</extends>
    <header>QELineEdit.h</header>
-  </customwidget>
-  <customwidget>
-   <class>QEPushButton</class>
-   <extends>QPushButton</extends>
-   <header>QEPushButton.h</header>
   </customwidget>
   <customwidget>
    <class>QERadioButton</class>
