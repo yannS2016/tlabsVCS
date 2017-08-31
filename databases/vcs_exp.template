@@ -30,7 +30,7 @@ record(calcout, "$(SYS):EXP-FAIL-COND") {
   field(INPD, "$(SYS):EXP-G10-FAIL PP") 
   field(INPE, "$(SYS):EXP-INIT.VAL") 
   field(OUT,  "$(SYS):RST-EXP.PROC PP")  
-  field(OOPT, "When Non-zero")  
+  field(OOPT, "Transition To Non-zero") 
 }
 record(calc, "$(SYS):EXP-G10-FAIL") {
   field(SCAN, "Passive")

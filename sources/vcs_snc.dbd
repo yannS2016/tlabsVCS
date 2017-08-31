@@ -12,6 +12,8 @@ registrar(iblClearanceSNCRegistrar)
 registrar(expClearanceSNCRegistrar)
 registrar(spc1gfClearanceSNCRegistrar)
 registrar(spc1basClearanceSNCRegistrar)
+registrar(spc2basClearanceSNCRegistrar)
+registrar(spc2gfClearanceSNCRegistrar)
 #registrar(speClearanceSNCRegistrar)
 
 

@@ -62,7 +62,7 @@
             <set>Qt::AlignCenter</set>
            </property>
            <property name="variable" stdset="0">
-            <string>VCS:SPC2-CLR-STATS</string>
+            <string>VCS:SPC2GF-CLR-STATS</string>
            </property>
            <property name="format" stdset="0">
             <enum>QELineEdit::Default</enum>
@@ -75,7 +75,7 @@
             <set>Qt::AlignCenter</set>
            </property>
            <property name="variable" stdset="0">
-            <string>VCS:SPC2-INTLCKS-STATS</string>
+            <string>VCS:SPC2GF-INTLCK-STATS</string>
            </property>
           </widget>
          </item>
@@ -104,6 +104,28 @@
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QERadioButton" name="qeradiobutton_3">
+         <property name="text">
+          <string>spc2_gf_init</string>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+         <property name="variable" stdset="0">
+          <string>VCS:SPC2GF-INIT</string>
+         </property>
+         <property name="format" stdset="0">
+          <enum>QERadioButton::LocalEnumeration</enum>
+         </property>
+         <property name="pressText">
+          <string>0</string>
+         </property>
+         <property name="releaseText">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QERadioButton" name="qeradiobutton_9">
          <property name="text">
           <string>switch_roof_A3_Closed</string>
          </property>
@@ -215,10 +237,10 @@
        <item>
         <widget class="QERadioButton" name="qeradiobutton_4">
          <property name="text">
-          <string>switch_I_SPC2_G6a</string>
+          <string>switch_II_SPC2_G6a</string>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:SW-I-SPC2-G6a</string>
+          <string>VCS:SW-II-SPC2-G6a</string>
          </property>
          <property name="format" stdset="0">
           <enum>QERadioButton::LocalEnumeration</enum>
@@ -289,7 +311,7 @@
           </color>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:SPC2-CLEAR</string>
+          <string>VCS:SPC2-CLR</string>
          </property>
         </widget>
        </item>

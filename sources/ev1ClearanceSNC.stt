@@ -1,7 +1,7 @@
 program ev1ClearanceSNC
 %{
 /**********************************************************/
-	#include "vcs_var_mes.h"
+	#include "vcs_var_mes.h" // define this here so C functions/variables are seen
 /**********************************************************/
 	#define	VC       	0
 	#define TOUT		5

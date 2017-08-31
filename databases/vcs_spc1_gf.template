@@ -98,7 +98,6 @@ record(calcout, "$(SYS):SPC1-W40-STS") {
   field(CALC, "!A?!B?!C?$(VCOK):$(B40ON):!C?$(B40NP):D:$(FAIL)")
   field(INPA, "$(SYS):SPC1GF-FAIL-COND PP")
   field(INPB, "$(SYS):WS-BUT-SPC1-40.VAL")
-  field(INPC, "$(SYS):SPC1-DA2-CLSD.VAL PP") # ALWAYS USE PP 
   field(INPC, "$(SYS):WATCHMAN-SPC1-40-ACT NPP")
   field(INPD, "$(SYS):SPC1-W41-STS PP")
   field(OUT,  "$(SYS):SPC1W40-WRT-OUTS.PROC PP")  

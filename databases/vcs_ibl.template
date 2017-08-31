@@ -39,7 +39,7 @@ record(calcout, "$(SYS):IBL-FAIL-COND") {
   field(INPD, "$(SYS):IBLG-FAIL PP") 
   field(INPE, "$(SYS):IBL-INIT NPP") 
   field(OUT,  "$(SYS):RST-IBL.PROC PP")  
-  field(OOPT, "When Non-zero")  
+  field(OOPT, "Transition To Non-zero")  
 }
 #################################################################################
 record(calcout, "$(SYS):IBLG-FAIL") {

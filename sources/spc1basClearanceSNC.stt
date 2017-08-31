@@ -25,7 +25,7 @@ short SPC1L_OLD_FAIL_COND;
 string SPC1L_CLR_STATS; 
 string SPC1L_INTLCK_STATS;
 // CONTROL FLAGS
-short released = FALSE;
+short spc1LUpdate= FALSE;
 short SPC1L_INIT; 				// basement initialization
 /* Associate SNL variables with epics output pv's*/
 assign	SPC1L_CLR_STATS		to	"{SYS}:SPC1L-CLR-STATS"; 
@@ -63,9 +63,9 @@ ss SPC1L_clearance_status {
 	state recover_faillure {
 			
 		when (!SPC1L_FAIL_COND) {
-			if(!released) {
+			if(!spc1LUpdate) {
 				printf("%sRECOVERING FROM FAILLURE - ENTERING W42 STATE%s\n",OK,DEF);
-				released = TRUE;
+				spc1LUpdate = TRUE;
 			}
 		} state  watchman_42_pressed
 			
@@ -87,7 +87,7 @@ ss SPC1L_clearance_status {
 		} state watchman_42_released
 	}
 //////////////////////////////////////////////////////////
-	state watchman_42_released {
+	state watchman_42_released{
 		
 		when (SPC1_W42_STS == FAIL) {
 
@@ -129,7 +129,7 @@ ss SPC1L_clearance_status {
 		option -e;
 		entry {
 			printf("SPC1 LOW CLEARANCE FAILURE CONDITION: ");
-			released = FALSE;
+			spc1LUpdate = FALSE;
 		}
 
 		when (SPC1L_FAIL_COND == RA2ON) {
@@ -180,7 +180,7 @@ ss SPC1L_clearance_status {
 		option -e;
 		entry {
 			printf("SPC1 LOW CLEAR FAILURE CONDITION: ");
-			released = FALSE;
+			spc1LUpdate = FALSE;
 		}
 		
 		when (SPC1L_VC == RA2ON) {
@@ -198,7 +198,7 @@ ss SPC1L_clearance_status {
 		
 		exit {
 		    SPC1L_OLD_FAIL_COND = SPC1L_FAIL_COND;
-			printf("VAULT CLEAR: %d %d \n",SPC1L_OLD_FAIL_COND, SPC1L_FAIL_COND);		
+			//printf("VAULT CLEAR: %d %d \n",SPC1L_OLD_FAIL_COND, SPC1L_FAIL_COND);		
 		}
 	}
 }

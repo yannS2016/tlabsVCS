@@ -24,7 +24,7 @@ short SPC1GF_FAIL_COND;
 string SPC1GF_CLR_STATS; 
 string SPC1GF_INTLCK_STATS;
 // CONTROL FLAGS
-short spc1Update = FALSE;
+short spc1GFUpdate = FALSE;
 short SPC1GF_OLD_FAIL_COND;
 
 /* Associate SNL variables with epics output pv's*/
@@ -44,7 +44,7 @@ monitor	SPC1GF_FAIL_COND;
 
 ss SPC1GF_clearance_status {
     state init {
-		when (delay(0.5)) {
+		when (delay(0.8)) {
 			initVault();
 			printf("%sSPC1 GROUND-FLOOR VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_40_pressed	
@@ -64,9 +64,9 @@ ss SPC1GF_clearance_status {
 	state recover_faillure {
 		
 		when (!SPC1GF_FAIL_COND) {
-			if(!spc1Update) {
+			if(!spc1GFUpdate) {
 				printf("%sRECOVERING FROM FAILLURE - ENTERING W40 STATE: %d%s\n",OK,SPC1_W40_STS,DEF);
-				spc1Update = TRUE;
+				spc1GFUpdate = TRUE;
 			}
 		} state  watchman_40_pressed
 			
@@ -85,10 +85,10 @@ ss SPC1GF_clearance_status {
 		when (SPC1_W40_STS == B40ON) {
 			SPC1GF_clear_underway();
 			SPC1GF_update_report(B40ON);
-		} state watchman_40_spc1Update
+		} state watchman_40_released
 	}
 //////////////////////////////////////////////////////////
-	state watchman_40_spc1Update {
+	state watchman_40_released {
 		
 		when (SPC1_W40_STS == FAIL) {
 
@@ -131,7 +131,7 @@ ss SPC1GF_clearance_status {
 		option -x;
 		entry {
 			printf("SPC1 GF CLEARANCE FAILURE CONDITION: ");
-			spc1Update = FALSE;
+			spc1GFUpdate = FALSE;
 		}
 
 		when (SPC1GF_FAIL_COND == RA2ON) {
@@ -152,7 +152,7 @@ ss SPC1GF_clearance_status {
 		
 		exit {
 		    SPC1GF_OLD_FAIL_COND = SPC1GF_FAIL_COND;
-			printf("VAULT CLEARANCE: %d %d \n",SPC1GF_OLD_FAIL_COND, SPC1GF_FAIL_COND);		
+			//printf("VAULT CLEARANCE: %d %d \n",SPC1GF_OLD_FAIL_COND, SPC1GF_FAIL_COND);		
 		}			
 	}
 ////////////////////////////////////////////////////////////////////////////
@@ -162,7 +162,7 @@ ss SPC1GF_clearance_status {
 		option -x;
 		entry {
 			printf("SPC1 GF CLEAR FAILURE CONDITION: ");
-			spc1Update = FALSE;
+			spc1GFUpdate = FALSE;
 		}
 		
 		when (SPC1GF_VC == RA2ON) {
@@ -190,7 +190,7 @@ ss SPC1GF_clearance_status {
 		
 		exit {
 		    SPC1GF_OLD_FAIL_COND = SPC1GF_FAIL_COND;
-			printf("VAULT CLEAR: %d %d \n",SPC1GF_OLD_FAIL_COND, SPC1GF_FAIL_COND);		
+			//printf("VAULT CLEAR: %d %d \n",SPC1GF_OLD_FAIL_COND, SPC1GF_FAIL_COND);		
 		}
 	}
 }

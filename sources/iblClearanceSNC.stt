@@ -75,7 +75,7 @@ ss IBL_clearance_status {
 
 		when (!IBL_FAIL_COND) {
 			if(!released) {
-				printf("%sRECOVERING FROM FAILLURE: ENTERING W9 STATE%s\n",OK,DEF);
+				printf("%sRECOVERING FROM FAILLURE - ENTERING W9 STATE%s\n",OK,DEF);
 				released = TRUE;
 			}
 		} state  watchman_9_pressed

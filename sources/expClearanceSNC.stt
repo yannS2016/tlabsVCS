@@ -40,7 +40,7 @@ short EXP_OLD_FAIL_COND;
 string EXP_CLR_STATS; 
 string EXP_INTLCK_STATS;
 
-short released = FALSE;
+short expUpdate= FALSE;
 /* Associate SNL variables with epics output pv's*/
 assign	EXP_CLR_STATS		to	"{SYS}:EXP-CLR-STATS"; 
 assign	EXP_INTLCK_STATS	to	"{SYS}:EXP-INTLCK-STATS"; 
@@ -91,9 +91,9 @@ ss EXP_clearance_status {
 		} state  clearance_faillures
 			
 		when (EXP_W26_STS != FAIL) {
-			if(!released) {
+			if(!expUpdate) {
 				printf("%sEXP RECOVERING FROM FAILLURE - ENTERING W26 STATE%s\n",OK,DEF);
-				released = TRUE;
+				expUpdate= TRUE;
 			}
 		} state  watchman_26_pressed
 			
@@ -239,9 +239,10 @@ ss EXP_clearance_status {
 	state clearance_faillures { 			/* FAIL CONDITIONS*/
 		
 		option -e;
+		option -x;
 		entry {
 			printf("EXP CLEARANCE FAILURE CONDITION: ");
-			released = FALSE;
+			expUpdate = FALSE;
 			EXP_OLD_FAIL_COND = EXP_FAIL_COND;
 		}
 
@@ -256,12 +257,18 @@ ss EXP_clearance_status {
 		} state recover_faillure
 			
 		when () {
-		} state gate_faillures			
+		} state gate_faillures
+		
+		exit {
+		    EXP_OLD_FAIL_COND = EXP_FAIL_COND;	
+		}			
 			
 	}
 //////////////////////////////////////////////////////////////////
 	state gate_faillures { 			/* DOOR A1A FAIL CONDITIONS*/
 			
+		option -x;
+		
 		when (EXP_FAIL_COND == G9ON) {			
 			EXP_update_failed(G9ON);
 			printf("%sGATE G9 WAS OPENED%s\n",ERROR,DEF);
@@ -273,15 +280,20 @@ ss EXP_clearance_status {
 		} state recover_faillure
 			
 		when () { // THIS MAY NOT BE NECCESSARY
-		} state recover_faillure		
+		} state recover_faillure
+			
+		exit {
+		    EXP_OLD_FAIL_COND = EXP_FAIL_COND;	
+		}	
 	}
 ////////////////////////////////////////////////////////////////////////////
 	state vc_faillures { 			/* FAIL CONDITIONS*/
 		
 		option -e;
+		option -x;
 		entry {
 			printf("EXP LOW CLEAR FAILURE CONDITION: ");
-			released = FALSE;
+			expUpdate = FALSE;
 		}
 		
 		when (EXP_VC == RA12ON) {
@@ -310,11 +322,15 @@ ss EXP_clearance_status {
 			EXP_update_failed(EXPPNK);
 			printf("%sA PANIC BUTTON WAS  PRESSED%s\n",ERROR,DEF);
 		} state recover_faillure
+		
+		exit {
+		    EXP_OLD_FAIL_COND = EXP_FAIL_COND;	
+		}
 	}
 }
 
 void initVault(){
-	EXP_INIT = FALSE;
+	EXP_INIT = TRUE;
 	not_cleared(EXP_CLR_STATS);
 	report_error(EXP_INTLCK_STATS, 54);
 	pvPut(EXP_INIT, SYNC);
