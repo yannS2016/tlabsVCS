@@ -9,9 +9,12 @@ registrar(a13aClearanceSNCRegistrar)
 registrar(ssccabClearanceSNCRegistrar)
 registrar(sscbasClearanceSNCRegistrar)
 registrar(iblClearanceSNCRegistrar)
+registrar(expClearanceSNCRegistrar)
+registrar(spc1gfClearanceSNCRegistrar)
+registrar(spc1basClearanceSNCRegistrar)
 #registrar(speClearanceSNCRegistrar)
 
 
 #registrar(sncExampleRegistrar)
-#registrar(expClearanceSNCRegistrar)
+
 
