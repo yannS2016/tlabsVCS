@@ -86,16 +86,17 @@ ss EXP_clearance_status {
 //////////////////////////////////////////////////////////
 	state recover_faillure {
 
-		when (EXP_FAIL_COND != EXP_OLD_FAIL_COND) {
-
-		} state  clearance_faillures
 			
-		when (EXP_W26_STS != FAIL) {
+		when (!EXP_FAIL_COND ) {
 			if(!expUpdate) {
 				printf("%sEXP RECOVERING FROM FAILLURE - ENTERING W26 STATE%s\n",OK,DEF);
 				expUpdate= TRUE;
 			}
 		} state  watchman_26_pressed
+		
+		when (EXP_FAIL_COND != EXP_OLD_FAIL_COND) {
+
+		} state  clearance_faillures
 			
 	}
 //////////////////////////////////////////////////////////
