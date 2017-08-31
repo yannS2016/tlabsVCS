@@ -2,13 +2,11 @@
 record(calc, "$(SYS):EXP-SEL-STAGE") {
   field(DESC, "Select processing branch")
   field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
-  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(FAIL)")
+  field(CALC, "A?!B?C?$(S0):$(S1):$(PNK):$(NI)")
   field(INPA, "$(SYS):EXP-INIT")
 ##IF BUTTON 26 or  28b  IS STILL PRESSED PNK IS ACTIVE##
   field(INPB, "$(SYS):EXP-PNK") 
-  field(INPC, "$(SYS):EXP-SNC-CLR")
-## THIS FLAG ENSURE WE ONLY RESPOND TO A SINGLE EVENT ON BUT 26 and 28b##
-  field(INPD, "$(SYS):WATCHMAN-EXP-26-ACT.VAL")
+  field(INPC, "$(SYS):EXP-CLR")
   field(FLNK, "$(SYS):EXP-PROC-STAGE")
 }
 ## THIS RECORDS PROPAGATE PROCESSING ##
@@ -17,9 +15,28 @@ record(fanout, "$(SYS):EXP-PROC-STAGE") {
   field(SELM, "Specified")
   field(SELL, "$(SYS):EXP-SEL-STAGE")
   field(LNK1, "$(SYS):EXP-VC")
-  field(LNK2, "$(SYS):EXP-VNCS1 PP")
-  field(LNK3, "$(SYS):EXP-VNCS5 PP")
-  field(LNK4, "$(SYS):EXP-PNK")
+  field(LNK2, "$(SYS):EXP-VNC")
+  field(LNK3, "$(SYS):EXP-PNK")
+}
+###############################################################################
+#CLEARANCE UNDERWAY FAIL CONDITIONS
+record(calcout, "$(SYS):EXP-FAIL-COND") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!E?$(VCOK):!A?!B?!C?!D?$(VCOK):$(G10ON):$(TOUT):$(G9ON):$(RA12ON)")
+  field(INPA, "$(SYS):SW-RF-A12-CLSD.VAL NPP") 
+  field(INPB, "$(SYS):SW-G9-EXP-A12 NPP")
+  field(INPC, "$(SYS):EXP-TIMEOUT.VAL NPP")
+  field(INPD, "$(SYS):EXP-G10-FAIL PP") 
+  field(INPE, "$(SYS):EXP-INIT.VAL") 
+  field(OUT,  "$(SYS):RST-EXP.PROC PP")  
+  field(OOPT, "When Non-zero")  
+}
+record(calc, "$(SYS):EXP-G10-FAIL") {
+  field(SCAN, "Passive")
+  field(CALC, "A=$(G10ON)?A:$(OFF)")
+  field(INPA, "$(SYS):EXP-G10-STS.VAL NPP")
+  field(INPB, "$(SYS):WATCHMAN-EXP-26-ACT.VAL NPP") 
 }
 ##################################################################################
 # monitor status of inputs which may cause clearance faillure
@@ -27,18 +44,15 @@ record(fanout, "$(SYS):EXP-PROC-STAGE") {
 record(calcout, "$(SYS):EXP-VC") { 
   field(DESC, "EXP Vault clear stage")
   field(SCAN, "Passive")
+  field(PINI, "YES")
   field(CALC, "!A?!B?!C?!D?E?$(EXPPNK):$(VCOK):$(G10ON):$(G9ON):$(DA12ON):$(RA12ON)")
-# IN LIVE APP USE A FLNK FROM  SW-I-EXP-A1A OR SW-I-EXP-A1A (SCAN=Intr) TO PROCESS THIS RECORD
-# AND ACCES IT HERE WITH NPP OR ACCES IT WITH PP BUT USE NPP ON ITS INPUTS
-  field(INPA, "$(SYS):SW-RF-A12-CLSD.VAL PP")
+  field(INPA, "$(SYS):SW-RF-A12-CLSD.VAL NPP")
   field(INPB, "$(SYS):EXP-DA12-CLSD.VAL.VAL PP")  
   field(INPC, "$(SYS):SW-G9-EXP-A12.VAL PP")
   field(INPD, "$(SYS):SW-G10-EXP-A12.VAL PP")
   field(INPE, "$(SYS):EXP-PNK.VAL PP")
   field(OUT,  "$(SYS):RST-EXP.PROC PP")  
   field(OOPT, "When Non-zero")
-  field(PINI, "YES")
-  field(VAL, "1") 
 }
 ####################### RESET VAULT #################
 record(fanout, "$(SYS):RST-EXP") {
@@ -46,7 +60,6 @@ record(fanout, "$(SYS):RST-EXP") {
   field(SELM, "All")
   field(LNK1, "$(SYS):RST-EXP-OUTS PP")
   field(LNK2, "$(SYS):RST-EXP-FLAGS PP")
-
 }
 record(seq, "$(SYS):RST-EXP-OUTS") { # MAY BE HANDLE BY SEQ
   field(SCAN, "Passive")
@@ -59,15 +72,15 @@ record(seq, "$(SYS):RST-EXP-OUTS") { # MAY BE HANDLE BY SEQ
   field(DOL7, "0")
   field(DOL8, "0")
   field(DOL9, "0")
-  field(LNK1, "$(SYS):EXP-SNC-CLR.VAL PP")
-  field(LNK2, "$(SYS):LED-WS-EXP-26.VAL PP")
-  field(LNK3, "$(SYS):LED-WS-EXP-28b.VAL PP")
-  field(LNK4, "$(SYS):LED-WS-EXP-28a.VAL PP")
-  field(LNK5, "$(SYS):LED-WS-EXP-27.VAL PP")
-  field(LNK6, "$(SYS):LED-WS-EXP-29.VAL PP")
-  field(LNK7, "$(SYS):CS8-EXP.VAL PP")
-  field(LNK8, "$(SYS):CL8-EXP.VAL PP")
-  field(LNK9, "$(SYS):EXP-COUNTER.VAL PP")
+  field(LNK1, "$(SYS):EXP-CLR PP")
+  field(LNK2, "$(SYS):LED-WS-EXP-28b PP")
+  field(LNK3, "$(SYS):LED-WS-EXP-26 PP")
+  field(LNK4, "$(SYS):LED-WS-EXP-28a PP")
+  field(LNK5, "$(SYS):LED-WS-EXP-27 PP")
+  field(LNK6, "$(SYS):LED-WS-EXP-29 PP")
+  field(LNK7, "$(SYS):CS8-EXP PP")
+  field(LNK8, "$(SYS):CL8-EXP PP")
+  field(LNK9, "$(SYS):EXP-COUNTER PP")
   field(SELM, "All")
 }
 
@@ -79,44 +92,37 @@ record(seq, "$(SYS):RST-EXP-FLAGS") { # MAY BE HANDLE BY SEQ
   field(DOL4, "0")
   field(DOL5, "0")
   field(DOL6, "0")
-  field(LNK1, "$(SYS):WATCHMAN-EXP-26-ACT.VAL PP")
-  field(LNK2, "$(SYS):WATCHMAN-EXP-28b-ACT.VAL PP")
-  field(LNK3, "$(SYS):WATCHMAN-EXP-28a-ACT.VAL PP")
-  field(LNK4, "$(SYS):WATCHMAN-EXP-27-ACT.VAL PP")
-  field(LNK5, "$(SYS):WATCHMAN-EXP-29-ACT.VAL PP")
-  field(LNK6, "$(SYS):EXP-G10-ACT.VAL PP")
+  field(LNK1, "$(SYS):WATCHMAN-EXP-26-ACT PP")
+  field(LNK2, "$(SYS):WATCHMAN-EXP-28b-ACT PP")
+  field(LNK3, "$(SYS):WATCHMAN-EXP-28a-ACT PP")
+  field(LNK4, "$(SYS):WATCHMAN-EXP-27-ACT PP")
+  field(LNK5, "$(SYS):WATCHMAN-EXP-29-ACT PP")
+  field(LNK6, "$(SYS):EXP-G10-ACT PP")
   field(SELM, "All")
 }
-########################################################################
-# formula to monitor status of inputs and set output in stage 1
-record(calc, "$(SYS):EXP-VNCS1") {
-  field(DESC, "Vault clearance stage 1")
+#######################################################################
+record(calc, "$(SYS):EXP-VNC") {
+  field(DESC, "Vault clearance")
   field(SCAN, "Passive")
-  field(FLNK, "$(SYS):EXPS1-PROC-OUTS") 
-  field(CALC, "!A?!B?!C?$(VCOK):$(G9ON):$(RA12ON):$(B26OFF)")
-  field(INPA, "$(SYS):WS-BUT-EXP-26.VAL")
-  field(INPB, "$(SYS):SW-RF-A12-CLSD.VAL")
-  field(INPC, "$(SYS):SW-G9-EXP-A12.VAL PP")    	  
   field(PINI, "YES")
+  field(CALC, "!A?$(VCOK):A")
+  field(INPA, "$(SYS):EXP-W26-STS PP")   	  
 }
 ########################################################################
-record(fanout, "$(SYS):EXPS1-PROC-OUTS") {
+record(calcout, "$(SYS):EXP-W26-STS") {
+  field(DESC, "Vault clearance")
   field(SCAN, "Passive")
-  field(SELM, "Specified")
-  field(SELL, "$(SYS):EXPS1-OUT-STS.VAL PP")
-  field(LNK1, "$(SYS):EXPS1-WRT-OUTS PP")
-  field(LNK2, "$(SYS):RST-EXP PP")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?$(VCOK):$(B26ON):!C?$(B26NP):D:$(FAIL)")
+  field(INPA, "$(SYS):EXP-FAIL-COND PP")
+  field(INPB, "$(SYS):WS-BUT-EXP-26.VAL")
+  field(INPC, "$(SYS):WATCHMAN-EXP-26-ACT.VAL NPP") 
+  field(INPD, "$(SYS):EXP-W28b-STS PP")
+  field(OUT,  "$(SYS):EXPW26-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero")   	  
 }
-
-# IF EXPS1-OUT-STS.VAL IS NON-ZERO RESET THE VAULT
-# OTHERWISE PROCESS STAGE 1 OUTPUTS
-record(calc, "$(SYS):EXPS1-OUT-STS") { 
-  field(SCAN, "Passive")
-  field(CALC, "!A?$(S0):$(S1)")
-  field(INPA, "$(SYS):EXP-VNCS1.VAL NPP")  
-}
-
-record(seq, "$(SYS):EXPS1-WRT-OUTS") { # MAY BE HANDLED BY SEQ
+########################################################################
+record(seq, "$(SYS):EXPW26-WRT-OUTS") { # MAY BE HANDLED BY SEQ
   field(DOL1, "1")
   field(DOL2, "1")
   field(DOL3, "1")
@@ -137,38 +143,24 @@ record(seq, "$(SYS):EXPS1-WRT-OUTS") { # MAY BE HANDLED BY SEQ
 # B28bON IS NOT RETURN AFTER B28b IS PRESSED AND RELEASED
 # EXP-VNCS2 RETURN 0 SO WE CAN PROCEED TO STAGE 3.
 #
-record(calcout, "$(SYS):EXP-VNCS2") {
+record(calcout, "$(SYS):EXP-W28b-STS") {
   field(DESC, "Vault clearance stage 2")
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(FLNK, "$(SYS):EXPS2-OUT-STS")
-  field(CALC, "A?!B?!C?!D?!E?!F||G?$(VCOK):$(B28bOFF):E:$(G9ON):$(TOUT):$(RA12ON):$(B26ON)")	  
-  field(INPA, "$(SYS):EXP-WATCH-26-RLSD.VAL PP") # THIS MUST BE CALLED IN PP	  
-  field(INPB, "$(SYS):SW-RF-A12-CLSD.VAL")
-  field(INPC, "$(SYS):EXP-TIMEOUT.VAL PP") # THIS MUST BE CALLED IN PP
-  field(INPD, "$(SYS):SW-G9-EXP-A12.VAL")	   
-  field(INPE, "$(SYS):EXP-G10-STS.VAL PP") # THIS MUST BE CALLED IN PP
-  field(INPF, "$(SYS):WS-BUT-EXP-28b.VAL")
-  field(INPG, "$(SYS):WATCHMAN-EXP-28b-ACT.VAL")	
-  field(OUT,  "$(SYS):EXPS2-WRT-OUTS.PROC PP")  
-  field(OOPT, "When Zero") 
-  field(VAL, "1")
+  field(CALC, "!F?!B?A&&!C?!D?$(VCOK):$(B28bON):!D?$(B28bOFF):E:B:$(FAIL)")
+  field(INPA, "$(SYS):EXP-WATCH-26-RLSD PP") # THIS MUST BE CALLED IN PP	  	  	   
+  field(INPB, "$(SYS):EXP-G10-STS.VAL PP")   # THIS MUST BE CALLED IN PP
+  field(INPC, "$(SYS):WS-BUT-EXP-28b.VAL")
+  field(INPD, "$(SYS):WATCHMAN-EXP-28b-ACT.VAL")
+  field(INPE, "$(SYS):EXP-W28a-STS PP")	
+  field(INPF, "$(SYS):EXP-FAIL-COND.VAL PP")
+  field(OUT,  "$(SYS):EXPW28b-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero")
 }
-
-# OFF IS USE TO INDICATE THAT THE DOOR IS IN CLOSED STATE SO WE CAN CONTINU CLEARANCE
-# A&&!B FAIL WEHN THE A UNDERWENT A STATE TRANSITION AS B LATCHES
-record(calc, "$(SYS):EXP-G10-STS") {
-  field(SCAN, "Passive")
-  field(PINI, "YES")
-  field(CALC, "(A&&!B)?$(G10OFF):(A&&B)?$(G10ON):$(OFF)")	  	   
-  field(INPA, "$(SYS):SW-G10-EXP-A12.VAL")
-  field(INPB, "$(SYS):EXP-G10-ACT.VAL")
-}
-
+###################################################################################################
 # THIS RECORDS IS PROCESSED ONLY WHEN EXP-VNCS2 RETURN 0
 # THAT IS EXP INTERLOCKS ARE CORRECT IN STAGE 2 SUB 1
-
-record(seq, "$(SYS):EXPS2-WRT-OUTS") {
+record(seq, "$(SYS):EXPW28b-WRT-OUTS") {
   field(SELM, "All")
   field(DOL1, "1")
   field(DOL2, "1")
@@ -178,42 +170,36 @@ record(seq, "$(SYS):EXPS2-WRT-OUTS") {
   field(LNK3, "$(SYS):EXP-G10-ACT.VAL PP")
   field(SCAN, "Passive")
 }
-
-# IF PREVIOUS INTERLOCKS(ROOF A12 OR TOUT OR DOOR A1A) CHANGED THEIR STATE
-# RESET THE VAULT, OTHERWISE DOOR A12 NEEDS TO BE CLOSED
-# OR PRESS WATCHMAN 28a
-# OR RELEASE WATCHMAN 28b
-
-record(calcout, "$(SYS):EXPS2-OUT-STS") {
+#####################################################################################
+# OFF IS USE TO INDICATE THAT THE DOOR IS IN CLOSED STATE SO WE CAN CONTINU CLEARANCE
+# A&&!B FAIL WHEN A UNDERWENT A STATE TRANSITION AS B LATCHES
+record(calc, "$(SYS):EXP-G10-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "A=$(RA12ON)||A=$(G9ON)||A=$(TOUT)||A=$(G10ON)?$(ON):$(OFF)")
-  field(INPA, "$(SYS):EXP-VNCS2.VAL PP")
-  field(OUT,  "$(SYS):RST-EXP.PROC PP")  
-  field(OOPT, "When Non-zero") 
-  field(VAL, "0")
+  field(CALC, "!C?(A&&!B)?$(G10OFF):(A&&B)?$(G10ON):$(OFF):$(FAIL)")	  	   
+  field(INPA, "$(SYS):SW-G10-EXP-A12.VAL")
+  field(INPB, "$(SYS):EXP-G10-ACT.VAL")
+  field(INPC, "$(SYS):EXP-FAIL-COND.VAL PP")
 }
-
-#############################################################################################
-record(calcout, "$(SYS):EXP-VNCS3") {
+########################################################################################
+record(calcout, "$(SYS):EXP-W28a-STS") {
   field(DESC, "Vault clearance stage 3")
   field(SCAN, "Passive")
   field(PINI, "YES")
-  #field(FLNK, "$(SYS):EXPS3-OUT-STS")
-  field(CALC, "!A?B?(!C||D)?$(VCOK):$(B28aOFF):$(B28bON):A")		  
-  field(INPA, "$(SYS):EXP-VNCS2.VAL.VAL PP")
-  field(INPB, "$(SYS):EXP-WATCH-28b-RLSD.VAL PP") # THIS MUST BE CALLED IN PP MODE	 	  
- 
-  field(INPC, "$(SYS):WS-BUT-EXP-28a.VAL PP")	  
-  field(INPD, "$(SYS):WATCHMAN-EXP-28a-ACT.VAL PP")
-  field(OUT,  "$(SYS):EXPS3-WRT-OUTS.PROC PP")  
-  field(OOPT, "When Zero") 
+  field(CALC, "!E?A&&!B?!C?$(VCOK):$(B28aON):!C?$(B28aOFF):D:$(FAIL)")		  
+  field(INPA, "$(SYS):EXP-WATCH-28b-RLSD.VAL PP") # THIS MUST BE CALLED IN PP MODE	 	  
+  field(INPB, "$(SYS):WS-BUT-EXP-28a.VAL PP")	  
+  field(INPC, "$(SYS):WATCHMAN-EXP-28a-ACT.VAL PP")
+  field(INPD, "$(SYS):EXP-W27-STS.VAL PP")
+  field(INPE, "$(SYS):EXP-FAIL-COND.VAL PP")
+  field(OUT,  "$(SYS):EXPW28a-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
   field(VAL, "1")
 }
 
 # THIS RECORDS IS PROCESSED ONLY WHEN EXP-VNCS2 RETRUN 0
 # THAT IS EXP INTERLOCKS ARE CORRECT IN STAGE 2 SUB 1	
-record(seq, "$(SYS):EXPS3-WRT-OUTS") {
+record(seq, "$(SYS):EXPW28a-WRT-OUTS") {
   field(SELM, "All")
   field(DOL1, "1")
   field(DOL2, "1")
@@ -222,60 +208,59 @@ record(seq, "$(SYS):EXPS3-WRT-OUTS") {
   field(SCAN, "Passive")
 }
 ##############################################################################################
-record(calcout, "$(SYS):EXP-VNCS4") {
+record(calcout, "$(SYS):EXP-W27-STS") {
   field(DESC, "Vault clearance stage 3")
   field(SCAN, "Passive")
   field(PINI, "YES")
-  #field(FLNK, "$(SYS):EXPS4-OUT-STS")
-  field(CALC, "!A?B?(!C||D)?$(VCOK):$(B27OFF):$(B28aON):A")		  
-  field(INPA, "$(SYS):EXP-VNCS3.VAL.VAL PP")
-  field(INPB, "$(SYS):EXP-WATCH-28a-RLSD.VAL PP") # THIS MUST BE CALLED IN PP MODE	 	  
- 
-  field(INPC, "$(SYS):WS-BUT-EXP-27.VAL PP")	  
-  field(INPD, "$(SYS):WATCHMAN-EXP-27-ACT.VAL PP")
-  field(OUT,  "$(SYS):EXPS4-WRT-OUTS.PROC PP")  
-  field(OOPT, "When Zero") 
-
+  field(CALC, "!E?A&&!B?!C?$(VCOK):$(B27ON):!C?$(B27OFF):D:$(FAIL)")		  
+  field(INPA, "$(SYS):EXP-WATCH-28a-RLSD.VAL PP") # THIS MUST BE CALLED IN PP MODE	 	  
+  field(INPB, "$(SYS):WS-BUT-EXP-27.VAL NPP")	  
+  field(INPC, "$(SYS):WATCHMAN-EXP-27-ACT.VAL NPP")
+  field(INPD, "$(SYS):EXP-W29-STS PP")
+  field(INPE, "$(SYS):EXP-FAIL-COND.VAL PP")
+  field(OUT,  "$(SYS):EXPW27-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
 }
-
+########################################################################################
 # THIS RECORDS IS PROCESSED ONLY WHEN EXP-VNCS2 RETRUN 0
 # THAT IS EXP INTERLOCKS ARE CORRECT IN STAGE 2 SUB 1	
-record(seq, "$(SYS):EXPS4-WRT-OUTS") {
+record(seq, "$(SYS):EXPW27-WRT-OUTS") {
   field(SELM, "All")
   field(DOL1, "1")
   field(DOL2, "1")
+  field(DOL3, "0")
   field(LNK1, "$(SYS):WATCHMAN-EXP-27-ACT.VAL PP")
   field(LNK2, "$(SYS):LED-WS-EXP-27.VAL PP")
+  field(LNK3, "$(SYS):EXP-VC.VAL NPP") # RESET PREVIOUS FAIL CONDITIONS - NEEDED BY SEQ
   field(SCAN, "Passive")
 }
 
 ##########################################################################################
-record(calcout, "$(SYS):EXP-VNCS5") {
+record(calcout, "$(SYS):EXP-W29-STS") {
   field(DESC, "Vault clearance stage 3")
   field(SCAN, "Passive")
   field(PINI, "YES")
-  #field(FLNK, "$(SYS):EXPS5-OUT-STS")
-  field(CALC, "!A?B?!C?!D?!E?$(VCOK):$(B29OFF):$(DA12S2ON):$(DA12S1ON):$(B27ON):A")		  
-  field(INPA, "$(SYS):EXP-VNCS4.VAL.VAL PP")
-  field(INPB, "$(SYS):EXP-WATCH-27-RLSD.VAL PP") # THIS MUST BE CALLED IN PP MODE	 	  
-  field(INPC, "$(SYS):SW-I-EXP-A12.VAL PP")
-  field(INPD, "$(SYS):SW-II-EXP-A12.VAL PP")
-  field(INPE, "$(SYS):WS-BUT-EXP-29.VAL PP")	    
-  field(OUT,  "$(SYS):EXPS5-WRT-OUTS.PROC PP")  
-  field(OOPT, "When Zero") 
+  field(CALC, "!E?!A?!B?C&&!D?$(VCOK):$(B29OFF):$(DA12S2OFF):$(DA12S1OFF):$(FAIL)")		   	  
+  field(INPA, "$(SYS):SW-I-EXP-A12.VAL PP")
+  field(INPB, "$(SYS):SW-II-EXP-A12.VAL PP")
+  field(INPC, "$(SYS):EXP-WATCH-27-RLSD.VAL PP") # THIS MUST BE CALLED IN PP MODE	
+  field(INPD, "$(SYS):WS-BUT-EXP-29.VAL PP")
+  field(INPE, "$(SYS):EXP-FAIL-COND.VAL PP")
+  field(OUT,  "$(SYS):EXPW29-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
 
 }
 
 # THIS RECORDS IS PROCESSED ONLY WHEN EXP-VNCS2 RETRUN 0
 # THAT IS EXP INTERLOCKS ARE CORRECT IN STAGE 2 SUB 1	
-record(seq, "$(SYS):EXPS5-WRT-OUTS") {
+record(seq, "$(SYS):EXPW29-WRT-OUTS") {
   field(SELM, "All")
   field(DOL1, "1")
   field(DOL2, "1")
   field(DOL3, "1")
   field(DLY2, "0.02")
   field(LNK1, "$(SYS):RST-EXP.PROC PP")
-  field(LNK2, "$(SYS):EXP-SNC-CLR.VAL PP")
+  field(LNK2, "$(SYS):EXP-CLR.VAL PP")
   field(LNK3, "$(SYS):LED-WS-EXP-29.VAL PP")
   field(SCAN, "Passive")
 }
@@ -355,7 +340,7 @@ record(calc, "$(SYS):EXP-TIMEOUT") {
 }
 ########################### Outputs ##################################
 
-record(bo, "$(SYS):EXP-SNC-CLR") {
+record(bo, "$(SYS):EXP-CLR") {
   field(VAL, "0")
   field(PINI, "YES")
   field(ZNAM, "OFF")
