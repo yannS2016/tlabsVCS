@@ -1,28 +1,29 @@
 program expClearanceSNC
 
 %{
+/*******************************************************************/
 #include "vcs_var_mes.h" // define this here so C functions are seen
-	
+/*******************************************************************/	
 #define	VCOK       	0
 #define TOUT		5
-#define FAIL		-1 
-#define	EXPPNK 		19
-#define RA12ON 		147  
+#define FAIL		-1
+#define	EXPPNK 		19 
+#define B26ON		69 
+#define B28bOFF		74
+#define B28bON		80 
+#define B28aOFF		73
+#define B28aON		79
+#define B27ON		78 
+#define B27OFF		72
+#define B29OFF		77  
 #define	DA12ON		68 
 #define	DA12S1OFF	75
 #define	DA12S2OFF	76
+#define RA12ON 		147 
 #define	G9ON		151  
-#define	G10ON		152 
 #define	G9OFF		153   
-#define	G10OFF		154           
-#define B26ON		69
-#define B27OFF		72
-#define B28aOFF		73
-#define B28bOFF		74
-#define B27ON		78 
-#define B28aON		79
-#define B28bON		80
-#define B29OFF		77 
+#define	G10ON		152  
+#define	G10OFF		154          
 }%
 /* Declare seq variables*/
 short EXP_INIT; 
@@ -32,15 +33,13 @@ short EXP_W28b_STS;
 short EXP_W28a_STS;
 short EXP_W27_STS;
 short EXP_W29_STS;
-short EXP_G10_STS;
-
 short EXP_FAIL_COND;
 short EXP_OLD_FAIL_COND;
-
+short EXP_UPDATE;
+short EXP_G10_STS;
+/////////////////////////////////
 string EXP_CLR_STATS; 
 string EXP_INTLCK_STATS;
-
-short expUpdate= FALSE;
 /* Associate SNL variables with epics output pv's*/
 assign	EXP_CLR_STATS		to	"{SYS}:EXP-CLR-STATS"; 
 assign	EXP_INTLCK_STATS	to	"{SYS}:EXP-INTLCK-STATS"; 
@@ -51,25 +50,25 @@ assign 	EXP_INIT 			to 	"{SYS}:EXP-INIT";
 assign 	EXP_W26_STS 		to 	"{SYS}:EXP-W26-STS"; 
 assign 	EXP_W28b_STS 		to  "{SYS}:EXP-W28b-STS";   
 assign 	EXP_W28a_STS 		to 	"{SYS}:EXP-W28a-STS";
-assign 	EXP_W27_STS 		to  "{SYS}:EXP-W27-STS";   
-assign 	EXP_W29_STS 		to 	"{SYS}:EXP-W29-STS";
-assign 	EXP_G10_STS 		to 	"{SYS}:EXP-G10-STS";
+assign 	EXP_W27_STS 		to 	"{SYS}:EXP-W27-STS";
+assign	EXP_W29_STS			to	"{SYS}:EXP-W29-STS";
 assign	EXP_FAIL_COND		to	"{SYS}:EXP-FAIL-COND";
+assign	EXP_G10_STS			to	"{SYS}:EXP-G10-STS";
 
 monitor	EXP_VC;
 monitor EXP_W26_STS; 
 monitor EXP_W28b_STS;   
 monitor EXP_W28a_STS;
-monitor EXP_W27_STS;   
-monitor EXP_W29_STS;
-monitor EXP_G10_STS;
+monitor EXP_W27_STS;
+monitor	EXP_W29_STS;
 monitor	EXP_FAIL_COND;
+monitor	EXP_G10_STS;
 
 ss EXP_clearance_status {
     state init {
-		when (delay(2)) {
+		when (delay(4)) {
 			initVault();
-			printf("\n%sEXPERIMENTAL BEAM LINE INITIALISATION COMPLETED%s\n",OK,DEF);
+			printf("\n%sEXP LOW INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_26_pressed	
     }
 ///////////////////////////////////////////////////////////////
@@ -77,7 +76,7 @@ ss EXP_clearance_status {
     state vault_cleared {
 		option -e;
 		entry {
-			printf("%sEXPERIMENTAL BEAM LINE IN CLEARED STATE%s\n",CLR,DEF);
+			printf("%sEXP LOW IN CLEARED STATE%s\n",CLR,DEF);
 		} 
 		when (EXP_VC != VCOK) {
 
@@ -86,33 +85,29 @@ ss EXP_clearance_status {
 //////////////////////////////////////////////////////////
 	state recover_faillure {
 
-			
-		when (!EXP_FAIL_COND ) {
-			if(!expUpdate) {
+		when (!EXP_FAIL_COND) {
+			if(!EXP_UPDATE) {
 				printf("%sEXP RECOVERING FROM FAILLURE - ENTERING W26 STATE%s\n",OK,DEF);
-				expUpdate= TRUE;
+				//resetStatus();
+				EXP_UPDATE = TRUE;
 			}
 		} state  watchman_26_pressed
 		
 		when (EXP_FAIL_COND != EXP_OLD_FAIL_COND) {
 
 		} state  clearance_faillures
-			
 	}
 //////////////////////////////////////////////////////////
+
 	state watchman_26_pressed {
-		/*option -e;
-		entry {
-		printf("%sEXP LAST FAILLURE: %d%s\n",OK,EXP_W26_STS,DEF);
-		
-		}*/
-		when (EXP_W26_STS == FAIL) {
-			EXP_OLD_FAIL_COND = EXP_FAIL_COND;
+
+		when (EXP_FAIL_COND != VCOK) {
+
 		} state  clearance_faillures
 			
 		when (EXP_W26_STS == B26ON) {
-			EXP_clear_underway();
 			EXP_update_report(B26ON);
+			EXP_clear_underway();
 		} state watchman_26_released
 	}
 //////////////////////////////////////////////////////////
@@ -121,7 +116,7 @@ ss EXP_clearance_status {
 		when (EXP_W26_STS == FAIL) {
 
 		} state  clearance_faillures
-			
+		
 		when (EXP_W26_STS != B26ON) {
 			EXP_update_report(G10OFF);
 		} state gate_g10_closed
@@ -132,7 +127,7 @@ ss EXP_clearance_status {
 		when (EXP_W26_STS == FAIL) {
 
 		} state  clearance_faillures
-			
+		
 		when (!EXP_G10_STS) {
 			EXP_update_report(B28bOFF);
 		} state watchman_28b_pressed
@@ -149,13 +144,14 @@ ss EXP_clearance_status {
 			EXP_update_report(B28bON);
 		} state watchman_28b_released
 	}
-//////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 	state watchman_28b_released {
-		
+
 		when (EXP_W26_STS == FAIL) {
 
 		} state  clearance_faillures
 			
+	
 		when (EXP_W28b_STS != B28bON) {
 			EXP_update_report(B28aOFF);
 		} state watchman_28a_pressed
@@ -166,126 +162,95 @@ ss EXP_clearance_status {
 		when (EXP_W26_STS == FAIL) {
 
 		} state  clearance_faillures
+		
 
-		when (EXP_W28b_STS == B28aON) {
+		when (EXP_W28a_STS == B28aON) {
 			EXP_update_report(B28aON);
 		} state watchman_28a_released
 	}
-//////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 	state watchman_28a_released {
-		
+
 		when (EXP_W26_STS == FAIL) {
 
 		} state  clearance_faillures
 			
-		when (EXP_W28b_STS != B28aON) {
+	
+		when (EXP_W28a_STS != B28aON) {
 			EXP_update_report(B27OFF);
 		} state watchman_27_pressed
-	}
-///////////////////////////////////////////////////////////
+	}	
+////////////////////////////////////////////////////////////
 	state watchman_27_pressed {
-		
+
 		when (EXP_W26_STS == FAIL) {
 
 		} state  clearance_faillures
-
+		
+		
 		when (EXP_W27_STS == B27ON) {
 			EXP_update_report(B27ON);
 		} state watchman_27_released
-	}
-//////////////////////////////////////////////////////////
+	}	
+/////////////////////////////////////////////////////////////
 	state watchman_27_released {
-		
+
 		when (EXP_W26_STS == FAIL) {
 
 		} state  clearance_faillures
-			
+		
 		when (EXP_W27_STS != B27ON) {
-
-		} state door_a12_closed
+		} state door_a12_closed		
 	}
-//////////////////////////////////////////////////////////	
+//////////////////////////////////////////////////////////
 	state door_a12_closed {
 		
 		when (EXP_W26_STS == FAIL) {
 
 		} state  clearance_faillures
 		
-		when (EXP_W29_STS == DA12S1OFF) {			
+		when (EXP_W29_STS == DA12S1OFF) {
 			EXP_update_report(DA12S1OFF);
 		} state door_a12_closed
-
-		when (EXP_W29_STS == DA12S2OFF) {			
+		
+		when (EXP_W29_STS == DA12S2OFF) {
 			EXP_update_report(DA12S2OFF);
 		} state door_a12_closed
-			
+		
 		when () {
 			EXP_update_report(B29OFF);
-		} state watchman_29_pressed
+		} state watchman_29_pressed	
 	}
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////
 	state watchman_29_pressed {
 		
 		when (EXP_W26_STS == FAIL) {
 
 		} state  clearance_faillures
-			
-			
-		when (!EXP_W29_STS) {
+		
 
+		when (!EXP_W29_STS) {
+			
 			EXP_status();
-		} state vault_cleared
+		} state vault_cleared	
 	}
 //////////////////////////////////////////////////////////////////
 	state clearance_faillures { 			/* FAIL CONDITIONS*/
-		
 		option -e;
 		option -x;
+		
 		entry {
 			printf("EXP CLEARANCE FAILURE CONDITION: ");
-			expUpdate = FALSE;
-			EXP_OLD_FAIL_COND = EXP_FAIL_COND;
+			EXP_UPDATE = FALSE;
 		}
 
-		when (EXP_FAIL_COND == RA12ON) {
-			EXP_update_failed(RA12ON);
-			printf("%sROOF A12 IS OPEN%s\n",ERROR,DEF);
-		} state recover_faillure		
-
-		when (EXP_FAIL_COND == TOUT) {			
-			EXP_update_failed(TOUT);
-			printf("%sTIME OUT ERROR: RELEASE ALL WATCHMEN%s\n",ERROR,DEF);
+		when () {		
+			EXP_update_failed(EXP_FAIL_COND);
 		} state recover_faillure
-			
-		when () {
-		} state gate_faillures
 		
 		exit {
-		    EXP_OLD_FAIL_COND = EXP_FAIL_COND;	
-		}			
-			
-	}
-//////////////////////////////////////////////////////////////////
-	state gate_faillures { 			/* DOOR A1A FAIL CONDITIONS*/
-			
-		option -x;
-		
-		when (EXP_FAIL_COND == G9ON) {			
-			EXP_update_failed(G9ON);
-			printf("%sGATE G9 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-
-		when (EXP_FAIL_COND == G10ON) {			
-			EXP_update_failed(G10ON);
-			printf("%sGATE G10 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-			
-		when () { // THIS MAY NOT BE NECCESSARY
-		} state recover_faillure
-			
-		exit {
-		    EXP_OLD_FAIL_COND = EXP_FAIL_COND;	
-		}	
+			EXP_OLD_FAIL_COND = EXP_FAIL_COND;
+		}
 	}
 ////////////////////////////////////////////////////////////////////////////
 	state vc_faillures { 			/* FAIL CONDITIONS*/
@@ -294,50 +259,29 @@ ss EXP_clearance_status {
 		option -x;
 		entry {
 			printf("EXP LOW CLEAR FAILURE CONDITION: ");
-			expUpdate = FALSE;
+			EXP_UPDATE = FALSE;
 		}
 		
-		when (EXP_VC == RA12ON) {
-			EXP_update_failed(RA12ON);
-			printf("%sROOF A12 IS OPEN%s\n",ERROR,DEF);
-		} state recover_faillure
-			
-		
-		when (EXP_VC == G9ON) {			
-			EXP_update_failed(G9ON);
-			printf("%sGATE G9 WAS OPENED%s\n",ERROR,DEF);
+		when () {
+			EXP_update_failed(EXP_VC);
+
 		} state recover_faillure
 
-		when (EXP_VC == G10ON) {			
-			EXP_update_failed(G10ON);
-			printf("%sGATE G10 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		
-		when (EXP_VC == DA12ON) {			
-			EXP_update_failed(DA12ON);
-			printf("%sDOOR A12 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-
-		when (EXP_VC == EXPPNK) {			
-			EXP_update_failed(EXPPNK);
-			printf("%sA PANIC BUTTON WAS  PRESSED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
 		exit {
-		    EXP_OLD_FAIL_COND = EXP_FAIL_COND;	
+			EXP_OLD_FAIL_COND = EXP_FAIL_COND;
 		}
 	}
 }
 
 void initVault(){
 	EXP_INIT = TRUE;
+	EXP_UPDATE = FALSE;
+	EXP_OLD_FAIL_COND = EXP_FAIL_COND; 
 	not_cleared(EXP_CLR_STATS);
 	report_error(EXP_INTLCK_STATS, 54);
 	pvPut(EXP_INIT, SYNC);
 	pvPut(EXP_CLR_STATS, SYNC);
 	pvPut(EXP_INTLCK_STATS, SYNC);
-	EXP_OLD_FAIL_COND = EXP_FAIL_COND;
 }
 
 void resetStatus()
@@ -354,6 +298,7 @@ void EXP_update_failed(short report)
 	pvPut(EXP_CLR_STATS, SYNC);
 	report_error(EXP_INTLCK_STATS, report);
 	pvPut(EXP_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,EXP_INTLCK_STATS,DEF);
 }
 /////////////////////////////////////////////////////////////////////////
 void EXP_update_report(short intlck) {
@@ -374,5 +319,3 @@ void EXP_clear_underway()
 	clear_underway(EXP_CLR_STATS);
 	pvPut(EXP_CLR_STATS, SYNC); 		
 }
-/**********************************************************/
-
