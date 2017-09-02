@@ -2,13 +2,12 @@
 record(calc, "$(SYS):TRL-SEL-STAGE") {
   field(DESC, "Select processing branch")
   field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
-  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(FAIL)")
+  field(CALC, "A?!B?C?$(S0):$(S1):$(PNK):$(NI)")
   field(INPA, "$(SYS):TRL-INIT")
-##IF BUTTON 34a or  34b  IS STILL PRESSED PNK IS ACTIVE##
+##IF BUTTON 9 or  8  IS STILL PRESSED PNK IS ACTIVE##
   field(INPB, "$(SYS):TRL-PNK") 
-  field(INPC, "$(SYS):TRL-SNC-CLR")
-## THIS FLAG ENSURE WE ONLY RESPOND TO A SINGLE EVENT ON BUT 34a and 34b##
-  field(INPD, "$(SYS):WATCHMAN-TRL-34a-ACT.VAL")
+  field(INPC, "$(SYS):TRL-CLR")
+## THIS FLAG ENSURE WE ONLY RESPOND TO A SINGLE EVENT ON BUT 9 and 8##
   field(FLNK, "$(SYS):TRL-PROC-STAGE")
 }
 ## THIS RECORDS PROPAGATE PROCESSING ##
@@ -17,26 +16,43 @@ record(fanout, "$(SYS):TRL-PROC-STAGE") {
   field(SELM, "Specified")
   field(SELL, "$(SYS):TRL-SEL-STAGE")
   field(LNK1, "$(SYS):TRL-VC")
-  field(LNK2, "$(SYS):TRL-VNCS1 PP")
-  field(LNK3, "$(SYS):TRL-VNCS3 PP")
-  field(LNK4, "$(SYS):TRL-PNK")
+  field(LNK2, "$(SYS):TRL-VNC")
+  field(LNK3, "$(SYS):TRL-PNK")
+}
+#######################################################################################
+record(calc, "$(SYS):TRL-VNC") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(VCOK):A")
+  field(INPA, "$(SYS):TRL-W34a-STS.VAL PP")  
+}
+
+###################################################################################
+#CLEARANCE UNDERWAY FAIL CONDITIONS
+record(calcout, "$(SYS):TRL-FAIL-COND") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?$(VCOK):$(G4S2ON):$(G4S1ON):$(TOUT)")
+  field(INPA, "$(SYS):TRL-TIMEOUT NPP") 
+  field(INPB, "$(SYS):SW-I-VLI-G4.VAL NPP")
+  field(INPC, "$(SYS):SW-II-VLI-G4.VAL NPP")
+  field(OUT,  "$(SYS):RST-TRL PP")  
+  field(OOPT, "Transition To Non-zero")  
 }
 ##################################################################################
 # monitor status of inputs which may cause clearance faillure
-# SIGNAL TO SYS: TRL-VC?TRL-SNC-CLR && (HARDWARE STATUS RECORDS):FALSE
+# SIGNAL TO SYS: TRL-VC?TRL-CLR && (HARDWARE STATUS RECORDS):FALSE
 record(calcout, "$(SYS):TRL-VC") { 
   field(DESC, "TRL Vault clear stage")
   field(SCAN, "Passive")
-  field(CALC, "!A?!B?C?$(TRLPNK):$(VCOK):$(G4ON):$(DA004AON)")
-# IN LIVE APP USE A FLNK FROM  SW-I-TRL-A004A OR SW-I-TRL-A004A (SCAN=Intr) TO PROCESS THIS RECORD
-# AND ACCES IT HERE WITH NPP OR ACCES IT WITH PP BUT USE NPP ON ITS INPUTS
-  field(INPA, "$(SYS):TRL-DA004A-CLSD.VAL PP")  
-  field(INPB, "$(SYS):TRL-G4-CLSD.VAL PP")
-  field(INPC, "$(SYS):TRL-PNK.VAL PP")
+  field(PINI, "YES")
+  field(FLNK, "$(SYS):TRL-FAIL-COND") # THIS RECORD MUST IMMEDIATELY READ A FAIL CONDITION
+  field(CALC, "!A?!B?C?$(TRLPNK):$(VCOK):$(G4ON):$(DA004ON)")
+  field(INPA, "$(SYS):TRL-DA004-CLSD PP") 
+  field(INPB, "$(SYS):TRL-G4-CLSD PP")
+  field(INPC, "$(SYS):TRL-PNK PP")
   field(OUT,  "$(SYS):RST-TRL.PROC PP")  
   field(OOPT, "When Non-zero")
-  field(PINI, "YES")
-  field(VAL, "1") 
 }
 ####################### RESET VAULT #################
 record(seq, "$(SYS):RST-TRL") { # MAY BE HANDLE BY SEQ
@@ -48,44 +64,29 @@ record(seq, "$(SYS):RST-TRL") { # MAY BE HANDLE BY SEQ
   field(DOL5, "0")
   field(DOL6, "0")
   field(DOL7, "0")
-  field(DOL8, "0")
-  field(LNK1, "$(SYS):TRL-SNC-CLR.VAL PP")
-  field(LNK2, "$(SYS):LED-WS-TRL-34a.VAL PP")
-  field(LNK3, "$(SYS):LED-WS-TRL-34b.VAL PP")
+  field(LNK1, "$(SYS):TRL-CLR.VAL PP")
+  field(LNK2, "$(SYS):LED-WS-TRL-34b.VAL PP")
+  field(LNK3, "$(SYS):LED-WS-TRL-34a.VAL PP")
   field(LNK4, "$(SYS):LED-WS-TRL-35.VAL PP")
   field(LNK5, "$(SYS):TRL-COUNTER.VAL PP")
   field(LNK6, "$(SYS):WATCHMAN-TRL-34a-ACT.VAL")
   field(LNK7, "$(SYS):WATCHMAN-TRL-34b-ACT.VAL")
-  field(LNK8, "$(SYS):WATCHMAN-TRL-35-ACT.VAL")
   field(SELM, "All")
 }
-
-#################### RECOVER FROM PANIQUE ################
-
-record(calc, "$(SYS):TRL-PNK") {
-  field(SCAN, "Passive")
-  field(PINI, "YES")
-  field(CALC, "!A||!B?$(ON):$(OFF)")
-  field(INPA, "$(SYS):WS-BUT-TRL-34a.VAL")
-  field(INPB, "$(SYS):WS-BUT-TRL-34b.VAL")
-  field(VAL, "0")
-}
-
+########################################################################
 # formula to monitor status of inputs and set output in stage 1
-record(calcout, "$(SYS):TRL-VNCS1") {
-  field(DESC, "Vault clearance stage 1")
+record(calcout, "$(SYS):TRL-W34a-STS") {
   field(SCAN, "Passive")
-  field(CALC, "!A?$(VCOK):$(B34aOFF)")
-  field(INPA, "$(SYS):WS-BUT-TRL-34a.VAL")
-  field(OUT,  "$(SYS):TRLS1-WRT-OUTS.PROC PP")  
-  field(OOPT, "When Zero") 
   field(PINI, "YES")
-  field(VAL, "1")  
+  field(CALC, "!A?!B?$(VCOK):$(B34aON):!B?$(B34aNP):C")
+  field(INPA, "$(SYS):WS-BUT-TRL-34a.VAL")
+  field(INPB, "$(SYS):WATCHMAN-TRL-34a-ACT.VAL")
+  field(INPC, "$(SYS):TRL-W34b-STS PP")	  
+  field(OUT,  "$(SYS):TRLW34a-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero")
 }
-
-####################### STAGE 1 OUTPUTS STATUS  #################
-
-record(seq, "$(SYS):TRLS1-WRT-OUTS") { # MAY BE HANDLED BY SEQ
+########################################################################
+record(seq, "$(SYS):TRLW34a-WRT-OUTS") { # MAY BE HANDLED BY SEQ
   field(DOL1, "1")
   field(DOL2, "0")
   field(DOL3, "1")
@@ -96,93 +97,69 @@ record(seq, "$(SYS):TRLS1-WRT-OUTS") { # MAY BE HANDLED BY SEQ
   field(SELM, "All")
 }
 
-############################## STAGE 2 LOGIC RECORDS ######################################
-
-record(calcout, "$(SYS):TRL-VNCS2") {
-  field(DESC, "Vault clearance stage 2")
+##################################################################
+record(calcout, "$(SYS):TRL-W34b-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-#  field(FLNK, "$(SYS):TRLS2-OUT-STS")
-# CONTINUE CLEARANCE STAGE 2 SUB 1
-  field(CALC, "A?!B?!C?!D?(!E||F)?$(VCOK):$(B34bOFF):$(G4S2ON):$(G4S1ON):$(TOUT):$(B34aON)")	  
-  field(INPA, "$(SYS):TRL-WATCH-34a-RLSD.VAL PP")
-  field(INPB, "$(SYS):TRL-TIMEOUT.VAL")
-  field(INPC, "$(SYS):SW-I-VLI-G4.VAL")
-  field(INPD, "$(SYS):SW-II-VLI-G4.VAL")
-  field(INPE, "$(SYS):WS-BUT-TRL-34b.VAL")
-  field(INPF, "$(SYS):WATCHMAN-TRL-34b-ACT.VAL")	  
-  field(OUT,  "$(SYS):TRLS2-WRT-OUTS.PROC PP")  
-  field(OOPT, "When Zero") 
-  field(VAL, "1")
+  field(CALC, "!A?B&&!C?!D?$(VCOK):$(B34bON):!D?$(B34bOFF):E:$(FAIL)")	  	  
+  field(INPA, "$(SYS):TRL-FAIL-COND PP")
+  field(INPB, "$(SYS):TRL-WATCH-34a-RLSD PP")
+  field(INPC, "$(SYS):WS-BUT-TRL-34b")
+  field(INPD, "$(SYS):WATCHMAN-TRL-34b-ACT")	
+  field(INPE, "$(SYS):TRL-W35-STS PP")
+  field(OUT,  "$(SYS):TRLW34b-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero")
 }
-
 # THIS RECORDS IS PROCESSED ONLY WHEN TRL-VNCS2 RETURN 0
 # THAT IS TRL INTERLOCKS ARE CORRECT IN STAGE 2 SUB 1
-
-record(seq, "$(SYS):TRLS2-WRT-OUTS") {
+record(seq, "$(SYS):TRLW34b-WRT-OUTS") {
   field(SELM, "All")
   field(DOL1, "1")
   field(DOL2, "1")
+  field(DOL3, "0")
   field(LNK1, "$(SYS):WATCHMAN-TRL-34b-ACT.VAL PP")
   field(LNK2, "$(SYS):LED-WS-TRL-34b.VAL PP")
+  field(LNK3, "$(SYS):TRL-VC.VAL NPP") # RESET ANY PREVIOUS FAIL CONDITIONS
   field(SCAN, "Passive")
 }
-
-
-########################################################################################
-# STAGE 3 IS INNER TO STAGE 2 
-# WE CAN ACCESS STAGE 2 FAIL CONDITION THIS WAY BY RETURN ITS ORELATED PV TRL-VNCS2 VALUE
-# WHEN NOT 0. THUS B IS EITHER TOUT OR G4S1ON OR G4S2ON
-record(calcout, "$(SYS):TRL-VNCS3") {
+##########################################################################
+record(calcout, "$(SYS):TRL-W35-STS") {
   field(DESC, "Vault clearance stage 3")
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(FLNK, "$(SYS):TRLS3-OUT-STS")
-  field(CALC, "!A?B?!C?!D?(!E&&!F)?$(VCOK):$(B35OFF):$(DA004AS2ON):$(DA004AS1ON):$(B34bON):A")	  
-  field(INPA, "$(SYS):TRL-VNCS2.VAL.VAL PP")
-  field(INPB, "$(SYS):TRL-WATCH-34b-RLSD.VAL PP") # THIS MUST BE CALLED IN PP MODE
-	 
-	  
-  field(INPC, "$(SYS):SW-I-TRL-A004A.VAL PP")
-  field(INPD, "$(SYS):SW-II-TRL-A004A.VAL PP")
-  field(INPE, "$(SYS):WS-BUT-TRL-35.VAL PP")
-  field(INPF, "$(SYS):WATCHMAN-TRL-35-ACT.VAL PP")
-  field(OUT,  "$(SYS):TRLS3-WRT-OUTS.PROC PP")  
-  field(OOPT, "When Zero") 
-  field(VAL, "1")
+  field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B35OFF):$(DA004S2OFF):$(DA004S1OFF):$(FAIL)")		  
+  field(INPA, "$(SYS):TRL-FAIL-COND PP")
+  field(INPB, "$(SYS):SW-I-TRL-A004.VAL")
+  field(INPC, "$(SYS):SW-II-TRL-A004.VAL")
+  field(INPD, "$(SYS):TRL-WATCH-34b-RLSD PP")	
+  field(INPE, "$(SYS):WS-BUT-TRL-35")	  
+  field(OUT,  "$(SYS):TRLW35-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
 }
-# IF PREVIOUS INTERLOCKS(GATE G4 OR TOUT) CHANGED THEIR STATE
-# RESET THE VAULT, OTHERWISE DOOR A004A NEEDS TO BE CLOSED
-# OR PRESS WATCHMAN 35
-# OR RELEASE WATCHMAN 34b
-record(calcout, "$(SYS):TRLS3-OUT-STS") {
-  field(SCAN, "Passive")
-  field(PINI, "YES")
-  field(CALC, "A=$(TOUT)||A=$(G4S1ON)||A=$(G4S2ON)?$(ON):$(OFF)")
-  field(INPA, "$(SYS):TRL-VNCS2.VAL PP")
-  field(OUT,  "$(SYS):RST-TRL.PROC PP")  
-  field(OOPT, "When Non-zero") 
-  field(VAL, "0")
-}
-################ RESET OUTPUTS IN CASE PREVIOUS INTERLOCK FAILED #############
-
-
 # THIS RECORDS IS PROCESSED ONLY WHEN TRL-VNCS2 RETRUN 0
 # THAT IS TRL INTERLOCKS ARE CORRECT IN STAGE 2 SUB 1	
-record(seq, "$(SYS):TRLS3-WRT-OUTS") {
+record(seq, "$(SYS):TRLW35-WRT-OUTS") {
   field(SELM, "All")
   field(DOL1, "1")
   field(DOL2, "1")
   field(DOL3, "1")
   field(DOL4, "1")
   field(DLY2, "0.02")
-  field(LNK1, "$(SYS):RST-TRL.PROC PP")
-  field(LNK2, "$(SYS):WATCHMAN-TRL-35-ACT.VAL PP")
-  field(LNK3, "$(SYS):TRL-SNC-CLR.VAL PP")
-  field(LNK4, "$(SYS):LED-WS-TRL-35.VAL PP")
+  field(LNK1, "$(SYS):RST-TRL PP")
+  field(LNK2, "$(SYS):LED-WS-TRL-35.VAL PP")
+  field(LNK3, "$(SYS):WATCHMAN-TRL-35-ACT.VAL PP")
+  field(LNK4, "$(SYS):TRL-CLR.VAL PP")
   field(SCAN, "Passive")
-}  
-
+}
+#################### RECOVER FROM PANIQUE ################
+record(calc, "$(SYS):TRL-PNK") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A||!B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-TRL-34a.VAL")
+  field(INPB, "$(SYS):WS-BUT-TRL-34b.VAL")
+  field(VAL, "0")
+}
 #################### WATCHMAN 34a RELEASE ##############################
 record(calc, "$(SYS):TRL-WATCH-34a-RLSD") {
   field(CALC, "A&&B?$(ON):$(OFF)")
@@ -205,8 +182,8 @@ record(calc, "$(SYS):TRL-DA004A-CLSD") {
 #################### GATE G4 CLOSED ##################################
 record(calc, "$(SYS):TRL-G4-CLSD") {
   field(CALC, "!A&&!B?$(OFF):$(ON)")
-  field(INPA, "$(SYS):SW-I-TRL-G4.VAL")
-  field(INPB, "$(SYS):SW-II-TRL-G4.VAL")
+  field(INPA, "$(SYS):SW-I-VLI-G4.VAL")
+  field(INPB, "$(SYS):SW-II-VLI-G4.VAL")
 }
 ########################## TIMER PROCEDURE #############################
 record(calc, "$(SYS):TRL-COUNTER") {
@@ -222,7 +199,7 @@ record(calc, "$(SYS):TRL-TIMEOUT") {
 }
 ########################### Outputs ##################################
 
-record(bo, "$(SYS):TRL-SNC-CLR") {
+record(bo, "$(SYS):TRL-CLR") {
   field(VAL, "0")
   field(PINI, "YES")
   field(ZNAM, "OFF")
@@ -321,22 +298,6 @@ record(bi, "$(SYS):SW-I-TRL-A004A") {
 }
 
 record(bi, "$(SYS):SW-II-TRL-A004A") {
-  field(SCAN, "Passive")
-  field(VAL, "1")
-  field(PINI, "YES")
-  field(ZNAM, "OFF")
-  field(ONAM, "ON")
-}
-### THIS GATE IS NAMED AFTER VAULT VLI
-record(bi, "$(SYS):SW-I-VLI-G4") {
-  field(SCAN, "Passive")
-  field(VAL, "1")
-  field(PINI, "YES")
-  field(ZNAM, "OFF")
-  field(ONAM, "ON")
-}
-
-record(bi, "$(SYS):SW-II-VLI-G4") {
   field(SCAN, "Passive")
   field(VAL, "1")
   field(PINI, "YES")
