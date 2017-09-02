@@ -261,7 +261,7 @@
           </color>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:TRL-SNC-CLR</string>
+          <string>VCS:TRL-CLR</string>
          </property>
         </widget>
        </item>
