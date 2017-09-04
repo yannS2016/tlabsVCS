@@ -2,14 +2,11 @@
 record(calc, "$(SYS):EV1-SEL-STAGE") {
   field(DESC, "Select processing branch")
   field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
-  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(FAIL)")
-  field(INPA, "$(SYS):EV1-INIT")
-##IF BUTTON 18 IS STILL PRESSED PNK IS ACTIVE##
+  field(CALC, "A?!B?C?$(S0):$(S1):$(PNK):$(NI)")
+  field(INPA, "$(SYS):EV1-INIT NPP")
+##IF BUTTON 42 IS STILL PRESSED PNK IS ACTIVE##
   field(INPB, "$(SYS):EV1-PNK") 
-  field(INPC, "$(SYS):EV1-CLR")
-## THIS FLAG ENSURE WE ONLY RESPOND TO A SINGLE EVENT ON BUT 18##
-## IF SET WE IN STAGE 2 OF CLEARANCE OTHERWISE WE IN STAGE 1## 
-  field(INPD, "$(SYS):WATCHMAN-EV1-18-ACT.VAL")
+  field(INPC, "$(SYS):EV1-CLR NPP")
   field(FLNK, "$(SYS):EV1-PROC-STAGE")
 }
 ## THIS RECORDS PROPAGATE PROCESSING ##
@@ -17,28 +14,22 @@ record(fanout, "$(SYS):EV1-PROC-STAGE") {
   field(SCAN, "Passive")
   field(SELM, "Specified")
   field(SELL, "$(SYS):EV1-SEL-STAGE")
-  field(LNK1, "$(SYS):EV1-VC")
-  field(LNK2, "$(SYS):EV1-VNCS1")
-  field(LNK3, "$(SYS):EV1-VNCS2")
-  field(LNK4, "$(SYS):EV1-PNK")
+  field(LNK1, "$(SYS):EV1-VC PP")
+  field(LNK2, "$(SYS):EV1-VNC PP")
+  field(LNK3, "$(SYS):EV1-PNK PP")
 }
 ##################################################################################
-# monitor status of inputs which may cause clearance faillure
-# SIGNAL TO SYS: EV1-VC?EV1-CLR && (HARDWARE STATUS RECORDS):FALSE
 record(calcout, "$(SYS):EV1-VC") { 
   field(DESC, "EV1 Vault clear stage")
   field(SCAN, "Passive")
   field(CALC, "!A?!B?!C?D?$(EV1PNK):$(VCOK):$(DA6ON):$(RA7ON):$(RA6ON)")
-  field(INPA, "$(SYS):SW-RF-A6-CLSD.VAL")
-  field(INPB, "$(SYS):SW-RF-A7-CLSD.VAL")
-# IN LIVE APP USE A FLNK FROM  SW-I-EV1-A6 OR SW-I-EV1-A6 (SCAN=Intr) TO PROCESS THIS RECORD
-# AND ACCES IT HERE WITH NPP OR ACCES IT WITH PP BUT USE NPP ON ITS INPUTS
+  field(INPA, "$(SYS):SW-RF-A6.VAL")
+  field(INPB, "$(SYS):SW-RF-A7.VAL")
   field(INPC, "$(SYS):EV1-DA6-CLSD.VAL PP") # FOR TESTING 
   field(INPD, "$(SYS):EV1-PNK.VAL PP")
-  field(OUT,  "$(SYS):RST-EV1.PROC PP")  
+  field(OUT,  "$(SYS):RST-EV1 PP")  
   field(OOPT, "When Non-zero")
   field(PINI, "YES")
-  field(VAL, "1") 
 }
 ####################### RESET VAULT #################
 record(seq, "$(SYS):RST-EV1") { # HANDLE BY SEQ
@@ -48,100 +39,82 @@ record(seq, "$(SYS):RST-EV1") { # HANDLE BY SEQ
   field(DOL3, "0")
   field(DOL4, "0")
   field(DOL5, "0")
-  field(DOL6, "0")
+  field(DOL11, "0")
   field(DOL7, "0")
-  field(LNK1, "$(SYS):CS9-EV1.VAL PP")
-  field(LNK2, "$(SYS):CL9-EV1.VAL PP")
-  field(LNK3, "$(SYS):EV1-CLR.VAL PP")
-  field(LNK4, "$(SYS):LED-WS-EV1-18.VAL PP")
-  field(LNK5, "$(SYS):LED-WS-EV1-19.VAL PP")
-  field(LNK6, "$(SYS):EV1-COUNTER.VAL PP")
-  field(LNK7, "$(SYS):WATCHMAN-EV1-18-ACT.VAL")
+  field(LNK1, "$(SYS):CS9-EV1 PP")
+  field(LNK2, "$(SYS):CL9-EV1 PP")
+  field(LNK3, "$(SYS):EV1-CLR PP")
+  field(LNK4, "$(SYS):LED-WS-EV1-18 PP")
+  field(LNK5, "$(SYS):LED-WS-EV1-19 PP")
+  field(LNK6, "$(SYS):EV1-COUNTER PP")
+  field(LNK7, "$(SYS):WATCHMAN-EV1-18-ACT PP")
   field(SELM, "All")
 }
-# ONLY CHNAGE OUTS STATE WHEN B18 IS PRESSED WHILE ROOF
-# A6 AND A7 ARE CLOSED: THIS ENSURE WE DONT UNECCESSARLY WRITE TO OUTS
-# formula to monitor status of inputs and set output in stage 1
-record(calcout, "$(SYS):EV1-VNCS1") {
-  field(DESC, "Vault clearance stage 1")
+#CLEARANCE UNDERWAY FAIL CONDITIONS
+record(calcout, "$(SYS):EV1-FAIL-COND") {
   field(SCAN, "Passive")
-  field(FLNK, "$(SYS):EV1S1-OUT-STS") 
-  field(CALC, "!A?!B?!C?$(VCOK):$(RA7ON):$(RA6ON):$(B18OFF)")
-  field(INPA, "$(SYS):WS-BUT-EV1-18.VAL")
-  field(INPB, "$(SYS):SW-RF-A6-CLSD.VAL")
-  field(INPC, "$(SYS):SW-RF-A7-CLSD.VAL")
-  field(OUT,  "$(SYS):EV1S1-WRT-OUTS.PROC PP")  
-  field(OOPT, "When Zero")  
   field(PINI, "YES")
+  field(CALC, "!A?!B?!C?$(VCOK):$(TOUT):$(RA6ON):$(RA7ON)")
+  field(INPA, "$(SYS):SW-RF-A6-CLSD NPP") 
+  field(INPB, "$(SYS):SW-RF-A7-CLSD.VAL")
+  field(INPC, "$(SYS):EV1-TIMEOUT NPP") 
+  field(OUT,  "$(SYS):RST-EV1 PP")  
+  field(OOPT, "Transition To Non-zero") # STOP THIS RECORD TO KEEP RESETTING SHARED OUTPUT AFTER INIT 
+}
+#######################################################################################
+record(calc, "$(SYS):EV1-VNC") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(VCOK):A")
+  field(INPA, "$(SYS):EV1-W18-STS PP")  
+}
+########################################################################
+# formula to monitor status of inputs and set output in stage 1
+record(calcout, "$(SYS):EV1-W18-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?$(VCOK):$(B18ON):!C?$(B18NP):D:$(FAIL)")
+  field(INPA, "$(SYS):EV1-FAIL-COND PP")
+  field(INPB, "$(SYS):WS-BUT-EV1-18.VAL")
+  field(INPC, "$(SYS):WATCHMAN-EV1-18-ACT NPP")
+  field(INPD, "$(SYS):EV1-W19-STS PP")
+  field(OUT,  "$(SYS):EV1W18-WRT-OUTS PP")  
+  field(OOPT, "Transition To Zero") 
 }
 ####################### STAGE 1 OUTPUTS STATUS  #################
-
-record(calcout, "$(SYS):EV1S1-OUT-STS") {
-  field(SCAN, "Passive")
-  field(PINI, "YES")
-  field(CALC, "A=$(B18OFF)?$(ON):$(OFF)")
-  field(INPA, "$(SYS):EV1-VNCS2.VAL")
-  field(OUT,  "$(SYS):RST-EV1.PROC PP")  
-  field(OOPT, "When Non-zero") 
-  field(VAL, "0")
-}
-
-record(seq, "$(SYS):EV1S1-WRT-OUTS") { # HANDLE BY SEQ
+record(seq, "$(SYS):EV1W18-WRT-OUTS") { # HANDLE BY SEQ
   field(DOL1, "1")
   field(DOL2, "1")
   field(DOL3, "1")
   field(DOL4, "0")
   field(DOL5, "1")
-  field(LNK1, "$(SYS):CS9-EV1.VAL PP")
-  field(LNK2, "$(SYS):CL9-EV1.VAL PP")
-  field(LNK3, "$(SYS):LED-WS-EV1-18.VAL PP")
-  field(LNK4, "$(SYS):EV1-COUNTER.VAL PP")
-  field(LNK5, "$(SYS):WATCHMAN-EV1-18-ACT.VAL PP")
+  field(DOL6, "0")
+  field(LNK1, "$(SYS):CS9-EV1 PP")
+  field(LNK2, "$(SYS):CL9-EV1 PP")
+  field(LNK3, "$(SYS):LED-WS-EV1-18 PP")
+  field(LNK4, "$(SYS):EV1-COUNTER PP")
+  field(LNK5, "$(SYS):WATCHMAN-EV1-18-ACT PP")
+  field(LNK6, "$(SYS):EV1-VC.VAL NPP") # RESET ANY PREVIOUS FAIL CONDITIONS
   field(SCAN, "Passive")
   field(SELM, "All")
 }
-# monitor status of inputs and set output in stage 2
-####################################################################################################
-## IF WATCHMAN 18 RELEASE CONTINUE CLEARANCE
-## WE TEST IT IN "EV1-WATCH-18-RLSD" RECORD
-
-record(calcout, "$(SYS):EV1-VNCS2") {
-  field(DESC, "Vault clearance stage 2")
+####################################################################################
+record(calcout, "$(SYS):EV1-W19-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(FLNK, "$(SYS):EV1S2-OUT-STS") 
-  field(CALC, "A?!B?!C?!D?!E?!F?!G?$(VCOK):$(B19OFF):$(DA6S2ON):$(DA6S1ON):$(TOUT):$(RA7ON):$(RA6ON):$(B18ON)")
-  field(INPA, "$(SYS):EV1-WATCH-18-RLSD.VAL PP")
-  field(INPB, "$(SYS):SW-RF-A6-CLSD.VAL")
-  field(INPC, "$(SYS):SW-RF-A7-CLSD.VAL")
-  field(INPD, "$(SYS):EV1-TIMEOUT.VAL")
-  field(INPE, "$(SYS):SW-I-EV1-A6.VAL PP")
-  field(INPF, "$(SYS):SW-II-EV1-A6.VAL PP")
-  field(INPG, "$(SYS):WS-BUT-EV1-19.VAL")
-  field(OUT,  "$(SYS):EV1S2-WRT-OUTS.PROC PP")  
-  field(OOPT, "When Zero") 
-  field(VAL, "1")
+  field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B19OFF):$(DA7S2OFF):$(DA7S1OFF):$(FAIL)")
+  field(INPA, "$(SYS):EV1GF-FAIL-COND PP")
+  field(INPB, "$(SYS):SW-I-EV1-A6.VAL NPP")
+  field(INPC, "$(SYS):SW-II-EV1-A6.VAL NPP")
+  field(INPD, "$(SYS):EV1-WATCH-18-RLSD.VAL PP")
+  field(INPE, "$(SYS):WS-BUT-EV1-19 NPP")
+  field(OUT,  "$(SYS):EV1W19-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
 }
-
 ####################### STAGE 2 OUTPUTS STATUS  #################
-
-# IF PREVIOUS INTERLOCKS(ROOF A7 AND A6) CHANGED THEIR STATE
-# RESET THE VAULT, OTHERWISE DOOR A6 NEEDS TO BE CLOSED
-# OR PRESS WATCHMAN 19
-# OR RELEASE WATCHMAN 18 
-record(calcout, "$(SYS):EV1S2-OUT-STS") {
-  field(SCAN, "Passive")
-  field(PINI, "YES")
-  field(CALC, "A=$(B18ON)||A=$(B19OFF)||A=$(DA6S2ON)||A=$(DA6S1ON)?$(OFF):$(ON)")
-  field(INPA, "$(SYS):EV1-VNCS2.VAL")
-  field(OUT,  "$(SYS):RST-EV1.PROC PP")  
-  field(OOPT, "When Non-zero") 
-  field(VAL, "0")
-}
-
 # THIS RECORDS IS PROCESSED ONLY WHEN EV1-VNCS2 RETRUN 0
 # THAT IS EV1 INTERLOCKS ARE CORRECT IN STAGE 2
-record(seq, "$(SYS):EV1S2-WRT-OUTS") {
+record(seq, "$(SYS):EV1W19-WRT-OUTS") {
   field(SELM, "All")
   field(DOL1, "1")
   field(DOL2, "1")
@@ -152,15 +125,7 @@ record(seq, "$(SYS):EV1S2-WRT-OUTS") {
   field(LNK3, "$(SYS):LED-WS-EV1-19.VAL PP")
   field(SCAN, "Passive")
 }
-#################### WATCHMAN 18 RELEASE ##############################
-record(calc, "$(SYS):EV1-WATCH-18-RLSD") {
-  field(CALC, "A&&B?$(ON):$(OFF)")
-  field(INPA, "$(SYS):WS-BUT-EV1-18.VAL")
-  field(INPB, "$(SYS):WATCHMAN-EV1-18-ACT.VAL")
-}
-
-################### RECOVER FROM PANIQUE ################
-
+#################### RECOVER FROM PANIQUE ################
 record(calc, "$(SYS):EV1-PNK") {
   field(SCAN, "Passive")
   field(PINI, "YES")
@@ -168,9 +133,14 @@ record(calc, "$(SYS):EV1-PNK") {
   field(INPA, "$(SYS):WS-BUT-EV1-18.VAL")
   field(VAL, "0")
 }
-
-#################### DOOR A6 CLOSED ##################################
-record(calc, "$(SYS):EV1-DA6-CLSD") {
+#################### WATCHMAN 18 RELEASE ##############################
+record(calc, "$(SYS):EV1-WATCH-18-RLSD") {
+  field(CALC, "A&&B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-EV1-18.VAL")
+  field(INPB, "$(SYS):WATCHMAN-EV1-18-ACT.VAL")
+}
+#################### DOOR A7 CLOSED ##################################
+record(calc, "$(SYS):EV1-DA7-CLSD") {
   field(CALC, "!A&&!B?$(OFF):$(ON)")
   field(INPA, "$(SYS):SW-I-EV1-A6.VAL")
   field(INPB, "$(SYS):SW-II-EV1-A6.VAL")
@@ -246,7 +216,6 @@ record(bo, "$(SYS):WATCHMAN-EV1-18-ACT") {
   field(ONAM, "ON")
   field(VAL, "0")
 }
-
 record(bi, "$(SYS):WS-BUT-EV1-18") {
   field(SCAN, "Passive")
   field(VAL, "1")
@@ -255,15 +224,7 @@ record(bi, "$(SYS):WS-BUT-EV1-18") {
   field(ONAM, "ON")
 }
 
-record(bi, "$(SYS):SW-RF-A6-CLSD") {
-  field(SCAN, "Passive")
-  field(VAL, "0")
-  field(PINI, "YES")
-  field(ZNAM, "OFF")
-  field(ONAM, "ON")
-}
-
-record(bi, "$(SYS):SW-RF-A7-CLSD") {
+record(bi, "$(SYS):SW-RF-A7") {
   field(SCAN, "Passive")
   field(VAL, "0")
   field(PINI, "YES")

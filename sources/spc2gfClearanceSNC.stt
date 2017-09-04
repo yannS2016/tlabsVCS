@@ -279,14 +279,6 @@ void initVault(){
 	pvPut(SPC2GF_CLR_STATS, SYNC);
 	pvPut(SPC2GF_INTLCK_STATS, SYNC);
 }
-
-void resetStatus()
-{
-	not_cleared(SPC2GF_CLR_STATS);
-	report_error(SPC2GF_INTLCK_STATS, 54);
-	pvPut(SPC2GF_CLR_STATS, SYNC);
-	pvPut(SPC2GF_INTLCK_STATS, SYNC);
-}
 ////////////////////////////////////////////////////////////////////////
 void SPC2GF_update_failed(short report)
 {

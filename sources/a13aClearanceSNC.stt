@@ -5,10 +5,7 @@ program a13aClearanceSNC
 #include "vcs_var_mes.h" // define this here so C functions are seen
 /*******************************************************************/
 #define	VCOK       	0
-#define TOUT		5
 #define FAIL		-1
-#define A13APNK     139
-#define	G5AON		140
 #define	G5AS1OFF	144
 #define	G5AS2OFF	143
 #define	B9bOFF      142
@@ -65,7 +62,7 @@ ss A13A_clearance_status {
 		
 		when (!A13A_FAIL_COND) {
 			if(!A13AUpdate) {
-				printf("%sRECOVERING FROM FAILLURE - ENTERING W9a STATE: %d%s\n",OK,A13A_W9a_STS,DEF);
+				printf("%sRECOVERING FROM FAILLURE - ENTERING W9a STATE%s\n",OK,DEF);
 				A13AUpdate = TRUE;
 			}
 		} state  watchman_9a_pressed
@@ -173,14 +170,6 @@ void initVault(){
 	not_cleared(A13A_CLR_STATS);
 	report_error(A13A_INTLCK_STATS, 54);
 	pvPut(A13A_INIT, SYNC);
-	pvPut(A13A_CLR_STATS, SYNC);
-	pvPut(A13A_INTLCK_STATS, SYNC);
-}
-
-void resetStatus()
-{
-	not_cleared(A13A_CLR_STATS);
-	report_error(A13A_INTLCK_STATS, 54);
 	pvPut(A13A_CLR_STATS, SYNC);
 	pvPut(A13A_INTLCK_STATS, SYNC);
 }

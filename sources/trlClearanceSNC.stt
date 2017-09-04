@@ -205,14 +205,6 @@ void initVault(){
 	pvPut(TRL_CLR_STATS, SYNC);
 	pvPut(TRL_INTLCK_STATS, SYNC);
 }
-
-void resetStatus()
-{
-	not_cleared(TRL_CLR_STATS);
-	report_error(TRL_INTLCK_STATS, 54);
-	pvPut(TRL_CLR_STATS, SYNC);
-	pvPut(TRL_INTLCK_STATS, SYNC);
-}
 ////////////////////////////////////////////////////////////////////////
 void TRL_update_failed(short report)
 {

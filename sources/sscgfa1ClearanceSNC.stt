@@ -171,14 +171,6 @@ void initVault(){
 	pvPut(SSCA1_CLR_STATS, SYNC);
 	pvPut(SSCA1_INTLCK_STATS, SYNC);
 }
-
-void resetStatus()
-{
-	not_cleared(SSCA1_CLR_STATS);
-	report_error(SSCA1_INTLCK_STATS, 54);
-	pvPut(SSCA1_CLR_STATS, SYNC);
-	pvPut(SSCA1_INTLCK_STATS, SYNC);
-}
 ////////////////////////////////////////////////////////////////////////
 void SSCA1_update_failed(short report)
 {

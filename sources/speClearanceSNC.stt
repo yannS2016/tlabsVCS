@@ -1,141 +1,171 @@
 program speClearanceSNC
+
 %{
-	#define	VC       	0
-	#define TOUT		5
-	#define	RA9ON		147
-	#define SPEPNK      116
-	#define	DA9ON       117
-	#define	B25ON       119
-	#define	B24ON       187
-	#define	B24OFF      118
-	#define DA9S1ON		121 
-	#define DA9S2ON		120
+/*******************************************************************/
+#include "vcs_var_mes.h" // define this here so C functions are seen
+/*******************************************************************/
+#define	VCOK       	0
+#define FAIL		-1
+#define	B25OFF      119
+#define	B24ON      	118
+#define DA9S1OFF	121 
+#define DA9S2OFF	120
 }%
 /* Declare seq variables*/
 short SPE_INIT; 
-short SPE_SEL_STAGE;
-
-short SPE_VC; 
-short SPE_VNCS1;   
-short SPE_VNCS2;  
-
+short SPE_VC;   
+short SSC_W24_STS;
+short SSC_W25_STS;
+short SPE_FAIL_COND;
 string SPE_CLR_STATS; 
 string SPE_INTLCK_STATS;
+// CONTROL FLAGS
+short SPEUpdate;
+short SPE_OLD_FAIL_COND;
+
 /* Associate SNL variables with epics output pv's*/
 assign	SPE_CLR_STATS		to	"{SYS}:SPE-CLR-STATS"; 
 assign	SPE_INTLCK_STATS	to	"{SYS}:SPE-INTLCK-STATS"; 
 /* Associate SNL variables with epics input pv's*/
 assign 	SPE_VC 				to 	"{SYS}:SPE-VC"; 
-assign 	SPE_VNCS1 			to  "{SYS}:SPE-VNCS1";   
-assign 	SPE_VNCS2 			to 	"{SYS}:SPE-VNCS2";
 assign 	SPE_INIT 			to 	"{SYS}:SPE-INIT";
-assign	SPE_SEL_STAGE		to	"{SYS}:SPE-SEL-STAGE";
+assign 	SSC_W24_STS 		to 	"{SYS}:SSC-W24-STS";   
+assign 	SSC_W25_STS 		to 	"{SYS}:SSC-W25-STS";
+assign	SPE_FAIL_COND		to	"{SYS}:SPE-FAIL-COND";
 
 monitor	SPE_VC;
-monitor	SPE_VNCS1;
-monitor	SPE_VNCS2;
-monitor	SPE_SEL_STAGE;
+monitor SSC_W24_STS;  
+monitor SSC_W25_STS;
+monitor	SPE_FAIL_COND;
 
 ss SPE_clearance_status {
     state init {
-		when (delay(4)) {
+		when (delay(0.8)) {
 			initVault();
-			printf("SPECTROMETER VAULT INITIALISATION COMPLETED\n");
-		} state vault_nc_stage_1	
+			printf("%sSPECTROMETER VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_24_pressed	
     }
+///////////////////////////////////////////////////////////////
 	/*VAULT CLEARED STATE*/
     state vault_cleared {
 		option -e;
 		entry {
-			printf("SPECTROMETER VAULT VAULT IN CLEARED STATE\n");
+			printf("%sSPECTROMETER VAULT IN CLEARED STATE%s\n",CLR,DEF);
 		} 
+		when (SPE_VC != VCOK) {
 
-		when (SPE_VC == RA9ON) {
-			SPE_update_failed(RA9ON);
-			printf("The roof is open\n");
-
-		} state vault_nc_stage_1
-
-				
-		when (SPE_VC == DA9ON) {
-			SPE_update_failed(DA9ON);
-			printf("Door A9 was opened\n");
-		} state vault_nc_stage_1
-
-
-		when (SPE_VC == SPEPNK) {
-			SPE_update_failed(SPEPNK);
-			printf("Panic button 24 was pressed\n");
-		} state vault_nc_stage_1
+		} state vc_faillures
 	}
-	
-	/*VAULT NOT CLEARED STAGE 1*/
-	state vault_nc_stage_1 {
+//////////////////////////////////////////////////////////
+	state recover_faillure {
+		
+		when (!SPE_FAIL_COND) {
+			if(!SPEUpdate) {
+				printf("%sRECOVERING FROM FAILLURE - ENTERING W24 STATE%s\n",OK,DEF);
+				SPEUpdate = TRUE;
+			}
+		} state  watchman_24_pressed
+			
+		when (SPE_FAIL_COND != SPE_OLD_FAIL_COND) {
+		} state  clearance_faillures
+	}
+//////////////////////////////////////////////////////////
+	state watchman_24_pressed {
 
-		when (SPE_SEL_STAGE == 3) {
+		when (SPE_FAIL_COND != VCOK) {
+			SPE_OLD_FAIL_COND = SPE_FAIL_COND;
+		} state  clearance_faillures
+			
+		when (SSC_W24_STS == B24ON) {
 			SPE_clear_underway();
-		} state vault_nc_stage_2
-
-
-		when (SPE_VNCS1 == RA9ON) {
-			SPE_update_failed(RA9ON);
-			printf("The roof is open\n");
-		} state vault_nc_stage_1
-		
-		
-		when(SPE_VNCS1 == B24ON){
-			SPE_update_report(B24ON);		
-			/*printf("Waiting for Vault Clearance\n");*/
-		}state vault_nc_stage_1
+			SPE_update_report(B24ON);
+		} state watchman_24_released
 	}
-	
-	/*VAULT NOT CLEARED STAGE 2*/
-	state vault_nc_stage_2 {
+//////////////////////////////////////////////////////////
+	state watchman_24_released {
 		
-		when (SPE_SEL_STAGE == 1) {
+		when (SPE_FAIL_COND != VCOK) {
+
+		} state  clearance_faillures
+			
+		when (SSC_W24_STS != B24ON) {
+		} state door_a9_closed
+	}
+//////////////////////////////////////////////////////////
+	state door_a9_closed {
+
+		when (SPE_FAIL_COND != VCOK) {
+
+		} state   clearance_faillures
+		
+		when (SSC_W25_STS == DA9S1OFF) {
+			SPE_update_report(DA9S1OFF);
+		} state door_a9_closed
+
+		when (SSC_W25_STS == DA9S2OFF) {
+			SPE_update_report(DA9S2OFF);
+		} state door_a9_closed
+
+
+		when () {
+			SPE_update_report(B25OFF);
+		} state watchman_25_pressed
+	}
+
+///////////////////////////////////////////////////////////
+	state watchman_25_pressed {
+		
+		when (SPE_FAIL_COND != VCOK) {
+
+		} state  clearance_faillures
+			
+			
+		when (!SSC_W25_STS) {
+
 			SPE_status();
 		} state vault_cleared
+	}
+///////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("SPE CLEARANCE FAILURE CONDITION: ");
+			SPEUpdate = FALSE;
+		}
 
-
-		when (SPE_VNCS2 == B24OFF) {
-			SPE_update_report(B24OFF);
-			printf("Watchman 24 must be released\n");
-		} state vault_nc_stage_2
+		when () {
+			SPE_update_failed(SPE_FAIL_COND);
+		} state recover_faillure
 		
+		exit {
+		    SPE_OLD_FAIL_COND = SPE_FAIL_COND;	
+		}			
+	}
+////////////////////////////////////////////////////////////////////////////
+	state vc_faillures { 			/* FAIL CONDITIONS*/
 		
-		when (SPE_VNCS2 == RA9ON) {
-			SPE_update_failed(RA9ON);
-			printf("The roof is open\n");
-		} state vault_nc_stage_1
-			
+		option -e;
+		option -x;
+		entry {
+			printf("SPE CLEAR FAILURE CONDITION: ");
+			SPEUpdate = FALSE;
+		}
 		
-		when (SPE_VNCS2 == TOUT) {
-			SPE_update_failed(TOUT);
-			printf("TIME OUT ERROR: RELEASE ALL WATCHMEN\n");
-		} state vault_nc_stage_1
+		when () {			
+			SPE_update_failed(SPE_VC);
+		} state recover_faillure
 		
-		when (SPE_VNCS2 == DA9S1ON) {
-			SPE_update_report(DA9S1ON);
-			printf("Door A9 switch 1 is open\n");
-		} state vault_nc_stage_2
-		
-		
-		when (SPE_VNCS2 == DA9S2ON) {
-			SPE_update_report(DA9S2ON);
-			printf("Door A9 switch 2 is open\n");
-		} state vault_nc_stage_2
-		
-		
-		when (SPE_VNCS2 == B25ON) {
-			SPE_update_report(B25ON);
-			printf("Watchman 25 must be activated\n");
-		} state vault_nc_stage_2
-
-	}	
+		exit {
+		    SPE_OLD_FAIL_COND = SPE_FAIL_COND;
+		}
+	}
 }
-
+///////////////////////////////////////////////////////////////////////////////
 void initVault(){
 	SPE_INIT = TRUE;
+	SPE_OLD_FAIL_COND = SPE_FAIL_COND;
 	not_cleared(SPE_CLR_STATS);
 	report_error(SPE_INTLCK_STATS, 54);
 	pvPut(SPE_INIT, SYNC);
@@ -143,6 +173,13 @@ void initVault(){
 	pvPut(SPE_INTLCK_STATS, SYNC);
 }
 
+void resetStatus()
+{
+	not_cleared(SPE_CLR_STATS);
+	report_error(SPE_INTLCK_STATS, 54);
+	pvPut(SPE_CLR_STATS, SYNC);
+	pvPut(SPE_INTLCK_STATS, SYNC);
+}
 ////////////////////////////////////////////////////////////////////////
 void SPE_update_failed(short report)
 {
@@ -150,6 +187,7 @@ void SPE_update_failed(short report)
 	pvPut(SPE_CLR_STATS, SYNC);
 	report_error(SPE_INTLCK_STATS, report);
 	pvPut(SPE_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,SPE_INTLCK_STATS,DEF);
 }
 /////////////////////////////////////////////////////////////////////////
 void SPE_update_report(short intlck) {
@@ -158,20 +196,15 @@ void SPE_update_report(short intlck) {
 }
 ////////////////////////////////////////////////////////////////////////
 void SPE_status()
-{  
+{
 	cleared(SPE_CLR_STATS);
 	pvPut(SPE_CLR_STATS, SYNC); 		
 	report_error(SPE_INTLCK_STATS, 54);
 	pvPut(SPE_INTLCK_STATS, SYNC);
 }
-//////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 void SPE_clear_underway()
 {  
 	clear_underway(SPE_CLR_STATS);
 	pvPut(SPE_CLR_STATS, SYNC); 		
 }
-/**********************************************************/
-%{
-	#include "vcs_var_mes.h"
-	
-}%

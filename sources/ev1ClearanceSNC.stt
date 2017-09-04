@@ -1,163 +1,175 @@
 program ev1ClearanceSNC
+
 %{
-/**********************************************************/
-	#include "vcs_var_mes.h" // define this here so C functions/variables are seen
-/**********************************************************/
-	#define	VC       	0
-	#define TOUT		5
-	#define	RA6ON       147
-	#define	RA7ON		148
-	#define EV1PNK      134
-	#define	DA6ON       101
-	#define	B19ON       105
-	#define	B18ON       187
-	#define	B18OFF      102
-	#define DA6S1ON		103 
-	#define DA6S2ON		104
+/*******************************************************************/
+#include "vcs_var_mes.h" // define this here so C functions are seen
+/*******************************************************************/
+#define	VCOK       	0
+#define FAIL		-1
+#define	B19OFF      105
+#define	B18ON      	102
+#define DA6S1OFF	103 
+#define DA6S2OFF	104
+
+
+
+
 }%
 /* Declare seq variables*/
 short EV1_INIT; 
-short EV1_SEL_STAGE;
-
-short EV1_VC; 
-short EV1_VNCS1;   
-short EV1_VNCS2;    
+short EV1_VC;   
+short SSC_W18_STS;
+short SSC_W19_STS;
+short EV1_FAIL_COND;
 string EV1_CLR_STATS; 
 string EV1_INTLCK_STATS;
+// CONTROL FLAGS
+short EV1Update;
+short EV1_OLD_FAIL_COND;
+
 /* Associate SNL variables with epics output pv's*/
 assign	EV1_CLR_STATS		to	"{SYS}:EV1-CLR-STATS"; 
 assign	EV1_INTLCK_STATS	to	"{SYS}:EV1-INTLCK-STATS"; 
 /* Associate SNL variables with epics input pv's*/
 assign 	EV1_VC 				to 	"{SYS}:EV1-VC"; 
-assign 	EV1_VNCS1 			to  "{SYS}:EV1-VNCS1";   
-assign 	EV1_VNCS2 			to 	"{SYS}:EV1-VNCS2";
 assign 	EV1_INIT 			to 	"{SYS}:EV1-INIT";
-assign	EV1_SEL_STAGE		to	"{SYS}:EV1-SEL-STAGE";
+assign 	SSC_W18_STS 		to 	"{SYS}:SSC-W18-STS";   
+assign 	SSC_W19_STS 		to 	"{SYS}:SSC-W19-STS";
+assign	EV1_FAIL_COND		to	"{SYS}:EV1-FAIL-COND";
 
 monitor	EV1_VC;
-monitor	EV1_VNCS1;
-monitor	EV1_VNCS2;
-monitor	EV1_SEL_STAGE;
+monitor SSC_W18_STS;  
+monitor SSC_W19_STS;
+monitor	EV1_FAIL_COND;
 
-ss ev1_clearance_status {
+ss EV1_clearance_status {
     state init {
-		when (delay(4)) {
+		when (delay(0.8)) {
 			initVault();
-			printf("EV1 INITIALISATION COMPLETED\n");
-		} state vault_nc_stage_1	
+			printf("%sEXPERIMENTAL VAULT 2 INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_18_pressed	
     }
+///////////////////////////////////////////////////////////////
 	/*VAULT CLEARED STATE*/
     state vault_cleared {
 		option -e;
 		entry {
-			printf("EV1 IN CLEARED STATE\n");
+			printf("%sEXPERIMENTAL VAULT 2 IN CLEARED STATE%s\n",CLR,DEF);
 		} 
+		when (EV1_VC != VCOK) {
 
-		when (EV1_VC == RA6ON) {
-			ev1_update_failed(RA6ON);
-			printf("The roof is open\n");
-
-		} state vault_nc_stage_1
-		
-		
-		when (EV1_VC == RA7ON) {
-			ev1_update_failed(RA7ON);
-			printf("Experimental vault 2 roof is open\n");
-		} state vault_nc_stage_1
-		
-		
-		when (EV1_VC == DA6ON) {
-			ev1_update_failed(DA6ON);
-			printf("Door A6 was opened\n");
-		} state vault_nc_stage_1
-
-
-		when (EV1_VC == EV1PNK) {
-			ev1_update_failed(EV1PNK);
-			printf("Panic button 18 was pressed\n");
-		} state vault_nc_stage_1
+		} state vc_faillures
 	}
-	
-	/*VAULT NOT CLEARED STAGE 1*/
-	state vault_nc_stage_1 {
-
-		when (EV1_SEL_STAGE == 3) {
-			ev1_clear_underway();
-			/*printf("CLEAR UNDERWAY: STAGE 2\n");*/
-		} state vault_nc_stage_2
-
-
-		when (EV1_VNCS1 == RA6ON) {
-			ev1_update_failed(RA6ON);
-			printf("The roof is open\n");
-		} state vault_nc_stage_1
-
-
-		when (EV1_VNCS1 == RA7ON) {
-			ev1_update_failed(RA7ON);
-			printf("Experimental vault 2 roof is open\n");
-		} state vault_nc_stage_1
+//////////////////////////////////////////////////////////
+	state recover_faillure {
 		
-		
-		when(EV1_VNCS1 == B18ON){
-			ev1_update_report(B18ON);		
-			/*printf("Waiting for Vault Clearance\n");*/
-		}state vault_nc_stage_1
+		when (!EV1_FAIL_COND) {
+			if(!EV1Update) {
+				printf("%sRECOVERING FROM FAILLURE - ENTERING W18 STATE%s\n",OK,DEF);
+				EV1Update = TRUE;
+			}
+		} state  watchman_18_pressed
+			
+		when (EV1_FAIL_COND != EV1_OLD_FAIL_COND) {
+		} state  clearance_faillures
 	}
-	
-	/*VAULT NOT CLEARED STAGE 2*/
-	state vault_nc_stage_2 {
+//////////////////////////////////////////////////////////
+	state watchman_18_pressed {
+
+		when (EV1_FAIL_COND != VCOK) {
+			EV1_OLD_FAIL_COND = EV1_FAIL_COND;
+		} state  clearance_faillures
+			
+		when (SSC_W18_STS == B18ON) {
+			EV1_clear_underway();
+			EV1_update_report(B18ON);
+		} state watchman_18_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_18_released {
 		
-		when (EV1_SEL_STAGE == 1) {
-			ev1_status();
+		when (EV1_FAIL_COND != VCOK) {
+
+		} state  clearance_faillures
+			
+		when (SSC_W18_STS != B18ON) {
+		} state door_a7_closed
+	}
+//////////////////////////////////////////////////////////
+	state door_a7_closed {
+
+		when (EV1_FAIL_COND != VCOK) {
+
+		} state   clearance_faillures
+		
+		when (SSC_W19_STS == DA6S1OFF) {
+			EV1_update_report(DA6S1OFF);
+		} state door_a7_closed
+
+		when (SSC_W19_STS == DA6S2OFF) {
+			EV1_update_report(DA6S2OFF);
+		} state door_a7_closed
+
+
+		when () {
+			EV1_update_report(B19OFF);
+		} state watchman_19_pressed
+	}
+
+///////////////////////////////////////////////////////////
+	state watchman_19_pressed {
+		
+		when (EV1_FAIL_COND != VCOK) {
+
+		} state  clearance_faillures
+			
+			
+		when (!SSC_W19_STS) {
+
+			EV1_status();
 		} state vault_cleared
+	}
+///////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("EV1 CLEARANCE FAILURE CONDITION: ");
+			EV1Update = FALSE;
+		}
 
-
-		when (EV1_VNCS2 == B18OFF) {
-			ev1_update_report(B18OFF);
-			printf("Watchman 18 must be released\n");
-		} state vault_nc_stage_2
+		when () {
+			EV1_update_failed(EV1_FAIL_COND);
+		} state recover_faillure
 		
+		exit {
+		    EV1_OLD_FAIL_COND = EV1_FAIL_COND;	
+		}			
+	}
+////////////////////////////////////////////////////////////////////////////
+	state vc_faillures { 			/* FAIL CONDITIONS*/
 		
-		when (EV1_VNCS2 == RA6ON) {
-			ev1_update_failed(RA6ON);
-			printf("The roof is open\n");
-		} state vault_nc_stage_1
+		option -e;
+		option -x;
+		entry {
+			printf("EV1 CLEAR FAILURE CONDITION: ");
+			EV1Update = FALSE;
+		}
 		
+		when () {			
+			EV1_update_failed(EV1_VC);
+		} state recover_faillure
 		
-		when (EV1_VNCS2 == RA7ON) {
-			ev1_update_failed(RA6ON);
-			printf("Experimental vault 2 roof is open\n");
-		} state vault_nc_stage_1
-		
-		when (EV1_VNCS2 == TOUT) {
-			ev1_update_failed(TOUT);
-			printf("TIME OUT ERROR: RELEASE ALL WATCHMEN\n");
-		} state vault_nc_stage_1
-		
-		
-		when (EV1_VNCS2 == DA6S1ON) {
-			ev1_update_report(DA6S1ON);
-			printf("Door A6 switch 1 is open\n");
-		} state vault_nc_stage_2
-		
-		
-		when (EV1_VNCS2 == DA6S2ON) {
-			ev1_update_report(DA6S2ON);
-			printf("Door A6 switch 2 is open\n");
-		} state vault_nc_stage_2
-		
-		
-		when (EV1_VNCS2 == B19ON) {
-			ev1_update_report(B19ON);
-			printf("Watchman 19 must be activated\n");
-		} state vault_nc_stage_2
-
-	}	
+		exit {
+		    EV1_OLD_FAIL_COND = EV1_FAIL_COND;
+		}
+	}
 }
-
+///////////////////////////////////////////////////////////////////////////////
 void initVault(){
 	EV1_INIT = TRUE;
+	EV1_OLD_FAIL_COND = EV1_FAIL_COND;
 	not_cleared(EV1_CLR_STATS);
 	report_error(EV1_INTLCK_STATS, 54);
 	pvPut(EV1_INIT, SYNC);
@@ -166,33 +178,34 @@ void initVault(){
 }
 
 ////////////////////////////////////////////////////////////////////////
-void ev1_update_failed(short report)
+void EV1_update_failed(short report)
 {
 	clear_failed(EV1_CLR_STATS);
 	pvPut(EV1_CLR_STATS, SYNC);
 	report_error(EV1_INTLCK_STATS, report);
 	pvPut(EV1_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,EV1_INTLCK_STATS,DEF);
 }
 /////////////////////////////////////////////////////////////////////////
-void ev1_update_report(short intlck) {
+void EV1_update_report(short intlck) {
 	report_error(EV1_INTLCK_STATS, intlck);
 	pvPut(EV1_INTLCK_STATS, SYNC);
 }
 ////////////////////////////////////////////////////////////////////////
-void ev1_status()
-{  
+void EV1_status()
+{
 	cleared(EV1_CLR_STATS);
 	pvPut(EV1_CLR_STATS, SYNC); 		
 	report_error(EV1_INTLCK_STATS, 54);
 	pvPut(EV1_INTLCK_STATS, SYNC);
 }
 ///////////////////////////////////////////////////////////
-void ev1_clear_underway()
+void EV1_clear_underway()
 {  
 	clear_underway(EV1_CLR_STATS);
 	pvPut(EV1_CLR_STATS, SYNC); 		
 }
-/**********************************************************/
+//////////////////////////////////////////////////////////////////////////
 %{
 
 inline void cleared(string vault_status) {   

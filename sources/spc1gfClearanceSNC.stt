@@ -204,14 +204,6 @@ void initVault(){
 	pvPut(SPC1GF_CLR_STATS, SYNC);
 	pvPut(SPC1GF_INTLCK_STATS, SYNC);
 }
-
-void resetStatus()
-{
-	not_cleared(SPC1GF_CLR_STATS);
-	report_error(SPC1GF_INTLCK_STATS, 54);
-	pvPut(SPC1GF_CLR_STATS, SYNC);
-	pvPut(SPC1GF_INTLCK_STATS, SYNC);
-}
 ////////////////////////////////////////////////////////////////////////
 void SPC1GF_update_failed(short report)
 {

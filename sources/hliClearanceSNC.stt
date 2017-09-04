@@ -1,151 +1,177 @@
 program hliClearanceSNC
+
 %{
-/**********************************************************/
-	#include "vcs_var_mes.h"
-/**********************************************************/
-	#define	VC       	0
-	#define TOUT		5
-	#define	RA14ON		147
-	#define HLIPNK      137
-	#define	DA14ON      91
-	#define	B31ON       95
-	#define	B30ON       187
-	#define	B30OFF      92
-	#define DA14S1ON	93 
-	#define DA14S2ON	94
+/*******************************************************************/
+#include "vcs_var_mes.h" // define this here so C functions are seen
+/*******************************************************************/
+#define	VCOK       	0
+#define FAIL		-1
+#define	B31OFF      95
+#define	B30ON      	92
+#define DA14S1OFF	93 
+#define DA14S2OFF	94
 }%
 /* Declare seq variables*/
 short HLI_INIT; 
-short HLI_SEL_STAGE;
-
-short HLI_VC; 
-short HLI_VNCS1;   
-short HLI_VNCS2;  
-
+short HLI_VC;   
+short SSC_W30_STS;
+short SSC_W31_STS;
+short HLI_FAIL_COND;
 string HLI_CLR_STATS; 
 string HLI_INTLCK_STATS;
+// CONTROL FLAGS
+short HLIUpdate;
+short HLI_OLD_FAIL_COND;
+
 /* Associate SNL variables with epics output pv's*/
 assign	HLI_CLR_STATS		to	"{SYS}:HLI-CLR-STATS"; 
 assign	HLI_INTLCK_STATS	to	"{SYS}:HLI-INTLCK-STATS"; 
 /* Associate SNL variables with epics input pv's*/
 assign 	HLI_VC 				to 	"{SYS}:HLI-VC"; 
-assign 	HLI_VNCS1 			to  "{SYS}:HLI-VNCS1";   
-assign 	HLI_VNCS2 			to 	"{SYS}:HLI-VNCS2";
 assign 	HLI_INIT 			to 	"{SYS}:HLI-INIT";
-assign	HLI_SEL_STAGE		to	"{SYS}:HLI-SEL-STAGE";
+assign 	SSC_W30_STS 		to 	"{SYS}:SSC-W30-STS";   
+assign 	SSC_W31_STS 		to 	"{SYS}:SSC-W31-STS";
+assign	HLI_FAIL_COND		to	"{SYS}:HLI-FAIL-COND";
 
 monitor	HLI_VC;
-monitor	HLI_VNCS1;
-monitor	HLI_VNCS2;
-monitor	HLI_SEL_STAGE;
+monitor SSC_W30_STS;  
+monitor SSC_W31_STS;
+monitor	HLI_FAIL_COND;
 
 ss HLI_clearance_status {
     state init {
-		when (delay(4)) {
+		when (delay(0.8)) {
 			initVault();
-			printf("HORIZONTAL BEAMLINE VAULT INITIALISATION COMPLETED\n");
-		} state vault_nc_stage_1	
+			printf("%sHORIZONTAL LINE VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_30_pressed	
     }
+///////////////////////////////////////////////////////////////
 	/*VAULT CLEARED STATE*/
     state vault_cleared {
 		option -e;
 		entry {
-			printf("HORIZONTAL BEAMLINE VAULT IN CLEARED STATE\n");
+			printf("%sHORIZONTAL LINE VAULT IN CLEARED STATE%s\n",CLR,DEF);
 		} 
+		when (HLI_VC != VCOK) {
 
-		when (HLI_VC == RA14ON) {
-			HLI_update_failed(RA14ON);
-			printf("The roof is open\n");
-
-		} state vault_nc_stage_1
-
-				
-		when (HLI_VC == DA14ON) {
-			HLI_update_failed(DA14ON);
-			printf("Door A14 was opened\n");
-		} state vault_nc_stage_1
-
-
-		when (HLI_VC == HLIPNK) {
-			HLI_update_failed(HLIPNK);
-			printf("Panic button 30 was pressed\n");
-		} state vault_nc_stage_1
+		} state vc_faillures
 	}
-	
-	/*VAULT NOT CLEARED STAGE 1*/
-	state vault_nc_stage_1 {
-
-		when (HLI_SEL_STAGE == 3) {
-			hli_clear_underway();
-		} state vault_nc_stage_2
-
-
-		when (HLI_VNCS1 == RA14ON) {
-			HLI_update_failed(RA14ON);
-			printf("The roof is open\n");
-		} state vault_nc_stage_1
+//////////////////////////////////////////////////////////
+	state recover_faillure {
 		
-		
-		when(HLI_VNCS1 == B30ON){
-			HLI_update_report(B30ON);		
-			/*printf("Waiting for Vault Clearance\n");*/
-		}state vault_nc_stage_1
+		when (!HLI_FAIL_COND) {
+			if(!HLIUpdate) {
+				printf("%sRECOVERING FROM FAILLURE - ENTERING W30 STATE%s\n",OK,DEF);
+				HLIUpdate = TRUE;
+			}
+		} state  watchman_30_pressed
+			
+		when (HLI_FAIL_COND != HLI_OLD_FAIL_COND) {
+		} state  clearance_faillures
 	}
-	
-	/*VAULT NOT CLEARED STAGE 2*/
-	state vault_nc_stage_2 {
+//////////////////////////////////////////////////////////
+	state watchman_30_pressed {
+
+		when (HLI_FAIL_COND != VCOK) {
+			HLI_OLD_FAIL_COND = HLI_FAIL_COND;
+		} state  clearance_faillures
+			
+		when (SSC_W30_STS == B30ON) {
+			HLI_clear_underway();
+			HLI_update_report(B30ON);
+		} state watchman_30_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_30_released {
 		
-		when (HLI_SEL_STAGE == 1) {
+		when (HLI_FAIL_COND != VCOK) {
+
+		} state  clearance_faillures
+			
+		when (SSC_W30_STS != B30ON) {
+		} state door_a14_closed
+	}
+//////////////////////////////////////////////////////////
+	state door_a14_closed {
+
+		when (HLI_FAIL_COND != VCOK) {
+
+		} state   clearance_faillures
+		
+		when (SSC_W31_STS == DA14S1OFF) {
+			HLI_update_report(DA14S1OFF);
+		} state door_a14_closed
+
+		when (SSC_W31_STS == DA14S2OFF) {
+			HLI_update_report(DA14S2OFF);
+		} state door_a14_closed
+
+
+		when () {
+			HLI_update_report(B31OFF);
+		} state watchman_31_pressed
+	}
+
+///////////////////////////////////////////////////////////
+	state watchman_31_pressed {
+		
+		when (HLI_FAIL_COND != VCOK) {
+
+		} state  clearance_faillures
+			
+			
+		when (!SSC_W31_STS) {
+
 			HLI_status();
 		} state vault_cleared
+	}
+///////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("HLI CLEARANCE FAILURE CONDITION: ");
+			HLIUpdate = FALSE;
+		}
 
-
-		when (HLI_VNCS2 == B30OFF) {
-			HLI_update_report(B30OFF);
-			printf("Watchman 30 must be released\n");
-		} state vault_nc_stage_2
+		when () {
+			HLI_update_failed(HLI_FAIL_COND);
+		} state recover_faillure
 		
+		exit {
+		    HLI_OLD_FAIL_COND = HLI_FAIL_COND;	
+		}			
+	}
+////////////////////////////////////////////////////////////////////////////
+	state vc_faillures { 			/* FAIL CONDITIONS*/
 		
-		when (HLI_VNCS2 == RA14ON) {
-			HLI_update_failed(RA14ON);
-			printf("The roof is open\n");
-		} state vault_nc_stage_1
-			
+		option -e;
+		option -x;
+		entry {
+			printf("HLI CLEAR FAILURE CONDITION: ");
+			HLIUpdate = FALSE;
+		}
 		
-		when (HLI_VNCS2 == TOUT) {
-			HLI_update_failed(TOUT);
-			printf("TIME OUT ERROR: RELEASE ALL WATCHMEN\n");
-		} state vault_nc_stage_1
+		when () {			
+			HLI_update_failed(HLI_VC);
+		} state recover_faillure
 		
-		when (HLI_VNCS2 == DA14S1ON) {
-			HLI_update_report(DA14S1ON);
-			printf("Door A14 switch 1 is open\n");
-		} state vault_nc_stage_2
-		
-		
-		when (HLI_VNCS2 == DA14S2ON) {
-			HLI_update_report(DA14S2ON);
-			printf("Door A14 switch 2 is open\n");
-		} state vault_nc_stage_2
-		
-		
-		when (HLI_VNCS2 == B31ON) {
-			HLI_update_report(B31ON);
-			printf("Watchman 31 must be activated\n");
-		} state vault_nc_stage_2
-
-	}	
+		exit {
+		    HLI_OLD_FAIL_COND = HLI_FAIL_COND;
+		}
+	}
 }
-
+///////////////////////////////////////////////////////////////////////////////
 void initVault(){
 	HLI_INIT = TRUE;
+	HLI_OLD_FAIL_COND = HLI_FAIL_COND;
 	not_cleared(HLI_CLR_STATS);
 	report_error(HLI_INTLCK_STATS, 54);
 	pvPut(HLI_INIT, SYNC);
 	pvPut(HLI_CLR_STATS, SYNC);
 	pvPut(HLI_INTLCK_STATS, SYNC);
 }
-
 ////////////////////////////////////////////////////////////////////////
 void HLI_update_failed(short report)
 {
@@ -153,6 +179,7 @@ void HLI_update_failed(short report)
 	pvPut(HLI_CLR_STATS, SYNC);
 	report_error(HLI_INTLCK_STATS, report);
 	pvPut(HLI_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,HLI_INTLCK_STATS,DEF);
 }
 /////////////////////////////////////////////////////////////////////////
 void HLI_update_report(short intlck) {
@@ -161,14 +188,14 @@ void HLI_update_report(short intlck) {
 }
 ////////////////////////////////////////////////////////////////////////
 void HLI_status()
-{  
+{
 	cleared(HLI_CLR_STATS);
 	pvPut(HLI_CLR_STATS, SYNC); 		
 	report_error(HLI_INTLCK_STATS, 54);
 	pvPut(HLI_INTLCK_STATS, SYNC);
 }
-//////////////////////////////////////////////////////////////////////////
-void hli_clear_underway()
+///////////////////////////////////////////////////////////
+void HLI_clear_underway()
 {  
 	clear_underway(HLI_CLR_STATS);
 	pvPut(HLI_CLR_STATS, SYNC); 		

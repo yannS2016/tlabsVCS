@@ -279,14 +279,6 @@ void initVault(){
 	pvPut(IBL_CLR_STATS, SYNC);
 	pvPut(IBL_INTLCK_STATS, SYNC);
 }
-
-void resetStatus()
-{
-	not_cleared(IBL_CLR_STATS);
-	report_error(IBL_INTLCK_STATS, 54);
-	pvPut(IBL_CLR_STATS, SYNC);
-	pvPut(IBL_INTLCK_STATS, SYNC);
-}
 ////////////////////////////////////////////////////////////////////////
 void IBL_update_failed(short report)
 {

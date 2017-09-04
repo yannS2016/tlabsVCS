@@ -7,7 +7,6 @@ program expClearanceSNC
 #define	VCOK       	0
 #define TOUT		5
 #define FAIL		-1
-#define	EXPPNK 		19 
 #define B26ON		69 
 #define B28bOFF		74
 #define B28bON		80 
@@ -16,13 +15,8 @@ program expClearanceSNC
 #define B27ON		78 
 #define B27OFF		72
 #define B29OFF		77  
-#define	DA12ON		68 
 #define	DA12S1OFF	75
-#define	DA12S2OFF	76
-#define RA12ON 		147 
-#define	G9ON		151  
-#define	G9OFF		153   
-#define	G10ON		152  
+#define	DA12S2OFF	76   
 #define	G10OFF		154          
 }%
 /* Declare seq variables*/
@@ -46,7 +40,6 @@ assign	EXP_INTLCK_STATS	to	"{SYS}:EXP-INTLCK-STATS";
 /* Associate SNL variables with epics input pv's*/
 assign 	EXP_VC 				to 	"{SYS}:EXP-VC"; 
 assign 	EXP_INIT 			to 	"{SYS}:EXP-INIT";
-
 assign 	EXP_W26_STS 		to 	"{SYS}:EXP-W26-STS"; 
 assign 	EXP_W28b_STS 		to  "{SYS}:EXP-W28b-STS";   
 assign 	EXP_W28a_STS 		to 	"{SYS}:EXP-W28a-STS";
@@ -66,9 +59,9 @@ monitor	EXP_G10_STS;
 
 ss EXP_clearance_status {
     state init {
-		when (delay(4)) {
+		when (delay(1)) {
 			initVault();
-			printf("\n%sEXP LOW INITIALISATION COMPLETED%s\n",OK,DEF);
+			printf("\n%sEXPERIMENTAL VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_26_pressed	
     }
 ///////////////////////////////////////////////////////////////
@@ -76,7 +69,7 @@ ss EXP_clearance_status {
     state vault_cleared {
 		option -e;
 		entry {
-			printf("%sEXP LOW IN CLEARED STATE%s\n",CLR,DEF);
+			printf("%sEXPERIMENTAL VAULT IN CLEARED STATE%s\n",CLR,DEF);
 		} 
 		when (EXP_VC != VCOK) {
 
@@ -88,7 +81,6 @@ ss EXP_clearance_status {
 		when (!EXP_FAIL_COND) {
 			if(!EXP_UPDATE) {
 				printf("%sEXP RECOVERING FROM FAILLURE - ENTERING W26 STATE%s\n",OK,DEF);
-				//resetStatus();
 				EXP_UPDATE = TRUE;
 			}
 		} state  watchman_26_pressed
@@ -272,7 +264,7 @@ ss EXP_clearance_status {
 		}
 	}
 }
-
+///////////////////////////////////////////////////////////////////////////////
 void initVault(){
 	EXP_INIT = TRUE;
 	EXP_UPDATE = FALSE;
@@ -280,14 +272,6 @@ void initVault(){
 	not_cleared(EXP_CLR_STATS);
 	report_error(EXP_INTLCK_STATS, 54);
 	pvPut(EXP_INIT, SYNC);
-	pvPut(EXP_CLR_STATS, SYNC);
-	pvPut(EXP_INTLCK_STATS, SYNC);
-}
-
-void resetStatus()
-{
-	not_cleared(EXP_CLR_STATS);
-	report_error(EXP_INTLCK_STATS, 54);
 	pvPut(EXP_CLR_STATS, SYNC);
 	pvPut(EXP_INTLCK_STATS, SYNC);
 }
