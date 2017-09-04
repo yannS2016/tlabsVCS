@@ -62,7 +62,7 @@ ifneq ($(SNCSEQ),)
     vcs_DBD += vcs_snc.dbd
     vcsSupport_SRCS += ev1ClearanceSNC.stt ev2ClearanceSNC.stt  ev3ClearanceSNC.stt bsvClearanceSNC.stt  hliClearanceSNC.stt  speClearanceSNC.stt  vliClearanceSNC.stt 
     vcsSupport_SRCS += a13aClearanceSNC.stt  ssccabClearanceSNC.stt  sscbasClearanceSNC.stt iblClearanceSNC.stt  expClearanceSNC.stt  spc1gfClearanceSNC.stt  spc1basClearanceSNC.stt
-    vcsSupport_SRCS += spc2basClearanceSNC.stt spc2gfClearanceSNC.stt
+    vcsSupport_SRCS += spc2basClearanceSNC.stt spc2gfClearanceSNC.stt trlClearanceSNC.stt sscgfa1ClearanceSNC.stt  sscgfa2ClearanceSNC.stt
     vcsSupport_LIBS += seq pv
     vcs_LIBS += seq pv
 

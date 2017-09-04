@@ -287,3 +287,4 @@ record(bi, "$(SYS):SPC2L-INIT") {
   field(ONAM, "ON")
 }
 
+

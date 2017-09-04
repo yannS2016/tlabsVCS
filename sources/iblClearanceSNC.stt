@@ -128,7 +128,7 @@ ss IBL_clearance_status {
 		} state  clearance_faillures
 			
 		when (IBL_W8_STS != B8ON) {
-			IBL_update_report(B8OFF);
+
 		} state door_a13_closed
 		
 	}

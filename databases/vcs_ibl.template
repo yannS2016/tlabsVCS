@@ -33,16 +33,16 @@ record(calcout, "$(SYS):IBL-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(CALC, "!E?$(VCOK):!A?B?!C?!D?$(VCOK):D:$(TOUT):$(A13AON):$(RA13ON)")
-  field(INPA, "$(SYS):SW-RF-A13-CLSD.VAL NPP") 
+  field(INPA, "$(SYS):SW-RF-A13.VAL NPP") 
   field(INPB, "$(SYS):A13A-CLR.VAL NPP")
   field(INPC, "$(SYS):IBL-TIMEOUT NPP") 
-  field(INPD, "$(SYS):IBLG-FAIL PP") 
+  field(INPD, "$(SYS):SSCA1A-FAIL PP") 
   field(INPE, "$(SYS):IBL-INIT NPP") 
   field(OUT,  "$(SYS):RST-IBL.PROC PP")  
   field(OOPT, "Transition To Non-zero")  
 }
 #################################################################################
-record(calcout, "$(SYS):IBLG-FAIL") {
+record(calcout, "$(SYS):SSCA1A-FAIL") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(CALC, "!A?!B?!C?!D?$(VCOK):$(GA1AS4ON):$(GA1AS3ON):$(GA1AS2ON):$(GA1AS1ON)")
@@ -62,9 +62,9 @@ record(calcout, "$(SYS):IBL-VC") {
   field(CALC, "!A?B?!C?!D?E?$(IBLPNK):$(VCOK):$(DA13ON):$(GA1AON):$(A13AON):$(RA13ON)")
 # IN LIVE APP USE A FLNK FROM  SW-I-SSC-A1A OR SW-I-SSC-A1A (SCAN=Intr) TO PROCESS THIS RECORD
 # AND ACCES IT HERE WITH NPP OR ACCES IT WITH PP BUT USE NPP ON ITS INPUTS
-  field(INPA, "$(SYS):SW-RF-A13-CLSD.VAL NPP") 
+  field(INPA, "$(SYS):SW-RF-A13.VAL NPP") 
   field(INPB, "$(SYS):A13A-CLR.VAL NPP")
-  field(INPC, "$(SYS):IBL-GA1A-CLSD PP")
+  field(INPC, "$(SYS):SSC-GA1A-CLSD PP")
   field(INPD, "$(SYS):IBL-DA13-CLSD PP")
   field(INPE, "$(SYS):IBL-PNK PP")
   field(OUT,  "$(SYS):RST-IBL.PROC PP")  
@@ -187,7 +187,6 @@ record(seq, "$(SYS):IBLW7-WRT-OUTS") {
   field(LNK2, "$(SYS):LED-WS-IBL-7.VAL PP")
   field(LNK3, "$(SYS):WATCHMAN-IBL-7-ACT.VAL PP")
   field(LNK4, "$(SYS):IBL-CLR.VAL PP")
-#  field(LNK4, "$(SYS):LED-WS-IBL-7.VAL PP")
   field(SCAN, "Passive")
 }
 
@@ -207,7 +206,7 @@ record(calc, "$(SYS):IBL-WATCH-8-RLSD") {
 }
 #####################################################################
 # GATE A1A CLOSED
-record(calc, "$(SYS):IBL-GA1A-CLSD") {
+record(calc, "$(SYS):SSC-GA1A-CLSD") {
   field(CALC, "!A&&!B&&!C&&!D?$(OFF):$(ON)")
   field(INPA, "$(SYS):SW-I-SSC-A1A.VAL")
   field(INPB, "$(SYS):SW-II-SSC-A1A.VAL")
@@ -400,7 +399,7 @@ record(bi, "$(SYS):SW-IV-SSC-A1A") {
   field(ONAM, "ON")
 }
 ### THIS GATE IS NAMED AFTER VAULT VLI
-record(bi, "$(SYS):SW-RF-A13-CLSD") {
+record(bi, "$(SYS):SW-RF-A13") {
   field(SCAN, "Passive")
   field(VAL, "1")
   field(PINI, "YES")
