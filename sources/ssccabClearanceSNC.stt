@@ -40,9 +40,9 @@ monitor	SSCCAB_FAIL_COND;
 
 ss SSCCAB_clearance_status {
     state init {
-		when (delay(0.8)) {
+		when (delay(1.5)) {
 			initVault();
-			printf("%sSSC BASEMENT VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+			printf("%sSSC CABLE WAY VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_16_pressed	
     }
 ///////////////////////////////////////////////////////////////
@@ -50,7 +50,7 @@ ss SSCCAB_clearance_status {
     state vault_cleared {
 		option -e;
 		entry {
-			printf("%sSSC BASEMENT VAULT IN CLEARED STATE%s\n",CLR,DEF);
+			printf("%sSSC CABLE WAY VAULT IN CLEARED STATE%s\n",CLR,DEF);
 		} 
 		when (SSCCAB_VC != VCOK) {
 
@@ -132,7 +132,7 @@ ss SSCCAB_clearance_status {
 		option -e;
 		option -x;
 		entry {
-			printf("SSC BAS CLEARANCE FAILURE CONDITION: ");
+			printf("SSC CAB CLEARANCE FAILURE CONDITION: ");
 			SSCCABUpdate = FALSE;
 		}
 
@@ -150,7 +150,7 @@ ss SSCCAB_clearance_status {
 		option -e;
 		option -x;
 		entry {
-			printf("SSC BAS CLEAR FAILURE CONDITION: ");
+			printf("SSC CAB CLEAR FAILURE CONDITION: ");
 			SSCCABUpdate = FALSE;
 		}
 		

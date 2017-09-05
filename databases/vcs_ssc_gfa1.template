@@ -26,7 +26,7 @@ record(calcout, "$(SYS):SSCA1-VC") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(FLNK, "$(SYS):SSCA1-FAIL-COND")
-  field(CALC, "!A?!B?!C?!D?E?$(SSCPNK):$(VCOK):$(G3ON):$(GA1AON):$(A001ON):$(RA1ON)")
+  field(CALC, "!A?B?!C?!D?E?$(SSCPNK):$(VCOK):$(G3ON):$(GA1AON):$(A001ON):$(RA1ON)")
   field(INPA, "$(SYS):SW-RF-A1.VAL NPP") 
   field(INPB, "$(SYS):SSCL-CLR.VAL NPP")
   field(INPC, "$(SYS):SSC-GA1A-CLSD PP") # define in IBL template
@@ -48,7 +48,7 @@ record(seq, "$(SYS):RST-SSCA1") { # HANDLE BY SEQ
   field(DOL6, "0")
   field(DOL7, "0")
   field(DOL8, "0")
-  field(LNK1, "$(SYS):CL3-SSC PP")
+  field(LNK1, "$(SYS):CS3-SSC PP")
   field(LNK2, "$(SYS):CL3-SSC PP")
   field(LNK3, "$(SYS):SSCA1-CLR PP")
   field(LNK4, "$(SYS):LED-WS-SSC-11 PP")
@@ -100,7 +100,7 @@ record(seq, "$(SYS):SSCW11-WRT-OUTS") { # HANDLE BY SEQ
   field(DOL4, "0")
   field(DOL5, "1")
   field(DOL6, "0")
-  field(LNK1, "$(SYS):CL3-SSC PP")
+  field(LNK1, "$(SYS):CS3-SSC PP")
   field(LNK2, "$(SYS):CL3-SSC PP")
   field(LNK3, "$(SYS):LED-WS-SSC-11 PP")
   field(LNK4, "$(SYS):SSCA1-COUNTER PP")
@@ -166,7 +166,7 @@ record(calc, "$(SYS):SSCA1-TIMEOUT") {
   field(INPA, "$(SYS):SSCA1-COUNTER.VAL PP")
 }
 ########################### Outputs ##################################
-record(bo, "$(SYS):CL3-SSC") {
+record(bo, "$(SYS):CS3-SSC") {
   field(VAL, "0")
   field(PINI, "YES")
   field(ZNAM, "OFF")
@@ -239,6 +239,14 @@ record(bi, "$(SYS):WS-BUT-SSC-12") {
 }
 
 record(bi, "$(SYS):SW-SSC-G3") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-RF-A1") {
   field(SCAN, "Passive")
   field(VAL, "1")
   field(PINI, "YES")

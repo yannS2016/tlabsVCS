@@ -134,25 +134,13 @@ ss SPC1GF_clearance_status {
 			spc1GFUpdate = FALSE;
 		}
 
-		when (SPC1GF_FAIL_COND == RA2ON) {
-			SPC1GF_update_failed(RA2ON);
-			printf("%sROOF A2 IS OPEN%s\n",ERROR,DEF);
+		when (SPC1GF_FAIL_COND) {
+			SPC1GF_update_failed(SPC1GF_FAIL_COND);
 		} state recover_faillure
 	
-		when (SPC1GF_FAIL_COND == DA2ON) {			
-			SPC1GF_update_failed(DA2ON);
-			printf("%sDOOR A2 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		
-		when (SPC1GF_FAIL_COND == TOUT) {			
-			SPC1GF_update_failed(TOUT);
-			printf("%sTIME OUT ERROR: RELEASE ALL WATCHMEN%s\n",ERROR,DEF);
-		} state recover_faillure
 		
 		exit {
-		    SPC1GF_OLD_FAIL_COND = SPC1GF_FAIL_COND;
-			//printf("VAULT CLEARANCE: %d %d \n",SPC1GF_OLD_FAIL_COND, SPC1GF_FAIL_COND);		
+		    SPC1GF_OLD_FAIL_COND = SPC1GF_FAIL_COND;		
 		}			
 	}
 ////////////////////////////////////////////////////////////////////////////
@@ -164,37 +152,18 @@ ss SPC1GF_clearance_status {
 			printf("SPC1 GF CLEAR FAILURE CONDITION: ");
 			spc1GFUpdate = FALSE;
 		}
-		
-		when (SPC1GF_VC == RA2ON) {
-			SPC1GF_update_failed(RA2ON);
-			printf("%sROOF A2 IS OPEN%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		
-		when (SPC1GF_VC == DA2ON) {
-			
-			SPC1GF_update_failed(DA2ON);
-			printf("%sDOOR A2 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		when (SPC1GF_VC == G7ON) {
-			SPC1GF_update_failed(G7ON);
-			printf("%sGATE G7 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
 
-		
-		when (SPC1GF_VC == SPC1GFPNK) {			
-			SPC1GF_update_failed(SPC1GFPNK);
-			printf("%sA PANIC BUTTON WAS  PRESSED%s\n",ERROR,DEF);
+		when (SPC1GF_VC) {			
+			SPC1GF_update_failed(SPC1GF_VC);
+
 		} state recover_faillure
 		
 		exit {
-		    SPC1GF_OLD_FAIL_COND = SPC1GF_FAIL_COND;
-			//printf("VAULT CLEAR: %d %d \n",SPC1GF_OLD_FAIL_COND, SPC1GF_FAIL_COND);		
+		    SPC1GF_OLD_FAIL_COND = SPC1GF_FAIL_COND;	
 		}
 	}
 }
-
+////////////////////////////////////////////////////////////////////////////////
 void initVault(){
 	SPC1GF_INIT = TRUE;
 	SPC1GF_OLD_FAIL_COND = SPC1GF_FAIL_COND;
@@ -203,6 +172,7 @@ void initVault(){
 	pvPut(SPC1GF_INIT, SYNC);
 	pvPut(SPC1GF_CLR_STATS, SYNC);
 	pvPut(SPC1GF_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,SPC1GF_INTLCK_STATS,DEF);
 }
 ////////////////////////////////////////////////////////////////////////
 void SPC1GF_update_failed(short report)

@@ -5,7 +5,6 @@ program sscgfa1ClearanceSNC
 #include "vcs_var_mes.h" // define this here so C functions are seen
 /*******************************************************************/
 #define	VCOK       	0
-#define TOUT		5
 #define FAIL		-1
 #define SSCPNK      19
 #define B11ON 		146	  
@@ -42,7 +41,7 @@ monitor	SSCA1_FAIL_COND;
 
 ss SSCA1_clearance_status {
     state init {
-		when (delay(0.8)) {
+		when (delay(2.5)) {
 			initVault();
 			printf("%sSSC GROUND FLOOR AREA 1 INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_11_pressed	
@@ -130,7 +129,7 @@ ss SSCA1_clearance_status {
 		option -e;
 		option -x;
 		entry {
-			printf("SSC-GFA1 CLEARANCE FAILURE CONDITION: ");
+			printf("SSC GF A1 CLEARANCE FAILURE CONDITION: ");
 			SSCA1Update = FALSE;
 		}
 
@@ -148,7 +147,7 @@ ss SSCA1_clearance_status {
 		option -e;
 		option -x;
 		entry {
-			printf("SSC-GFA1 CLEAR FAILURE CONDITION: ");
+			printf("SSC GF A1 CLEAR FAILURE CONDITION: ");
 			SSCA1Update = FALSE;
 		}
 		

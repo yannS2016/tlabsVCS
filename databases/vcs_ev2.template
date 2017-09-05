@@ -41,7 +41,7 @@ record(seq, "$(SYS):RST-EV2") { # HANDLE BY SEQ
   field(DOL3, "0")
   field(DOL4, "0")
   field(DOL5, "0")
-  field(DOL11, "0")
+  field(DOL6, "0")
   field(DOL7, "0")
   field(LNK1, "$(SYS):CS10-EV2 PP")
   field(LNK2, "$(SYS):CL10-EV2 PP")

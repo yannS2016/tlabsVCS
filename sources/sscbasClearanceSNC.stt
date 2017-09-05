@@ -69,9 +69,9 @@ monitor	SSC_FAIL_COND;
 
 ss SSCL_clearance_status {
     state init {
-		when (delay(4)) {
+		when (delay(2)) {
 			initVault();
-			printf("\n%sSSC LOW INITIALISATION COMPLETED%s\n",OK,DEF);
+			printf("%sSSC LOW INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_1_pressed	
     }
 ///////////////////////////////////////////////////////////////
@@ -363,7 +363,7 @@ ss SSCL_clearance_status {
 }
 
 void initVault(){
-	SSCL_INIT = FALSE;
+	SSCL_INIT = TRUE;
 	not_cleared(SSCL_CLR_STATS);
 	report_error(SSCL_INTLCK_STATS, 54);
 	pvPut(SSCL_INIT, SYNC);

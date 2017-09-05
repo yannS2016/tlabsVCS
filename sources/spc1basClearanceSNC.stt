@@ -127,52 +127,21 @@ ss SPC1L_clearance_status {
 	state clearance_faillures { 			/* FAIL CONDITIONS*/
 		
 		option -e;
+		option -x;
 		entry {
 			printf("SPC1 LOW CLEARANCE FAILURE CONDITION: ");
 			spc1LUpdate = FALSE;
 		}
 
-		when (SPC1L_FAIL_COND == RA2ON) {
-			SPC1L_update_failed(RA2ON);
-			printf("%sROOF A2 IS OPEN%s\n",ERROR,DEF);
+		when () {
+			SPC1L_update_failed(SPC1L_FAIL_COND);
+
 		} state recover_faillure
 		
-		when (SPC1L_FAIL_COND == A005ON) {			
-			SPC1L_update_failed(A005ON);
-			printf("%sSPC1 GROUND-FLOOR VAULT NOT CLEARED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		
-		when (SPC1L_FAIL_COND == TOUT) {			
-			SPC1L_update_failed(TOUT);
-			printf("%sTIME OUT ERROR: RELEASE ALL WATCHMEN%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		when () {														// OTHERWISE IT IT A DOOR FAILLURE		
-		} state doors_faillures
 		
 		exit {
 		    SPC1L_OLD_FAIL_COND = SPC1L_FAIL_COND;	
 		}
-	}
-////////////////////////////////////////////////////////////////////////////
-	state doors_faillures { 			/* FAIL CONDITIONS*/
-		
-		when (SPC1L_FAIL_COND == DA001ON) {			
-			SPC1L_update_failed(DA001ON);
-			printf("%sDOOR A001 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		when (SPC1L_FAIL_COND == DA005AON) {			
-			SPC1L_update_failed(DA005AON);
-			printf("%sDOOR A005A WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		when (SPC1L_FAIL_COND == DA005ON) {			
-			SPC1L_update_failed(DA005ON);
-			printf("%sDOOR A005 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
 	}
 ////////////////////////////////////////////////////////////////////////////
 	state vc_faillures { 			/* FAIL CONDITIONS*/
@@ -183,26 +152,18 @@ ss SPC1L_clearance_status {
 			spc1LUpdate = FALSE;
 		}
 		
-		when (SPC1L_VC == RA2ON) {
-			SPC1L_update_failed(RA2ON);
-			printf("%sROOF A2 IS OPEN%s\n",ERROR,DEF);
+		when () {
+			SPC1L_update_failed(SPC1L_VC);
+
 		} state recover_faillure
-		
-		when (SPC1L_VC == SPC1LPNK) {			
-			SPC1L_update_failed(SPC1LPNK);
-			printf("%sA PANIC BUTTON WAS  PRESSED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		when () {														// OTHERWISE IT IT A DOOR FAILLURE		
-		} state doors_faillures
+
 		
 		exit {
-		    SPC1L_OLD_FAIL_COND = SPC1L_FAIL_COND;
-			//printf("VAULT CLEAR: %d %d \n",SPC1L_OLD_FAIL_COND, SPC1L_FAIL_COND);		
+		    SPC1L_OLD_FAIL_COND = SPC1L_FAIL_COND;	
 		}
 	}
 }
-
+//////////////////////////////////////////////////////////////////////////////////
 void initVault(){
 	SPC1L_INIT = TRUE;
 	not_cleared(SPC1L_CLR_STATS);
@@ -210,6 +171,7 @@ void initVault(){
 	pvPut(SPC1L_CLR_STATS, SYNC);
 	pvPut(SPC1L_INTLCK_STATS, SYNC);
 	pvPut(SPC1L_INIT, SYNC);
+	printf("%s%s%s\n",ERROR,SPC1L_INTLCK_STATS,DEF);
 }
 ////////////////////////////////////////////////////////////////////////
 void SPC1L_update_failed(short report)

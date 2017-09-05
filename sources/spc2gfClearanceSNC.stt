@@ -170,60 +170,9 @@ ss SPC2GF_clearance_status {
 			spc2GFUpdate= FALSE;
 		}
 
-		when (SPC2GF_FAIL_COND == RA3ON) {
-			SPC2GF_update_failed(RA3ON);
-			printf("%sROOF A3 IS OPEN%s\n",ERROR,DEF);
-		} state recover_faillure
-
-		when (SPC2GF_FAIL_COND == A007ON) {
-			SPC2GF_update_failed(A007ON);
-			printf("%sAREA A007 IS NOT CLEARED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-
-		when (SPC2GF_FAIL_COND == TOUT) {	
-			SPC2GF_update_failed(TOUT);
-			printf("%sTIME OUT ERROR: RELEASE ALL WATCHMEN%s\n",ERROR,DEF);
-		} state recover_faillure
-			
-		when () {
-		
-		} state doors_faillures
-		
-		
-		exit {
-		    SPC2GF_OLD_FAIL_COND = SPC2GF_FAIL_COND;	
-		}			
-			
-	}
-//////////////////////////////////////////////////////////////////
-	state doors_faillures { 			/* DOOR A1A FAIL CONDITIONS*/
-	
-		option -x;
-				
-		when (SPC2GF_FAIL_COND == G6aON) {
+		when (SPC2GF_FAIL_COND) {
 					
-			SPC2GF_update_failed(G6aON);
-			printf("%sGATE G6a IS OPEN%s\n",ERROR,DEF);
-		} state recover_faillure
-
-			
-		when (SPC2GF_FAIL_COND == DA3aON) {
-		
-			SPC2GF_update_failed(DA3aON);
-			printf("%sDOOR A3a WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		
-		when (SPC2GF_VC == DA3ON) {
-			
-			SPC2GF_update_failed(DA3ON);
-			printf("%sDOOR A3 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-			
-		when () { // THIS MAY NOT BE NECCESSARY
-		
+			SPC2GF_update_failed(SPC2GF_FAIL_COND);
 		} state recover_faillure
 		
 		exit {
@@ -241,35 +190,17 @@ ss SPC2GF_clearance_status {
 			spc2GFUpdate= FALSE;
 		}
 		
-		when (SPC2GF_VC == RA3ON) {
-			SPC2GF_update_failed(RA3ON);
-			printf("%sROOF A3 IS OPEN%s\n",ERROR,DEF);
-		} state recover_faillure
-			
-		when (SPC2GF_VC == A007ON) {
-			
-			SPC2GF_update_failed(A007ON);
-			printf("%sAREA A007 IS NOT CLEARED%s\n",ERROR,DEF);
-		} state recover_faillure
-	
-
-		when (SPC2GF_VC == SPC2GFPNK) {
-			
-			SPC2GF_update_failed(SPC2GFPNK);
-			printf("%sA PANIC BUTTON WAS  PRESSED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		
 		when () {
-		
-		} state doors_faillures		
+			SPC2GF_update_failed(SPC2GF_VC);
+		} state recover_faillure
+				
 		
 		exit {
 		    SPC2GF_OLD_FAIL_COND = SPC2GF_FAIL_COND;	
 		}
 	}
 }
-
+////////////////////////////////////////////////////////////////////////////
 void initVault(){
 	SPC2GF_INIT = TRUE;
 	SPC2GF_OLD_FAIL_COND = SPC2GF_FAIL_COND;
@@ -278,6 +209,7 @@ void initVault(){
 	pvPut(SPC2GF_INIT, SYNC);
 	pvPut(SPC2GF_CLR_STATS, SYNC);
 	pvPut(SPC2GF_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,SPC2GF_INTLCK_STATS,DEF);
 }
 ////////////////////////////////////////////////////////////////////////
 void SPC2GF_update_failed(short report)
