@@ -105,6 +105,28 @@
        <item>
         <widget class="QERadioButton" name="qeradiobutton_3">
          <property name="text">
+          <string>vli_init</string>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+         <property name="variable" stdset="0">
+          <string>VCS:VLI-INIT</string>
+         </property>
+         <property name="format" stdset="0">
+          <enum>QERadioButton::LocalEnumeration</enum>
+         </property>
+         <property name="pressText">
+          <string>0</string>
+         </property>
+         <property name="releaseText">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QERadioButton" name="qeradiobutton_6">
+         <property name="text">
           <string>switch_I_VLI_A004</string>
          </property>
          <property name="autoExclusive">
@@ -239,7 +261,7 @@
           </color>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:VLI-SNC-CLR</string>
+          <string>VCS:VLI-CLR</string>
          </property>
         </widget>
        </item>

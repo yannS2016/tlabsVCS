@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>648</width>
-    <height>437</height>
+    <height>443</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -62,7 +62,7 @@
             <set>Qt::AlignCenter</set>
            </property>
            <property name="variable" stdset="0">
-            <string>VCS:SPC2-LOW-CLR-STATS</string>
+            <string>VCS:SPC2L-CLR-STATS</string>
            </property>
            <property name="format" stdset="0">
             <enum>QELineEdit::Default</enum>
@@ -75,7 +75,7 @@
             <set>Qt::AlignCenter</set>
            </property>
            <property name="variable" stdset="0">
-            <string>VCS:SPC2-LOW-INTLCK-STATS</string>
+            <string>VCS:SPC2L-INTLCK-STATS</string>
            </property>
           </widget>
          </item>
@@ -104,6 +104,28 @@
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QERadioButton" name="qeradiobutton_3">
+         <property name="text">
+          <string>spc2_low_init</string>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+         <property name="variable" stdset="0">
+          <string>VCS:SPC2L-INIT</string>
+         </property>
+         <property name="format" stdset="0">
+          <enum>QERadioButton::LocalEnumeration</enum>
+         </property>
+         <property name="pressText">
+          <string>0</string>
+         </property>
+         <property name="releaseText">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QERadioButton" name="qeradiobutton_6">
          <property name="text">
           <string>switch_I_SPC2_A007</string>
          </property>
@@ -223,7 +245,7 @@
           </color>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:SPC2-LOW-CLEAR</string>
+          <string>VCS:SPC2L-CLR</string>
          </property>
         </widget>
        </item>

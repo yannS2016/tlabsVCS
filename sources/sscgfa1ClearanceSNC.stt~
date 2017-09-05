@@ -1,0 +1,200 @@
+program sscgfa1ClearanceSNC
+
+%{
+/*******************************************************************/
+#include "vcs_var_mes.h" // define this here so C functions are seen
+/*******************************************************************/
+#define	VCOK       	0
+#define FAIL		-1
+#define SSCPNK      19
+#define B11ON 		146	  
+#define B12OFF		47   	  
+#define G3OFF		46	
+
+}%
+/* Declare seq variables*/
+short SSCA1_INIT; 
+short SSCA1_VC;   
+short SSC_W11_STS;
+short SSC_W12_STS;
+short SSCA1_FAIL_COND;
+string SSCA1_CLR_STATS; 
+string SSCA1_INTLCK_STATS;
+// CONTROL FLAGS
+short SSCA1Update;
+short SSCA1_OLD_FAIL_COND;
+
+/* Associate SNL variables with epics output pv's*/
+assign	SSCA1_CLR_STATS		to	"{SYS}:SSCA1-CLR-STATS"; 
+assign	SSCA1_INTLCK_STATS	to	"{SYS}:SSCA1-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	SSCA1_VC 			to 	"{SYS}:SSCA1-VC"; 
+assign 	SSCA1_INIT 			to 	"{SYS}:SSCA1-INIT";
+assign 	SSC_W11_STS 		to 	"{SYS}:SSC-W11-STS";   
+assign 	SSC_W12_STS 		to 	"{SYS}:SSC-W12-STS";
+assign	SSCA1_FAIL_COND		to	"{SYS}:SSCA1-FAIL-COND";
+
+monitor	SSCA1_VC;
+monitor SSC_W11_STS;  
+monitor SSC_W12_STS;
+monitor	SSCA1_FAIL_COND;
+
+ss SSCA1_clearance_status {
+    state init {
+		when (delay(1.5)) {
+			initVault();
+			printf("%sSSC GROUND FLOOR AREA 1 INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_11_pressed	
+    }
+///////////////////////////////////////////////////////////////
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("%sSSC GROUND FLOOR AREA 1 IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (SSCA1_VC != VCOK) {
+
+		} state vc_faillures
+	}
+//////////////////////////////////////////////////////////
+	state recover_faillure {
+		
+		when (!SSCA1_FAIL_COND) {
+			if(!SSCA1Update) {
+				printf("%sRECOVERING FROM FAILLURE - ENTERING W11 STATE%s\n",OK,DEF);
+				SSCA1Update = TRUE;
+			}
+		} state  watchman_11_pressed
+			
+		when (SSCA1_FAIL_COND != SSCA1_OLD_FAIL_COND) {
+		} state  clearance_faillures
+	}
+//////////////////////////////////////////////////////////
+
+	state watchman_11_pressed {
+
+		when (SSCA1_FAIL_COND != VCOK) {
+			SSCA1_OLD_FAIL_COND = SSCA1_FAIL_COND;
+		} state  clearance_faillures
+			
+		when (SSC_W11_STS == B11ON) {
+			SSCA1_clear_underway();
+			SSCA1_update_report(B11ON);
+		} state watchman_11_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_11_released {
+		
+		when (SSC_W11_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+		when (SSC_W11_STS != B11ON) {
+		} state gate_g3_closed
+	}
+//////////////////////////////////////////////////////////
+	state gate_g3_closed {
+
+		when (SSCA1_FAIL_COND != VCOK) {
+
+		} state   clearance_faillures
+		
+		when (SSC_W12_STS == G3OFF) {
+			SSCA1_update_report(G3OFF);
+		} state gate_g3_closed
+
+
+		when () {
+			SSCA1_update_report(B12OFF);
+		} state watchman_12_pressed
+	}
+
+///////////////////////////////////////////////////////////
+	state watchman_12_pressed {
+		
+		when (SSC_W12_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+			
+		when (!SSC_W12_STS) {
+
+			SSCA1_status();
+		} state vault_cleared
+	}
+///////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("SSC GF A1 CLEARANCE FAILURE CONDITION: ");
+			SSCA1Update = FALSE;
+		}
+
+		when () {
+			SSCA1_update_failed(SSCA1_FAIL_COND);
+		} state recover_faillure
+		
+		exit {
+		    SSCA1_OLD_FAIL_COND = SSCA1_FAIL_COND;	
+		}			
+	}
+////////////////////////////////////////////////////////////////////////////
+	state vc_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("SSC GF A1 CLEAR FAILURE CONDITION: ");
+			SSCA1Update = FALSE;
+		}
+		
+		when () {			
+			SSCA1_update_failed(SSCA1_VC);
+		} state recover_faillure
+		
+		exit {
+		    SSCA1_OLD_FAIL_COND = SSCA1_FAIL_COND;
+		}
+	}
+}
+///////////////////////////////////////////////////////////////////////////////
+void initVault(){
+	SSCA1_INIT = TRUE;
+	SSCA1_OLD_FAIL_COND = SSCA1_FAIL_COND;
+	not_cleared(SSCA1_CLR_STATS);
+	report_error(SSCA1_INTLCK_STATS, 54);
+	pvPut(SSCA1_INIT, SYNC);
+	pvPut(SSCA1_CLR_STATS, SYNC);
+	pvPut(SSCA1_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SSCA1_update_failed(short report)
+{
+	clear_failed(SSCA1_CLR_STATS);
+	pvPut(SSCA1_CLR_STATS, SYNC);
+	report_error(SSCA1_INTLCK_STATS, report);
+	pvPut(SSCA1_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,SSCA1_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void SSCA1_update_report(short intlck) {
+	report_error(SSCA1_INTLCK_STATS, intlck);
+	pvPut(SSCA1_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SSCA1_status()
+{
+	cleared(SSCA1_CLR_STATS);
+	pvPut(SSCA1_CLR_STATS, SYNC); 		
+	report_error(SSCA1_INTLCK_STATS, 54);
+	pvPut(SSCA1_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void SSCA1_clear_underway()
+{  
+	clear_underway(SSCA1_CLR_STATS);
+	pvPut(SSCA1_CLR_STATS, SYNC); 		
+}

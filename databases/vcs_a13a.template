@@ -2,14 +2,11 @@
 record(calc, "$(SYS):A13A-SEL-STAGE") {
   field(DESC, "Select processing branch")
   field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
-  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(FAIL)")
-  field(INPA, "$(SYS):A13A-INIT")
-##IF BUTTON 9a IS STILL PRESSED PNK IS ACTIVE##
+  field(CALC, "A?!B?C?$(S0):$(S1):$(PNK):$(NI)")
+  field(INPA, "$(SYS):A13A-INIT NPP")
+##IF BUTTON 42 IS STILL PRESSED PNK IS ACTIVE##
   field(INPB, "$(SYS):A13A-PNK") 
-  field(INPC, "$(SYS):A13A-CLR")
-## THIS FLAG ENSURE WE ONLY RESPOND TO A SINGLE EVENT ON BUT 9a##
-## IF SET WE IN STAGE 2 OF CLEARANCE OTHERWISE WE IN STAGE 1## 
-  field(INPD, "$(SYS):WATCHMAN-A13A-9a-ACT.VAL")
+  field(INPC, "$(SYS):A13A-CLR NPP")
   field(FLNK, "$(SYS):A13A-PROC-STAGE")
 }
 ## THIS RECORDS PROPAGATE PROCESSING ##
@@ -17,26 +14,24 @@ record(fanout, "$(SYS):A13A-PROC-STAGE") {
   field(SCAN, "Passive")
   field(SELM, "Specified")
   field(SELL, "$(SYS):A13A-SEL-STAGE")
-  field(LNK1, "$(SYS):A13A-VC")
-  field(LNK2, "$(SYS):A13A-VNCS1")
-  field(LNK3, "$(SYS):A13A-VNCS2")
-  field(LNK4, "$(SYS):A13A-PNK")
+  field(LNK1, "$(SYS):A13A-VC PP")
+  field(LNK2, "$(SYS):A13A-VNC PP")
+  field(LNK3, "$(SYS):A13A-PNK PP")
 }
 ##################################################################################
 # monitor status of inputs which may cause clearance faillure
-# SIGNAL TO SYS: A13A-VC?A13A-CLR && (HARDWARE STATUS RECORDS):FALSE
+# SIGNAL TO SYS: A13A-VC?A13A-SNC-CLR && (HARDWARE STATUS RECORDS):FALSE
 record(calcout, "$(SYS):A13A-VC") { 
   field(DESC, "A13A Vault clear stage")
   field(SCAN, "Passive")
+  field(PINI, "YES")
   field(CALC, "!A?B?$(A13APNK):$(VCOK):$(G5AON)")
-# IN LIVE APP USE A FLNK FROM  SW-I-A13A-A001A OR SW-I-A13A-A001A (SCAN=Intr) TO PROCESS THIS RECORD
-# AND ACCES IT HERE WITH NPP OR ACCES IT WITH PP BUT USE NPP ON ITS INPUTS 
-  field(INPA, "$(SYS):A13A-G5A-CLSD.VAL PP")
+  field(INPA, "$(SYS):A13A-G5A-CLSD.VAL PP")  
   field(INPB, "$(SYS):A13A-PNK.VAL PP")
   field(OUT,  "$(SYS):RST-A13A.PROC PP")  
   field(OOPT, "When Non-zero")
-  field(PINI, "YES")
-  field(VAL, "1") 
+
+ 
 }
 ####################### RESET VAULT #################
 record(seq, "$(SYS):RST-A13A") { # HANDLE BY SEQ
@@ -53,92 +48,71 @@ record(seq, "$(SYS):RST-A13A") { # HANDLE BY SEQ
   field(LNK5, "$(SYS):WATCHMAN-A13A-9a-ACT.VAL")
   field(SELM, "All")
 }
-
-#record(dfanout, "$(SYS):RST-A13A") { 
-#  field(SCAN, "Passive")
-#  field(SELM, "All")
-#  field(OMSL, "supervisory")
-#  field(DOL,  "1")
-#  field(OUTA, "$(SYS):CS7-A13A.VAL PP")
-#  field(OUTB, "$(SYS):CL7-A13A.VAL PP")
-#  field(OUTC, "$(SYS):A13A-CLR.VAL PP")
-#  field(OUTD, "$(SYS):LED-WS-A13A-9a.VAL PP")
-#  field(OUTE, "$(SYS):LED-WS-A13A-9b.VAL PP")
-#  field(OUTF, "$(SYS):A13A-COUNTER.VAL PP")
-#  field(OUTG, "$(SYS):WATCHMAN-A13A-9a-ACT.VAL")
-#}
-
-#################### RECOVER FROM PANIQUE ################
-
-record(calc, "$(SYS):A13A-PNK") {
+#######################################################################################################
+#CLEARANCE UNDERWAY FAIL CONDITIONS
+record(calcout, "$(SYS):A13A-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!A?$(ON):$(OFF)")
-  field(INPA, "$(SYS):WS-BUT-A13A-9a.VAL")
-  field(VAL, "0")
+  field(CALC, "!A?$(VCOK):$(TOUT)") 
+  field(INPA, "$(SYS):A13A-TIMEOUT NPP")
+  field(OUT,  "$(SYS):RST-A13A.PROC PP")  
+  field(OOPT, "Transition To Non-zero") # STOP THIS RECORD TO KEEP RESETTING SHARED OUTPUT AFTER INIT 
 }
-# formula to monitor status of inputs and set output in stage 1
-record(calcout, "$(SYS):A13A-VNCS1") {
-  field(DESC, "Vault clearance stage 1")
+#######################################################################################
+record(calc, "$(SYS):A13A-VNC") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!A?$(VCOK):$(B9aOFF)")
-  field(INPA, "$(SYS):WS-BUT-A13A-9a.VAL")
-  field(OUT,  "$(SYS):A13AS1-WRT-OUTS.PROC PP")  
-  field(OOPT, "When Zero") 
-  field(VAL, "1")  
+  field(CALC, "!A?$(VCOK):A")
+  field(INPA, "$(SYS):A13A-W9a-STS PP")  
+}
+###############################################################
+# ONLY CHNAGE OUTS STATE WHEN B9a IS PRESSED WHILE ROOF
+# A007 AND DOOR A007 ARE CLOSED: THIS ENSURE WE DONT UNECCESSARLY WRITE TO OUTS
 
+record(calcout, "$(SYS):A13A-W9a-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?$(VCOK):$(B9aON):!C?$(B9aNP):D:$(FAIL)")
+  field(INPA, "$(SYS):A13A-FAIL-COND PP")
+  field(INPB, "$(SYS):WS-BUT-A13A-9a.VAL")
+  field(INPC, "$(SYS):WATCHMAN-A13A-9a-ACT NPP")
+  field(INPD, "$(SYS):A13A-W9b-STS PP")
+  field(OUT,  "$(SYS):SSCW9a-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
 }
 ####################### STAGE 1 OUTPUTS STATUS  #################
 
-record(seq, "$(SYS):A13AS1-WRT-OUTS") { # HANDLE BY SEQ
+record(seq, "$(SYS):SSCW9a-WRT-OUTS") { # HANDLE BY SEQ
   field(DOL1, "1")
   field(DOL2, "0")
   field(DOL3, "1")
+  field(DOL4, "0")
+  field(SCAN, "Passive")
   field(LNK1, "$(SYS):LED-WS-A13A-9a.VAL PP")
   field(LNK2, "$(SYS):A13A-COUNTER.VAL PP")
   field(LNK3, "$(SYS):WATCHMAN-A13A-9a-ACT.VAL PP")
-  field(SCAN, "Passive")
+  field(LNK4, "$(SYS):A13A-VC.VAL NPP") # RESET ANY PREVIOUS FAIL CONDITIONS
   field(SELM, "All")
 }
 # monitor status of inputs and set output in stage 2
 ####################################################################################################
 ## IF WATCHMAN 9a RELEASE CONTINUE CLEARANCE
-## WE TEST IT IN "A13A-WATCH-9a-RLSD" RECORD
-record(calcout, "$(SYS):A13A-VNCS2") {
-  field(DESC, "Vault clearance stage 2")
+## WE TEST THIS IN "A13A-WATCH-9a-RLSD" RECORD
+record(calcout, "$(SYS):A13A-W9b-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(FLNK, "$(SYS):A13AS2-OUT-STS") 
-  field(CALC, "A?!B?!C?!D?!E?$(VCOK):$(B9bOFF):$(G5AS2ON):$(G5AS1ON):$(TOUT):$(B9aON)")
-  field(INPA, "$(SYS):A13A-WATCH-9a-RLSD.VAL PP")
-  field(INPB, "$(SYS):A13A-TIMEOUT.VAL")
-  field(INPC, "$(SYS):SW-I-A13A-G5A.VAL")
-  field(INPD, "$(SYS):SW-II-A13A-G5A.VAL")
-  field(INPE, "$(SYS):WS-BUT-A13A-9b.VAL")
-  field(OUT,  "$(SYS):A13AS2-WRT-OUTS.PROC PP")  
-  field(OOPT, "When Zero") 
-  field(VAL, "1")
+  field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B9bOFF):$(G5AS2OFF):$(G5AS1OFF):$(FAIL)")
+  field(INPA, "$(SYS):A13A-FAIL-COND PP")
+  field(INPB, "$(SYS):SW-I-A13A-G5A.VAL")
+  field(INPC, "$(SYS):SW-II-A13A-G5A.VAL")
+  field(INPD, "$(SYS):A13A-WATCH-9a-RLSD.VAL PP")
+  field(INPE, "$(SYS):WS-BUT-A13A-9b NPP")
+  field(OUT,  "$(SYS):SSCW9b-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
 }
-
-####################### STAGE 2 OUTPUTS STATUS  #################
-
-# IF PREVIOUS INTERLOCKS(TIMEOUT) CHANGED THEIR STATE
-# RESET THE VAULT, OTHERWISE GATE G5A NEEDS TO BE CLOSED
-# OR PRESS WATCHMAN 9b
-# OR RELEASE WATCHMAN 9a 
-record(calcout, "$(SYS):A13AS2-OUT-STS") {
-  field(SCAN, "Passive")
-  field(PINI, "YES")
-  field(CALC, "A=$(TOUT)?$(ON):$(OFF)")
-  field(INPA, "$(SYS):A13A-VNCS2.VAL")
-  field(OUT,  "$(SYS):RST-A13A.PROC PP")  
-  field(OOPT, "When Non-zero") 
-  field(VAL, "0")
-}
-# THIS RECORDS IS PROCESSED ONLY WHEN A13A-VNCS2 RETRUN 0
-# THAT IS A13A INTERLOCKS ARE CORRECT IN STAGE 2
-record(seq, "$(SYS):A13AS2-WRT-OUTS") {
+####################### STAGE 2 OUTPUTS STATUS  ################# biancaf@phoenixcontact.co.za
+# THIS RECORDS IS PROCESSED ONLY WHEN A13A-W9b-STS RETRUN 0
+record(seq, "$(SYS):SSCW9b-WRT-OUTS") {
   field(SELM, "All")
   field(DOL1, "1")
   field(DOL2, "1")
@@ -148,6 +122,14 @@ record(seq, "$(SYS):A13AS2-WRT-OUTS") {
   field(LNK2, "$(SYS):A13A-CLR.VAL PP")
   field(LNK3, "$(SYS):LED-WS-A13A-9b.VAL PP")
   field(SCAN, "Passive")
+}
+#################### RECOVER FROM PANIQUE ################
+record(calc, "$(SYS):A13A-PNK") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-A13A-9a.VAL")
+  field(VAL, "0")
 }
 #################### WATCHMAN 9a RELEASE ##############################
 record(calc, "$(SYS):A13A-WATCH-9a-RLSD") {

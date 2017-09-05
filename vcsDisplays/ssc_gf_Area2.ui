@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>658</width>
-    <height>448</height>
+    <height>458</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -68,7 +68,7 @@
             <set>Qt::AlignCenter</set>
            </property>
            <property name="variable" stdset="0">
-            <string>VCS:SSC-UPA2-CLR-STATS</string>
+            <string>VCS:SSCA2-CLR-STATS</string>
            </property>
            <property name="format" stdset="0">
             <enum>QELineEdit::Default</enum>
@@ -81,7 +81,7 @@
             <set>Qt::AlignCenter</set>
            </property>
            <property name="variable" stdset="0">
-            <string>VCS:SSC-UPA2-INTLCK-STATS</string>
+            <string>VCS:SSCA2-INTLCK-STATS</string>
            </property>
           </widget>
          </item>
@@ -97,6 +97,28 @@
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QERadioButton" name="qeradiobutton">
+         <property name="text">
+          <string>ssc_gf_a2_init</string>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+         <property name="variable" stdset="0">
+          <string>VCS:SSCA2-INIT</string>
+         </property>
+         <property name="format" stdset="0">
+          <enum>QERadioButton::LocalEnumeration</enum>
+         </property>
+         <property name="pressText">
+          <string>0</string>
+         </property>
+         <property name="releaseText">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QERadioButton" name="qeradiobutton_2">
          <property name="text">
           <string>switch_I_SSC_A1</string>
          </property>
@@ -197,7 +219,7 @@
           </color>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:SSC-UPA2-CLEAR</string>
+          <string>VCS:SSC-CLR</string>
          </property>
         </widget>
        </item>

@@ -1,147 +1,177 @@
 program vliClearanceSNC
+
 %{
-/**********************************************************/
-	#include "vcs_var_mes.h"
-/**********************************************************/
-	#define	VC       	0
-	#define TOUT		5
-	#define VLIPNK      138
-	#define	G4ON		82
-	#define	G4S1ON		83
-	#define	G4S2ON		84
-	#define	B33ON       100
-	#define	B32ON       187
-	#define	B32OFF      97
-	#define	DA004ON     96
-	#define DA004S1ON	98 
-	#define DA004S2ON	99
+/*******************************************************************/
+#include "vcs_var_mes.h" // define this here so C functions are seen
+/*******************************************************************/
+#define	VCOK       	0
+#define TOUT		5
+#define FAIL		-1
+#define VLIPNK      138
+#define	G4ON		82
+#define	G4S1ON		83
+#define	G4S2ON		84
+#define	B33OFF      100
+#define	B32ON       97
+#define	DA004ON     96
+#define DA004S1OFF	98 
+#define DA004S2OFF	99
 }%
 /* Declare seq variables*/
 short VLI_INIT; 
-short VLI_SEL_STAGE;
-
-short VLI_VC; 
-short VLI_VNCS1;   
-short VLI_VNCS2;  
-
+short VLI_VC;   
+short VLI_W32_STS;
+short VLI_W33_STS;
+short VLI_FAIL_COND;
 string VLI_CLR_STATS; 
 string VLI_INTLCK_STATS;
+// CONTROL FLAGS
+short vliUpdate;
+short VLI_OLD_FAIL_COND;
+
 /* Associate SNL variables with epics output pv's*/
 assign	VLI_CLR_STATS		to	"{SYS}:VLI-CLR-STATS"; 
 assign	VLI_INTLCK_STATS	to	"{SYS}:VLI-INTLCK-STATS"; 
 /* Associate SNL variables with epics input pv's*/
 assign 	VLI_VC 				to 	"{SYS}:VLI-VC"; 
-assign 	VLI_VNCS1 			to  "{SYS}:VLI-VNCS1";   
-assign 	VLI_VNCS2 			to 	"{SYS}:VLI-VNCS2";
 assign 	VLI_INIT 			to 	"{SYS}:VLI-INIT";
-assign	VLI_SEL_STAGE		to	"{SYS}:VLI-SEL-STAGE";
+assign 	VLI_W32_STS 		to 	"{SYS}:VLI-W32-STS";   
+assign 	VLI_W33_STS 		to 	"{SYS}:VLI-W33-STS";
+assign	VLI_FAIL_COND		to	"{SYS}:VLI-FAIL-COND";
 
 monitor	VLI_VC;
-monitor	VLI_VNCS1;
-monitor	VLI_VNCS2;
-monitor	VLI_SEL_STAGE;
+monitor VLI_W32_STS;  
+monitor VLI_W33_STS;
+monitor	VLI_FAIL_COND;
 
 ss VLI_clearance_status {
     state init {
-		when (delay(4)) {
+		when (delay(0.8)) {
 			initVault();
-			printf("VERTICAL BEAMLINE VAULT INITIALISATION COMPLETED\n");
-		} state vault_nc_stage_1	
+			printf("%sVERTICAL BEAMLINE VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_32_pressed	
     }
+///////////////////////////////////////////////////////////////
 	/*VAULT CLEARED STATE*/
     state vault_cleared {
 		option -e;
 		entry {
-			printf("VERTICAL BEAMLINE VAULT IN CLEARED STATE\n");
+			printf("%sVERTICAL BEAMLINE VAULT IN CLEARED STATE%s\n",CLR,DEF);
 		} 
+		when (VLI_VC != VCOK) {
 
-		when (VLI_VC == DA004ON) {
-			VLI_update_failed(DA004ON);
-			printf("Door A004 was opened\n");
-		} state vault_nc_stage_1
-			
-			
-		when (VLI_VC == G4ON) {
-			VLI_update_failed(G4ON);
-			printf("Gate G4 was opened\n");
-
-		} state vault_nc_stage_1
-
-			
-		when (VLI_VC == VLIPNK) {
-			VLI_update_failed(VLIPNK);
-			printf("Panic button 32 was pressed\n");
-		} state vault_nc_stage_1
+		} state vc_faillures
 	}
-	
-	/*VAULT NOT CLEARED STAGE 1*/
-	state vault_nc_stage_1 {
+//////////////////////////////////////////////////////////
+	state recover_faillure {
+		
+		when (!VLI_FAIL_COND) {
+			if(!vliUpdate) {
+				printf("%sRECOVERING FROM FAILLURE - ENTERING W32 STATE: %d%s\n",OK,VLI_W32_STS,DEF);
+				vliUpdate = TRUE;
+			}
+		} state  watchman_32_pressed
+			
+		when (VLI_FAIL_COND != VLI_OLD_FAIL_COND) {
+		} state  clearance_faillures
+	}
+//////////////////////////////////////////////////////////
 
-		when (VLI_SEL_STAGE == 3) {
+	state watchman_32_pressed {
+
+		when (VLI_FAIL_COND != VCOK) {
+			VLI_OLD_FAIL_COND = VLI_FAIL_COND;
+		} state  clearance_faillures
+			
+		when (VLI_W32_STS == B32ON) {
 			VLI_clear_underway();
-		} state vault_nc_stage_2
-		
-			
-		when(VLI_VNCS1 == B32ON){
-			VLI_update_report(B32ON);		
-			/*printf("Waiting for Vault Clearance\n");*/
-		}state vault_nc_stage_1
+			VLI_update_report(B32ON);
+		} state watchman_32_released
 	}
-	
-	/*VAULT NOT CLEARED STAGE 2*/
-	state vault_nc_stage_2 {
+//////////////////////////////////////////////////////////
+	state watchman_32_released {
 		
-		when (VLI_SEL_STAGE == 1) {
+		when (VLI_W32_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+		when (VLI_W32_STS != B32ON) {
+		} state door_a004_closed
+	}
+//////////////////////////////////////////////////////////
+	state door_a004_closed {
+
+		when (VLI_FAIL_COND != VCOK) {
+
+		} state   clearance_faillures
+		
+		when (VLI_W33_STS == DA004S1OFF) {
+			VLI_update_report(DA004S1OFF);
+		} state door_a004_closed
+
+		when (VLI_W33_STS == DA004S2OFF) {
+			VLI_update_report(DA004S2OFF);
+		} state door_a004_closed
+		
+		when () {
+			VLI_update_report(B33OFF);
+		} state watchman_33_pressed
+	}
+
+///////////////////////////////////////////////////////////
+	state watchman_33_pressed {
+		
+		when (VLI_W33_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+			
+		when (!VLI_W33_STS) {
+
 			VLI_status();
 		} state vault_cleared
-			
+	}
+///////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("VLI CLEARANCE FAILURE CONDITION: ");
+			vliUpdate = FALSE;
+		}
 
-		when (VLI_VNCS2 == B32OFF) {
-			VLI_update_report(B32OFF);
-			printf("Watchman 32 must be released\n");
-		} state vault_nc_stage_2
-			
+		when () {
+			VLI_update_failed(VLI_FAIL_COND);
+		} state recover_faillure
 		
-		when (VLI_VNCS2 == TOUT) {
-			VLI_update_failed(TOUT);
-			printf("TIME OUT ERROR: RELEASE ALL WATCHMEN\n");
-		} state vault_nc_stage_1
-			
+		exit {
+		    VLI_OLD_FAIL_COND = VLI_FAIL_COND;	
+		}			
+	}
+////////////////////////////////////////////////////////////////////////////
+	state vc_faillures { 			/* FAIL CONDITIONS*/
 		
-		when (VLI_VNCS2 == G4S1ON) {
-			VLI_update_failed(G4S1ON);
-			printf("Gate G4 switch 1 is open\n");
-		} state vault_nc_stage_1
-			
-			
-		when (VLI_VNCS2 == G4S2ON) {
-			VLI_update_failed(G4S2ON);
-			printf("Gate G4 switch 2 is open\n");
-		} state vault_nc_stage_1
-			
+		option -e;
+		option -x;
+		entry {
+			printf("VLI CLEAR FAILURE CONDITION: ");
+			vliUpdate = FALSE;
+		}
 		
-		when (VLI_VNCS2 == DA004S1ON) {
-			VLI_update_report(DA004S1ON);
-			printf("Door A004 switch 1 is open\n");
-		} state vault_nc_stage_2
+		when () {			
+			VLI_update_failed(VLI_VC);
+		} state recover_faillure
 		
-		
-		when (VLI_VNCS2 == DA004S2ON) {
-			VLI_update_report(DA004S2ON);
-			printf("Door A004 switch 2 is open\n");
-		} state vault_nc_stage_2
-		
-		
-		when (VLI_VNCS2 == B33ON) {
-			VLI_update_report(B33ON);
-			printf("Watchman 33 must be activated\n");
-		} state vault_nc_stage_2
-
-	}	
+		exit {
+		    VLI_OLD_FAIL_COND = VLI_FAIL_COND;
+		}
+	}
 }
-
+///////////////////////////////////////////////////////////////////////////////
 void initVault(){
 	VLI_INIT = TRUE;
+	VLI_OLD_FAIL_COND = VLI_FAIL_COND;
 	not_cleared(VLI_CLR_STATS);
 	report_error(VLI_INTLCK_STATS, 54);
 	pvPut(VLI_INIT, SYNC);
@@ -149,6 +179,13 @@ void initVault(){
 	pvPut(VLI_INTLCK_STATS, SYNC);
 }
 
+void resetStatus()
+{
+	not_cleared(VLI_CLR_STATS);
+	report_error(VLI_INTLCK_STATS, 54);
+	pvPut(VLI_CLR_STATS, SYNC);
+	pvPut(VLI_INTLCK_STATS, SYNC);
+}
 ////////////////////////////////////////////////////////////////////////
 void VLI_update_failed(short report)
 {
@@ -156,6 +193,7 @@ void VLI_update_failed(short report)
 	pvPut(VLI_CLR_STATS, SYNC);
 	report_error(VLI_INTLCK_STATS, report);
 	pvPut(VLI_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,VLI_INTLCK_STATS,DEF);
 }
 /////////////////////////////////////////////////////////////////////////
 void VLI_update_report(short intlck) {
@@ -164,7 +202,7 @@ void VLI_update_report(short intlck) {
 }
 ////////////////////////////////////////////////////////////////////////
 void VLI_status()
-{  
+{
 	cleared(VLI_CLR_STATS);
 	pvPut(VLI_CLR_STATS, SYNC); 		
 	report_error(VLI_INTLCK_STATS, 54);

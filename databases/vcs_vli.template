@@ -98,7 +98,11 @@ record(seq, "$(SYS):VLIW32-WRT-OUTS") { # MAY BE HANDLED BY SEQ
   field(LNK3, "$(SYS):LED-WS-VLI-32.VAL PP")
   field(LNK4, "$(SYS):VLI-COUNTER.VAL PP")
   field(LNK5, "$(SYS):WATCHMAN-VLI-32-ACT.VAL PP")
+<<<<<<< HEAD
   field(LNK6, "$(SYS):VLI-CLR.VAL PP")
+=======
+  field(LNK6, "$(SYS):VLI-VC.VAL NPP")
+>>>>>>> vcsDevs_v1.0
   field(SCAN, "Passive")
   field(SELM, "All")
 }
@@ -110,7 +114,11 @@ record(calcout, "$(SYS):VLI-W33-STS") {
   field(INPA, "$(SYS):VLI-FAIL-COND PP")
   field(INPB, "$(SYS):SW-I-VLI-A004.VAL")
   field(INPC, "$(SYS):SW-II-VLI-A004.VAL")
+<<<<<<< HEAD
   field(INPD, "$(SYS):VLI-WATCH-34b-RLSD PP")	
+=======
+  field(INPD, "$(SYS):VLI-WATCH-32-RLSD PP")	
+>>>>>>> vcsDevs_v1.0
   field(INPE, "$(SYS):WS-BUT-VLI-33")	  
   field(OUT,  "$(SYS):VLIW33-WRT-OUTS.PROC PP")  
   field(OOPT, "Transition To Zero") 
@@ -125,7 +133,11 @@ record(seq, "$(SYS):VLIW33-WRT-OUTS") {
   field(DLY2, "0.02")
   field(LNK1, "$(SYS):RST-VLI PP")
   field(LNK2, "$(SYS):LED-WS-VLI-33.VAL PP")
+<<<<<<< HEAD
   field(LNK3, "$(SYS):WATCHMAN-VLI-33-ACT.VAL PP")
+=======
+  field(LNK3, "$(SYS):VLI-CLR.VAL PP")
+>>>>>>> vcsDevs_v1.0
   field(SCAN, "Passive")
 }
 #################### RECOVER FROM PANIQUE ################

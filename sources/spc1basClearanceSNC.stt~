@@ -1,0 +1,197 @@
+program spc1basClearanceSNC
+
+%{
+#include "vcs_var_mes.h" // define this here so C functions are seen
+
+#define FAIL		-1 	
+#define	VCOK       	0
+#define TOUT		5
+#define SPC1LPNK	19
+#define RA2ON		147
+#define B42ON		179
+#define B43OFF		182
+#define DA001ON		173
+#define DA005AON	174
+#define DA005ON		175
+#define DA005OFF	181
+#define A005ON		185
+}%
+/* Declare seq variables*/
+short SPC1L_VC;   
+short SPC1_W42_STS;
+short SPC1_W43_STS;
+short SPC1L_FAIL_COND;
+short SPC1L_OLD_FAIL_COND;
+string SPC1L_CLR_STATS; 
+string SPC1L_INTLCK_STATS;
+// CONTROL FLAGS
+short spc1LUpdate= FALSE;
+short SPC1L_INIT; 				// basement initialization
+/* Associate SNL variables with epics output pv's*/
+assign	SPC1L_CLR_STATS		to	"{SYS}:SPC1L-CLR-STATS"; 
+assign	SPC1L_INTLCK_STATS	to	"{SYS}:SPC1L-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	SPC1L_VC 			to 	"{SYS}:SPC1L-VC"; 
+assign 	SPC1_W42_STS 		to 	"{SYS}:SPC1-W42-STS";   
+assign 	SPC1_W43_STS 		to 	"{SYS}:SPC1-W43-STS";
+assign	SPC1L_FAIL_COND		to	"{SYS}:SPC1L-FAIL-COND";
+assign 	SPC1L_INIT 			to 	"{SYS}:SPC1L-INIT";
+monitor	SPC1L_VC;
+monitor SPC1_W42_STS;  
+monitor SPC1_W43_STS;
+monitor	SPC1L_FAIL_COND;
+
+ss SPC1L_clearance_status {
+    state init {
+		when (delay(0.5)) {
+			initVault();
+			printf("\n%sSPC1 BASEMENT VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_42_pressed	
+    }
+///////////////////////////////////////////////////////////////
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("%sSPC1 BASEMENT VAULT IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (SPC1L_VC != VCOK) {
+
+		} state vc_faillures
+	}
+//////////////////////////////////////////////////////////
+	state recover_faillure {
+			
+		when (!SPC1L_FAIL_COND) {
+			if(!spc1LUpdate) {
+				printf("%sRECOVERING FROM FAILLURE - ENTERING W42 STATE%s\n",OK,DEF);
+				spc1LUpdate = TRUE;
+			}
+		} state  watchman_42_pressed
+			
+		when (SPC1L_FAIL_COND != SPC1L_OLD_FAIL_COND) {
+
+		} state  clearance_faillures
+	}
+//////////////////////////////////////////////////////////
+
+	state watchman_42_pressed {
+
+		when (SPC1_W42_STS == FAIL) {
+			SPC1L_OLD_FAIL_COND = SPC1L_FAIL_COND;
+		} state  clearance_faillures
+			
+		when (SPC1_W42_STS == B42ON) {
+			SPC1L_clear_underway();
+			SPC1L_update_report(B42ON);
+		} state watchman_42_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_42_released{
+		
+		when (SPC1_W42_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+		when (SPC1_W42_STS != B42ON) {
+			SPC1L_update_report(DA005OFF);
+		} state door_a005_closed
+	}
+//////////////////////////////////////////////////////////
+	state door_a005_closed {
+
+		when (SPC1_W42_STS == FAIL) {
+
+		} state   clearance_faillures
+		
+		
+		when (SPC1_W43_STS != DA005OFF) {
+			SPC1L_update_report(B43OFF);
+		} state watchman_43_pressed
+	}
+
+///////////////////////////////////////////////////////////
+	state watchman_43_pressed {
+		
+		when (SPC1_W42_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+			
+		when (!SPC1_W43_STS) {
+
+			SPC1L_status();
+		} state vault_cleared
+	}
+///////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		entry {
+			printf("SPC1 LOW CLEARANCE FAILURE CONDITION: ");
+			spc1LUpdate = FALSE;
+		}
+
+		when () {
+			SPC1L_update_failed(SPC1L_FAIL_COND);
+		} state recover_faillure
+		
+		exit {
+		    SPC1L_OLD_FAIL_COND = SPC1L_FAIL_COND;	
+		}
+	}
+////////////////////////////////////////////////////////////////////////////
+	state vc_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		entry {
+			printf("SPC1 LOW CLEAR FAILURE CONDITION: ");
+			spc1LUpdate = FALSE;
+		}
+
+		when (SPC1L_VC) {			
+			SPC1L_update_failed(SPC1L_VC);
+		} state recover_faillure
+				
+		exit {
+		    SPC1L_OLD_FAIL_COND = SPC1L_FAIL_COND;	
+		}
+	}
+}
+//////////////////////////////////////////////////////////////////////////////
+void initVault(){
+	SPC1L_INIT = TRUE;
+	not_cleared(SPC1L_CLR_STATS);
+	report_error(SPC1L_INTLCK_STATS, 54);
+	pvPut(SPC1L_CLR_STATS, SYNC);
+	pvPut(SPC1L_INTLCK_STATS, SYNC);
+	pvPut(SPC1L_INIT, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SPC1L_update_failed(short report)
+{
+	clear_failed(SPC1L_CLR_STATS);
+	pvPut(SPC1L_CLR_STATS, SYNC);
+	report_error(SPC1L_INTLCK_STATS, report);
+	pvPut(SPC1L_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,SPC1L_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void SPC1L_update_report(short intlck) {
+	report_error(SPC1L_INTLCK_STATS, intlck);
+	pvPut(SPC1L_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SPC1L_status()
+{  
+	cleared(SPC1L_CLR_STATS);
+	pvPut(SPC1L_CLR_STATS, SYNC); 		
+	report_error(SPC1L_INTLCK_STATS, 54);
+	pvPut(SPC1L_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void SPC1L_clear_underway()
+{  
+	clear_underway(SPC1L_CLR_STATS);
+	pvPut(SPC1L_CLR_STATS, SYNC); 		
+}

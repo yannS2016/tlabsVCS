@@ -1,0 +1,204 @@
+program cnaClearanceSNC
+
+%{
+/*******************************************************************/
+#include "vcs_var_mes.h" // define this here so C functions are seen
+/*******************************************************************/
+#define	VCOK       	0
+#define FAIL		-1
+#define	B38ON		124					
+#define	B39OFF		125      		 	
+#define	DA12AON		123       			
+#define	DA12AS1OFF	126        		   	 
+#define	DA12AS2OFF	127 
+}%
+/* Declare seq variables*/
+short cnA_INIT; 
+short cnA_VC;   
+short cnA_W38_STS;
+short cnA_W39_STS;
+short cnA_FAIL_COND;
+string cnA_CLR_STATS; 
+string cnA_INTLCK_STATS;
+// CONTROL FLAGS
+short cnAUpdate;
+short cnA_OLD_FAIL_COND;
+
+/* Associate SNL variables with epics output pv's*/
+assign	cnA_CLR_STATS		to	"{SYS}:cnA-CLR-STATS"; 
+assign	cnA_INTLCK_STATS	to	"{SYS}:cnA-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	cnA_VC 				to 	"{SYS}:cnA-VC"; 
+assign 	cnA_INIT 			to 	"{SYS}:cnA-INIT";
+assign 	cnA_W38_STS 		to 	"{SYS}:cnA-W38-STS";   
+assign 	cnA_W39_STS 		to 	"{SYS}:cnA-W39-STS";
+assign	cnA_FAIL_COND		to	"{SYS}:cnA-FAIL-COND";
+
+monitor	cnA_VC;
+monitor cnA_W38_STS;  
+monitor cnA_W39_STS;
+monitor	cnA_FAIL_COND;
+
+ss cnA_clearance_status {
+    state init {
+		when (delay(6)) {
+			initVault();
+			printf("%sNORTHERN PASSAGE WAY OF A-BLOCK INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_38_pressed	
+    }
+///////////////////////////////////////////////////////////////
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("%sNORTHERN PASSAGE WAY OF A-BLOCK IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (cnA_VC != VCOK) {
+
+		} state vc_faillures
+	}
+//////////////////////////////////////////////////////////
+	state recover_faillure {
+		
+		when (!cnA_FAIL_COND) {
+			if(!cnAUpdate) {
+				printf("%sRECOVERING FROM FAILLURE - ENTERING W38 STATE%s\n",OK,DEF);
+				cnAUpdate = TRUE;
+			}
+		} state  watchman_38_pressed
+			
+		when (cnA_FAIL_COND != cnA_OLD_FAIL_COND) {
+		} state  clearance_faillures
+	}
+//////////////////////////////////////////////////////////
+	state watchman_38_pressed {
+
+		when (cnA_FAIL_COND != VCOK) {
+			cnA_OLD_FAIL_COND = cnA_FAIL_COND;
+		} state  clearance_faillures
+			
+		when (cnA_W38_STS == B38ON) {
+			cnA_clear_underway();
+			cnA_update_report(B38ON);
+		} state watchman_38_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_38_released {
+		
+		when (cnA_FAIL_COND != VCOK) {
+
+		} state  clearance_faillures
+			
+		when (cnA_W38_STS != B38ON) {
+		} state door_a12a_closed
+	}
+//////////////////////////////////////////////////////////
+	state door_a12a_closed {
+
+		when (cnA_FAIL_COND != VCOK) {
+
+		} state   clearance_faillures
+		
+		when (cnA_W39_STS == DA12AS1OFF) {
+			cnA_update_report(DA12AS1OFF);
+		} state door_a12a_closed
+
+		when (cnA_W39_STS == DA12AS2OFF) {
+			cnA_update_report(DA12AS2OFF);
+		} state door_a12a_closed
+
+
+		when () {
+			cnA_update_report(B39OFF);
+		} state watchman_39_pressed
+	}
+
+///////////////////////////////////////////////////////////
+	state watchman_39_pressed {
+		
+		when (cnA_FAIL_COND != VCOK) {
+
+		} state  clearance_faillures
+			
+			
+		when (!cnA_W39_STS) {
+
+			cnA_status();
+		} state vault_cleared
+	}
+///////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("cnA CLEARANCE FAILURE CONDITION: ");
+			cnAUpdate = FALSE;
+		}
+
+		when () {
+			cnA_update_failed(cnA_FAIL_COND);
+		} state recover_faillure
+		
+		exit {
+		    cnA_OLD_FAIL_COND = cnA_FAIL_COND;	
+		}			
+	}
+////////////////////////////////////////////////////////////////////////////
+	state vc_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("cnA CLEAR FAILURE CONDITION: ");
+			cnAUpdate = FALSE;
+		}
+		
+		when () {			
+			cnA_update_failed(cnA_VC);
+		} state recover_faillure
+		
+		exit {
+		    cnA_OLD_FAIL_COND = cnA_FAIL_COND;
+		}
+	}
+}
+///////////////////////////////////////////////////////////////////////////////
+void initVault(){
+	cnA_INIT = TRUE;
+	cnA_OLD_FAIL_COND = cnA_FAIL_COND;
+	not_cleared(cnA_CLR_STATS);
+	report_error(cnA_INTLCK_STATS, 54);
+	pvPut(cnA_INIT, SYNC);
+	pvPut(cnA_CLR_STATS, SYNC);
+	pvPut(cnA_INTLCK_STATS, SYNC);
+}
+
+////////////////////////////////////////////////////////////////////////
+void cnA_update_failed(short report)
+{
+	clear_failed(cnA_CLR_STATS);
+	pvPut(cnA_CLR_STATS, SYNC);
+	report_error(cnA_INTLCK_STATS, report);
+	pvPut(cnA_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,cnA_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void cnA_update_report(short intlck) {
+	report_error(cnA_INTLCK_STATS, intlck);
+	pvPut(cnA_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void cnA_status()
+{
+	cleared(cnA_CLR_STATS);
+	pvPut(cnA_CLR_STATS, SYNC); 		
+	report_error(cnA_INTLCK_STATS, 54);
+	pvPut(cnA_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void cnA_clear_underway()
+{  
+	clear_underway(cnA_CLR_STATS);
+	pvPut(cnA_CLR_STATS, SYNC); 		
+}

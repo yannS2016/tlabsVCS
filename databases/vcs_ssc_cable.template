@@ -2,14 +2,11 @@
 record(calc, "$(SYS):SSCCAB-SEL-STAGE") {
   field(DESC, "Select processing branch")
   field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
-  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(NI)")
-  field(INPA, "$(SYS):SSCCAB-INIT")
-##IF BUTTON 16 IS STILL PRESSED PNK IS ACTIVE##
+  field(CALC, "A?!B?C?$(S0):$(S1):$(PNK):$(NI)")
+  field(INPA, "$(SYS):SSCCAB-INIT NPP")
+##IF BUTTON 42 IS STILL PRESSED PNK IS ACTIVE##
   field(INPB, "$(SYS):SSCCAB-PNK") 
-  field(INPC, "$(SYS):SSCCAB-CLR")
-## THIS FLAG ENSURE WE ONLY RESPOND TO A SINGLE EVENT ON BUT 16##
-## IF SET WE IN STAGE 2 OF CLEARANCE OTHERWISE WE IN STAGE 1## 
-  field(INPD, "$(SYS):WATCHMAN-SSC-16-ACT.VAL")
+  field(INPC, "$(SYS):SSCCAB-CLR NPP")
   field(FLNK, "$(SYS):SSCCAB-PROC-STAGE")
 }
 ## THIS RECORDS PROPAGATE PROCESSING ##
@@ -17,10 +14,9 @@ record(fanout, "$(SYS):SSCCAB-PROC-STAGE") {
   field(SCAN, "Passive")
   field(SELM, "Specified")
   field(SELL, "$(SYS):SSCCAB-SEL-STAGE")
-  field(LNK1, "$(SYS):SSCCAB-VC")
-  field(LNK2, "$(SYS):SSCCAB-VNCS1")
-  field(LNK3, "$(SYS):SSCCAB-VNCS2")
-  field(LNK4, "$(SYS):SSCCAB-PNK")
+  field(LNK1, "$(SYS):SSCCAB-VC PP")
+  field(LNK2, "$(SYS):SSCCAB-VNC PP")
+  field(LNK3, "$(SYS):SSCCAB-PNK PP")
 }
 ##################################################################################
 # monitor status of inputs which may cause clearance faillure
@@ -54,80 +50,73 @@ record(seq, "$(SYS):RST-SSCCAB") { # HANDLE BY SEQ
   field(LNK5, "$(SYS):WATCHMAN-SSC-16-ACT.VAL")
   field(SELM, "All")
 }
-
-
-#################### RECOVER FROM PANIQUE ################
-
-record(calc, "$(SYS):SSCCAB-PNK") {
+#######################################################################################################
+#CLEARANCE UNDERWAY FAIL CONDITIONS
+record(calcout, "$(SYS):SSCCAB-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!A?$(ON):$(OFF)")
-  field(INPA, "$(SYS):WS-BUT-SSC-16.VAL")
-  field(VAL, "0")
+  field(CALC, "!A?!B?!C?$(VCOK):$(TOUT):$(DA001AS2ON):$(DA001AS1ON)") 
+  field(INPA, "$(SYS):SW-I-SSC-A001A.VAL NPP")
+  field(INPB, "$(SYS):SW-II-SSC-A001A.VAL NPP")
+  field(INPC, "$(SYS):SSCCAB-TIMEOUT NPP")
+  field(OUT,  "$(SYS):RST-SSCCAB.PROC PP")  
+  field(OOPT, "Transition To Non-zero") # STOP THIS RECORD TO KEEP RESETTING SHARED OUTPUT AFTER INIT 
 }
-# formula to monitor status of inputs and set output in stage 1
-record(calcout, "$(SYS):SSCCAB-VNCS1") {
-  field(DESC, "Vault clearance stage 1")
+#######################################################################################
+record(calc, "$(SYS):SSCCAB-VNC") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!A?$(VCOK):$(B16OFF)")
-  field(INPA, "$(SYS):WS-BUT-SSC-16.VAL")
-  field(OUT,  "$(SYS):SSCCABS1-WRT-OUTS.PROC PP")  
+  field(CALC, "!A?$(VCOK):A")
+  field(INPA, "$(SYS):SSC-W16-STS PP")  
+}
+###############################################################
+# ONLY CHNAGE OUTS STATE WHEN B16 IS PRESSED WHILE ROOF
+# A007 AND DOOR A007 ARE CLOSED: THIS ENSURE WE DONT UNECCESSARLY WRITE TO OUTS
+
+record(calcout, "$(SYS):SSC-W16-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?$(VCOK):$(B16ON):!C?$(B16NP):D:$(FAIL)")
+  field(INPA, "$(SYS):SSCCAB-FAIL-COND PP")
+  field(INPB, "$(SYS):WS-BUT-SSC-16.VAL")
+  field(INPC, "$(SYS):WATCHMAN-SSC-16-ACT NPP")
+  field(INPD, "$(SYS):SSC-W17-STS PP")
+  field(OUT,  "$(SYS):SSCW16-WRT-OUTS.PROC PP")  
   field(OOPT, "Transition To Zero") 
-  field(VAL, "1")  
 }
 ####################### STAGE 1 OUTPUTS STATUS  #################
 
-record(seq, "$(SYS):SSCCABS1-WRT-OUTS") { # HANDLE BY SEQ
+record(seq, "$(SYS):SSCW16-WRT-OUTS") { # HANDLE BY SEQ
   field(DOL1, "1")
   field(DOL2, "0")
   field(DOL3, "1")
+  field(DOL4, "0")
+  field(SCAN, "Passive")
   field(LNK1, "$(SYS):LED-WS-SSC-16.VAL PP")
   field(LNK2, "$(SYS):SSCCAB-COUNTER.VAL PP")
   field(LNK3, "$(SYS):WATCHMAN-SSC-16-ACT.VAL PP")
-  field(SCAN, "Passive")
+  field(LNK4, "$(SYS):SSCCAB-VC.VAL NPP") # RESET ANY PREVIOUS FAIL CONDITIONS
   field(SELM, "All")
 }
 # monitor status of inputs and set output in stage 2
 ####################################################################################################
 ## IF WATCHMAN 16 RELEASE CONTINUE CLEARANCE
 ## WE TEST THIS IN "SSC-WATCH-16-RLSD" RECORD
-record(calcout, "$(SYS):SSCCAB-VNCS2") {
-  field(DESC, "Vault clearance stage 2")
+record(calcout, "$(SYS):SSC-W17-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(FLNK, "$(SYS):SSCCABS2-OUT-STS") 
-  field(CALC, "A?!B?!C?!D?!E?!F?!G?$(VCOK):$(B17OFF):$(G5S2ON):$(G5S1ON):$(DA001AS2ON):$(DA001AS1ON):$(TOUT):$(B16ON)")
-  field(INPA, "$(SYS):SSC-WATCH-16-RLSD.VAL PP")
-  field(INPB, "$(SYS):SSCCAB-TIMEOUT.VAL")
-  field(INPC, "$(SYS):SW-I-SSC-A001A.VAL NPP")
-  field(INPD, "$(SYS):SW-II-SSC-A001A.VAL NPP")
-  field(INPE, "$(SYS):SW-I-SSC-G5.VAL")
-  field(INPF, "$(SYS):SW-II-SSC-G5.VAL")
-  field(INPG, "$(SYS):WS-BUT-SSC-17.VAL")
-  field(OUT,  "$(SYS):SSCCABS2-WRT-OUTS.PROC PP")  
+  field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B17OFF):$(G5S2OFF):$(G5S1OFF):$(FAIL)")
+  field(INPA, "$(SYS):SSCCAB-FAIL-COND PP")
+  field(INPB, "$(SYS):SW-I-SSC-G5.VAL")
+  field(INPC, "$(SYS):SW-II-SSC-G5.VAL")
+  field(INPD, "$(SYS):SSC-WATCH-16-RLSD.VAL PP")
+  field(INPE, "$(SYS):WS-BUT-SSC-17 NPP")
+  field(OUT,  "$(SYS):SSCW17-WRT-OUTS.PROC PP")  
   field(OOPT, "Transition To Zero") 
-  field(VAL, "1")
 }
-
-####################### STAGE 2 OUTPUTS STATUS  #################
-
-# IF PREVIOUS INTERLOCKS(G5) CHANGED THEIR STATE
-# RESET THE VAULT, OTHERWISE DOOR A001A NEEDS TO BE CLOSED
-# OR PRESS WATCHMAN 17
-# OR RELEASE WATCHMAN 16 
-record(calcout, "$(SYS):SSCCABS2-OUT-STS") {
-  field(SCAN, "Passive")
-  field(PINI, "YES")
-  field(CALC, "A=$(TOUT)||A=$(DA001AS2ON)||A=$(DA001AS1ON)?$(ON):$(OFF)")
-  field(INPA, "$(SYS):SSCCAB-VNCS2.VAL")
-  field(OUT,  "$(SYS):RST-SSCCAB.PROC PP")  
-  field(OOPT, "When Non-zero") 
-  field(VAL, "0")
-}
-# THIS RECORDS IS PROCESSED ONLY WHEN SSCCAB-VNCS2 RETRUN 0
-# THAT IS SSCCAB INTERLOCKS ARE CORRECT IN STAGE 2
-record(seq, "$(SYS):SSCCABS2-WRT-OUTS") {
+####################### STAGE 2 OUTPUTS STATUS  ################# biancaf@phoenixcontact.co.za
+# THIS RECORDS IS PROCESSED ONLY WHEN SSC-W17-STS RETRUN 0
+record(seq, "$(SYS):SSCW17-WRT-OUTS") {
   field(SELM, "All")
   field(DOL1, "1")
   field(DOL2, "1")
@@ -137,6 +126,14 @@ record(seq, "$(SYS):SSCCABS2-WRT-OUTS") {
   field(LNK2, "$(SYS):SSCCAB-CLR.VAL PP")
   field(LNK3, "$(SYS):LED-WS-SSC-17.VAL PP")
   field(SCAN, "Passive")
+}
+#################### RECOVER FROM PANIQUE ################
+record(calc, "$(SYS):SSCCAB-PNK") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-SSC-16.VAL")
+  field(VAL, "0")
 }
 #################### WATCHMAN 16 RELEASE ##############################
 record(calc, "$(SYS):SSC-WATCH-16-RLSD") {
@@ -165,7 +162,7 @@ record(calc, "$(SYS):SSCCAB-COUNTER") {
 }
 record(calc, "$(SYS):SSCCAB-TIMEOUT") {
   field(SCAN, "1 second")
-  field(CALC, "A>=$(COUT)?$(ON):$(OFF)")
+  field(CALC, "A>=$(SSCTOUT)?$(ON):$(OFF)")
   field(INPA, "$(SYS):SSCCAB-COUNTER.VAL PP")
 }
 ########################### Outputs ##################################

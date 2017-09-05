@@ -2,14 +2,11 @@
 record(calc, "$(SYS):SPE-SEL-STAGE") {
   field(DESC, "Select processing branch")
   field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
-  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(FAIL)")
-  field(INPA, "$(SYS):SPE-INIT")
-##IF BUTTON 24 IS STILL PRESSED PNK IS ACTIVE##
+  field(CALC, "A?!B?C?$(S0):$(S1):$(PNK):$(NI)")
+  field(INPA, "$(SYS):SPE-INIT NPP")
+##IF BUTTON 42 IS STILL PRESSED PNK IS ACTIVE##
   field(INPB, "$(SYS):SPE-PNK") 
-  field(INPC, "$(SYS):SPE-SNC-CLR")
-## THIS FLAG ENSURE WE ONLY RESPOND TO A SINGLE EVENT ON BUT 24##
-## IF SET WE IN STAGE 2 OF CLEARANCE OTHERWISE WE IN STAGE 1## 
-  field(INPD, "$(SYS):WATCHMAN-SPE-24-ACT.VAL")
+  field(INPC, "$(SYS):SPE-CLR NPP")
   field(FLNK, "$(SYS):SPE-PROC-STAGE")
 }
 ## THIS RECORDS PROPAGATE PROCESSING ##
@@ -17,21 +14,18 @@ record(fanout, "$(SYS):SPE-PROC-STAGE") {
   field(SCAN, "Passive")
   field(SELM, "Specified")
   field(SELL, "$(SYS):SPE-SEL-STAGE")
-  field(LNK1, "$(SYS):SPE-VC")
-  field(LNK2, "$(SYS):SPE-VNCS1")
-  field(LNK3, "$(SYS):SPE-VNCS2")
-  field(LNK4, "$(SYS):SPE-PNK")
+  field(LNK1, "$(SYS):SPE-VC PP")
+  field(LNK2, "$(SYS):SPE-VNC PP")
+  field(LNK3, "$(SYS):SPE-PNK PP")
 }
 ##################################################################################
 # monitor status of inputs which may cause clearance faillure
-# SIGNAL TO SYS: SPE-VC?SPE-SNC-CLR && (HARDWARE STATUS RECORDS):FALSE
+# SIGNAL TO SYS: SPE-VC?SPE-CLR && (HARDWARE STATUS RECORDS):FALSE
 record(calcout, "$(SYS):SPE-VC") { 
   field(DESC, "SPE Vault clear stage")
   field(SCAN, "Passive")
   field(CALC, "!A?!B?C?$(SPEPNK):$(VCOK):$(DA9ON):$(RA9ON)")
-  field(INPA, "$(SYS):SW-RF-A9-CLSD.VAL")
-# IN LIVE APP USE A FLNK FROM  SW-I-SPE-A9 OR SW-I-SPE-A9 (SCAN=Intr) TO PROCESS THIS RECORD
-# AND ACCES IT HERE WITH NPP OR ACCES IT WITH PP BUT USE NPP ON ITS INPUTS
+  field(INPA, "$(SYS):SW-RF-A9.VAL")
   field(INPB, "$(SYS):SPE-DA9-CLSD.VAL PP") # FOR TESTING 
   field(INPC, "$(SYS):SPE-PNK.VAL PP")
   field(OUT,  "$(SYS):RST-SPE.PROC PP")  
@@ -51,127 +45,94 @@ record(seq, "$(SYS):RST-SPE") { # HANDLE BY SEQ
   field(DOL7, "0")
   field(LNK1, "$(SYS):CS12-SPE.VAL PP")
   field(LNK2, "$(SYS):CL12-SPE.VAL PP")
-  field(LNK3, "$(SYS):SPE-SNC-CLR.VAL PP")
+  field(LNK3, "$(SYS):SPE-CLR.VAL PP")
   field(LNK4, "$(SYS):LED-WS-SPE-24.VAL PP")
   field(LNK5, "$(SYS):LED-WS-SPE-25.VAL PP")
   field(LNK6, "$(SYS):SPE-COUNTER.VAL PP")
   field(LNK7, "$(SYS):WATCHMAN-SPE-24-ACT.VAL")
   field(SELM, "All")
 }
-
-#record(dfanout, "$(SYS):RST-SPE") { 
-#  field(SCAN, "Passive")
-#  field(SELM, "All")
-#  field(OMSL, "supervisory")
-#  field(DOL,  "1")
-#  field(OUTA, "$(SYS):CS12-SPE.VAL PP")
-#  field(OUTB, "$(SYS):CL12-SPE.VAL PP")
-#  field(OUTC, "$(SYS):SPE-SNC-CLR.VAL PP")
-#  field(OUTD, "$(SYS):LED-WS-SPE-24.VAL PP")
-#  field(OUTE, "$(SYS):LED-WS-SPE-25.VAL PP")
-#  field(OUTF, "$(SYS):SPE-COUNTER.VAL PP")
-#  field(OUTG, "$(SYS):WATCHMAN-SPE-24-ACT.VAL")
-#}
-
-#################### RECOVER FROM PANIQUE ################
-
-record(calc, "$(SYS):SPE-PNK") {
+#CLEARANCE UNDERWAY FAIL CONDITIONS
+record(calcout, "$(SYS):SPE-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!A?$(ON):$(OFF)")
-  field(INPA, "$(SYS):WS-BUT-SPE-24.VAL")
-  field(VAL, "0")
+  field(CALC, "!A?!B?$(VCOK):$(TOUT):$(RA9ON)")
+  field(INPA, "$(SYS):SW-RF-A9 NPP") 
+  field(INPB, "$(SYS):SPE-TIMEOUT NPP") 
+  field(OUT,  "$(SYS):RST-SPE PP")  
+  field(OOPT, "Transition To Non-zero") # STOP THIS RECORD TO KEEP RESETTING SHARED OUTPUT AFTER INIT 
 }
-# formula to monitor status of inputs and set output in stage 1
-record(calc, "$(SYS):SPE-VNCS1") {
-  field(DESC, "Vault clearance stage 1")
+#######################################################################################
+record(calc, "$(SYS):SPE-VNC") {
   field(SCAN, "Passive")
-  field(FLNK, "$(SYS):SPES1-PROC-OUTS") 
-  field(CALC, "!A?!B?$(VCOK):$(RA9ON):$(B24OFF)")
-  field(INPA, "$(SYS):WS-BUT-SPE-24.VAL")
-  field(INPB, "$(SYS):SW-RF-A9-CLSD.VAL")
   field(PINI, "YES")
-  field(VAL, "1")  
+  field(CALC, "!A?$(VCOK):A")
+  field(INPA, "$(SYS):SPE-W24-STS PP")  
+}
+########################################################################
+# formula to monitor status of inputs and set output in stage 1
+record(calcout, "$(SYS):SPE-W24-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?$(VCOK):$(B24ON):!C?$(B24NP):D:$(FAIL)")
+  field(INPA, "$(SYS):SPE-FAIL-COND PP")
+  field(INPB, "$(SYS):WS-BUT-SPE-24.VAL")
+  field(INPC, "$(SYS):WATCHMAN-SPE-24-ACT NPP")
+  field(INPD, "$(SYS):SPE-W25-STS PP")
+  field(OUT,  "$(SYS):SPEW24-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
 }
 ####################### STAGE 1 OUTPUTS STATUS  #################
-
-# IF SPES1-OUT-STS.VAL IS NON-ZERO RESET THE VAULT
-# OTHERWISE PROCESS STAGE 1 OUTPUTS
-record(calcout, "$(SYS):SPES1-OUT-STS") { 
-  field(SCAN, "Passive")
-  field(CALC, "!A?$(S0):$(S1)")
-  field(INPA, "$(SYS):SPE-VNCS1.VAL NPP")  
-}
-record(fanout, "$(SYS):SPES1-PROC-OUTS") {
-  field(SCAN, "Passive")
-  field(SELM, "Specified")
-  field(SELL, "$(SYS):SPES1-OUT-STS.VAL PP")
-  field(LNK1, "$(SYS):SPES1-WRT-OUTS PP")
-  field(LNK2, "$(SYS):RST-SPE PP")
-}
-
-record(seq, "$(SYS):SPES1-WRT-OUTS") { # HANDLE BY SEQ
+record(seq, "$(SYS):SPEW24-WRT-OUTS") { # HANDLE BY SEQ
   field(DOL1, "1")
   field(DOL2, "1")
   field(DOL3, "1")
   field(DOL4, "0")
   field(DOL5, "1")
+  field(DOL6, "0")
   field(LNK1, "$(SYS):CS12-SPE.VAL PP")
   field(LNK2, "$(SYS):CL12-SPE.VAL PP")
   field(LNK3, "$(SYS):LED-WS-SPE-24.VAL PP")
   field(LNK4, "$(SYS):SPE-COUNTER.VAL PP")
   field(LNK5, "$(SYS):WATCHMAN-SPE-24-ACT.VAL PP")
+  field(LNK6, "$(SYS):SPE-VC.VAL NPP") # RESET ANY PREVIOUS FAIL CONDITIONS
   field(SCAN, "Passive")
   field(SELM, "All")
 }
-# monitor status of inputs and set output in stage 2
-####################################################################################################
-## IF WATCHMAN 24 RELEASE CONTINUE CLEARANCE
-## WE TEST IT IN "SPE-WATCH-24-RLSD" RECORD
-record(calcout, "$(SYS):SPE-VNCS2") {
-  field(DESC, "Vault clearance stage 2")
+####################################################################################
+record(calcout, "$(SYS):SPE-W25-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(FLNK, "$(SYS):SPES2-OUT-STS") 
-  field(CALC, "A?!B?!C?!D?!E?!F?$(VCOK):$(B25OFF):$(DA9S2ON):$(DA9S1ON):$(TOUT):$(RA9ON):$(B24ON)")
-  field(INPA, "$(SYS):SPE-WATCH-24-RLSD.VAL PP")
-  field(INPB, "$(SYS):SW-RF-A9-CLSD.VAL")
-  field(INPC, "$(SYS):SPE-TIMEOUT.VAL")
-  field(INPD, "$(SYS):SW-I-SPE-A9.VAL PP")
-  field(INPE, "$(SYS):SW-II-SPE-A9.VAL PP")
-  field(INPF, "$(SYS):WS-BUT-SPE-25.VAL")
-  field(OUT,  "$(SYS):SPES2-WRT-OUTS.PROC PP")  
-  field(OOPT, "When Zero") 
-  field(VAL, "1")
+  field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B25OFF):$(DA9S2OFF):$(DA9S1OFF):$(FAIL)")
+  field(INPA, "$(SYS):SPE-FAIL-COND PP")
+  field(INPB, "$(SYS):SW-I-SPE-A9.VAL NPP")
+  field(INPC, "$(SYS):SW-II-SPE-A9.VAL NPP")
+  field(INPD, "$(SYS):SPE-WATCH-24-RLSD.VAL PP")
+  field(INPE, "$(SYS):WS-BUT-SPE-25 NPP")
+  field(OUT,  "$(SYS):SPEW25-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
 }
-
 ####################### STAGE 2 OUTPUTS STATUS  #################
-
-# IF PREVIOUS INTERLOCKS(ROOF A9 OR TIMEOUT) CHANGED THEIR STATE
-# RESET THE VAULT, OTHERWISE DOOR A9 NEEDS TO BE CLOSED
-# OR PRESS WATCHMAN 25
-# OR RELEASE WATCHMAN 24 
-record(calcout, "$(SYS):SPES2-OUT-STS") {
-  field(SCAN, "Passive")
-  field(PINI, "YES")
-  field(CALC, "A=$(RA9ON)||A=$(TOUT)?$(ON):$(OFF)")
-  field(INPA, "$(SYS):SPE-VNCS2.VAL")
-  field(OUT,  "$(SYS):RST-SPE.PROC PP")  
-  field(OOPT, "When Non-zero") 
-  field(VAL, "0")
-}
 # THIS RECORDS IS PROCESSED ONLY WHEN SPE-VNCS2 RETRUN 0
 # THAT IS SPE INTERLOCKS ARE CORRECT IN STAGE 2
-record(seq, "$(SYS):SPES2-WRT-OUTS") {
+record(seq, "$(SYS):SPEW25-WRT-OUTS") {
   field(SELM, "All")
   field(DOL1, "1")
   field(DOL2, "1")
   field(DOL3, "1")
   field(DLY2, "0.02")
   field(LNK1, "$(SYS):RST-SPE.PROC PP")
-  field(LNK2, "$(SYS):SPE-SNC-CLR.VAL PP")
+  field(LNK2, "$(SYS):SPE-CLR.VAL PP")
   field(LNK3, "$(SYS):LED-WS-SPE-25.VAL PP")
   field(SCAN, "Passive")
+}
+#################### RECOVER FROM PANIQUE ################
+record(calc, "$(SYS):SPE-PNK") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-SPE-24.VAL")
+  field(VAL, "0")
 }
 #################### WATCHMAN 24 RELEASE ##############################
 record(calc, "$(SYS):SPE-WATCH-24-RLSD") {
@@ -215,7 +176,7 @@ record(bo, "$(SYS):CL12-SPE") {
   field(ONAM, "ON")
 }
 
-record(bo, "$(SYS):SPE-SNC-CLR") {
+record(bo, "$(SYS):SPE-CLR") {
   field(VAL, "0")
   field(PINI, "YES")
   field(ZNAM, "OFF")
@@ -264,9 +225,9 @@ record(bi, "$(SYS):WS-BUT-SPE-24") {
   field(ONAM, "ON")
 }
 
-record(bi, "$(SYS):SW-RF-A9-CLSD") {
+record(bi, "$(SYS):SW-RF-A9") {
   field(SCAN, "Passive")
-  field(VAL, "0")
+  field(VAL, "1")
   field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")

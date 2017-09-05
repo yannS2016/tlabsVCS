@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>671</width>
-    <height>451</height>
+    <height>458</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -89,10 +89,10 @@
        <item>
         <widget class="QERadioButton" name="qeradiobutton_4">
          <property name="text">
-          <string>switch_I_cnA_A12A</string>
+          <string>cnA_init</string>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:SW-I-cnA-A12A</string>
+          <string>VCS:cnA-INIT</string>
          </property>
          <property name="format" stdset="0">
           <enum>QERadioButton::LocalEnumeration</enum>
@@ -102,6 +102,28 @@
          </property>
          <property name="releaseText">
           <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QERadioButton" name="qeradiobutton_3">
+         <property name="text">
+          <string>switch_I_cnA_A12A</string>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>12</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+         <property name="variable" stdset="0">
+          <string>VCS:SW-I-cnA-A12A</string>
+         </property>
+         <property name="format" stdset="0">
+          <enum>QERadioButton::Integer</enum>
          </property>
         </widget>
        </item>
@@ -179,7 +201,7 @@
           </color>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:cnA-CLEAR</string>
+          <string>VCS:cnA-CLR</string>
          </property>
         </widget>
        </item>
@@ -310,7 +332,7 @@
         </color>
        </property>
        <property name="variable" stdset="0">
-        <string>VCS:EXP-CLEAR</string>
+        <string>VCS:EXP-CLR</string>
        </property>
        <property name="displayAlarmStateOption" stdset="0">
         <enum>QEBitStatus::Never</enum>
@@ -362,7 +384,7 @@
         </color>
        </property>
        <property name="variable" stdset="0">
-        <string>VCS:SPE-CLEAR</string>
+        <string>VCS:SPE-CLR</string>
        </property>
       </widget>
      </item>
@@ -411,7 +433,7 @@
         </color>
        </property>
        <property name="variable" stdset="0">
-        <string>VCS:BSV-CLEAR</string>
+        <string>VCS:BSV-CLR</string>
        </property>
        <property name="variableSubstitutions" stdset="0">
         <string/>

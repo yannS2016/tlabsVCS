@@ -1,8 +1,9 @@
 program spc1basClearanceSNC
 
 %{
+/*******************************************************************/
 #include "vcs_var_mes.h" // define this here so C functions are seen
-
+/*******************************************************************/
 #define FAIL		-1 	
 #define	VCOK       	0
 #define TOUT		5
@@ -25,7 +26,7 @@ short SPC1L_OLD_FAIL_COND;
 string SPC1L_CLR_STATS; 
 string SPC1L_INTLCK_STATS;
 // CONTROL FLAGS
-short released = FALSE;
+short spc1LUpdate= FALSE;
 short SPC1L_INIT; 				// basement initialization
 /* Associate SNL variables with epics output pv's*/
 assign	SPC1L_CLR_STATS		to	"{SYS}:SPC1L-CLR-STATS"; 
@@ -63,9 +64,9 @@ ss SPC1L_clearance_status {
 	state recover_faillure {
 			
 		when (!SPC1L_FAIL_COND) {
-			if(!released) {
+			if(!spc1LUpdate) {
 				printf("%sRECOVERING FROM FAILLURE - ENTERING W42 STATE%s\n",OK,DEF);
-				released = TRUE;
+				spc1LUpdate = TRUE;
 			}
 		} state  watchman_42_pressed
 			
@@ -87,7 +88,7 @@ ss SPC1L_clearance_status {
 		} state watchman_42_released
 	}
 //////////////////////////////////////////////////////////
-	state watchman_42_released {
+	state watchman_42_released{
 		
 		when (SPC1_W42_STS == FAIL) {
 
@@ -129,50 +130,16 @@ ss SPC1L_clearance_status {
 		option -e;
 		entry {
 			printf("SPC1 LOW CLEARANCE FAILURE CONDITION: ");
-			released = FALSE;
+			spc1LUpdate = FALSE;
 		}
 
-		when (SPC1L_FAIL_COND == RA2ON) {
-			SPC1L_update_failed(RA2ON);
-			printf("%sROOF A2 IS OPEN%s\n",ERROR,DEF);
+		when () {
+			SPC1L_update_failed(SPC1L_FAIL_COND);
 		} state recover_faillure
-		
-		when (SPC1L_FAIL_COND == A005ON) {			
-			SPC1L_update_failed(A005ON);
-			printf("%sSPC1 GROUND-FLOOR VAULT NOT CLEARED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		
-		when (SPC1L_FAIL_COND == TOUT) {			
-			SPC1L_update_failed(TOUT);
-			printf("%sTIME OUT ERROR: RELEASE ALL WATCHMEN%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		when () {														// OTHERWISE IT IT A DOOR FAILLURE		
-		} state doors_faillures
 		
 		exit {
 		    SPC1L_OLD_FAIL_COND = SPC1L_FAIL_COND;	
 		}
-	}
-////////////////////////////////////////////////////////////////////////////
-	state doors_faillures { 			/* FAIL CONDITIONS*/
-		
-		when (SPC1L_FAIL_COND == DA001ON) {			
-			SPC1L_update_failed(DA001ON);
-			printf("%sDOOR A001 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		when (SPC1L_FAIL_COND == DA005AON) {			
-			SPC1L_update_failed(DA005AON);
-			printf("%sDOOR A005A WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		when (SPC1L_FAIL_COND == DA005ON) {			
-			SPC1L_update_failed(DA005ON);
-			printf("%sDOOR A005 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
 	}
 ////////////////////////////////////////////////////////////////////////////
 	state vc_faillures { 			/* FAIL CONDITIONS*/
@@ -180,29 +147,19 @@ ss SPC1L_clearance_status {
 		option -e;
 		entry {
 			printf("SPC1 LOW CLEAR FAILURE CONDITION: ");
-			released = FALSE;
+			spc1LUpdate = FALSE;
 		}
-		
-		when (SPC1L_VC == RA2ON) {
-			SPC1L_update_failed(RA2ON);
-			printf("%sROOF A2 IS OPEN%s\n",ERROR,DEF);
+
+		when (SPC1L_VC) {			
+			SPC1L_update_failed(SPC1L_VC);
 		} state recover_faillure
-		
-		when (SPC1L_VC == SPC1LPNK) {			
-			SPC1L_update_failed(SPC1LPNK);
-			printf("%sA PANIC BUTTON WAS  PRESSED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		when () {														// OTHERWISE IT IT A DOOR FAILLURE		
-		} state doors_faillures
-		
+				
 		exit {
-		    SPC1L_OLD_FAIL_COND = SPC1L_FAIL_COND;
-			printf("VAULT CLEAR: %d %d \n",SPC1L_OLD_FAIL_COND, SPC1L_FAIL_COND);		
+		    SPC1L_OLD_FAIL_COND = SPC1L_FAIL_COND;	
 		}
 	}
 }
-
+//////////////////////////////////////////////////////////////////////////////
 void initVault(){
 	SPC1L_INIT = TRUE;
 	not_cleared(SPC1L_CLR_STATS);
@@ -211,14 +168,6 @@ void initVault(){
 	pvPut(SPC1L_INTLCK_STATS, SYNC);
 	pvPut(SPC1L_INIT, SYNC);
 }
-
-void resetStatus()
-{
-	not_cleared(SPC1L_CLR_STATS);
-	report_error(SPC1L_INTLCK_STATS, 54);
-	pvPut(SPC1L_CLR_STATS, SYNC);
-	pvPut(SPC1L_INTLCK_STATS, SYNC);
-}
 ////////////////////////////////////////////////////////////////////////
 void SPC1L_update_failed(short report)
 {
@@ -226,6 +175,7 @@ void SPC1L_update_failed(short report)
 	pvPut(SPC1L_CLR_STATS, SYNC);
 	report_error(SPC1L_INTLCK_STATS, report);
 	pvPut(SPC1L_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,SPC1L_INTLCK_STATS,DEF);
 }
 /////////////////////////////////////////////////////////////////////////
 void SPC1L_update_report(short intlck) {

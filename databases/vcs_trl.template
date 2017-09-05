@@ -47,8 +47,13 @@ record(calcout, "$(SYS):TRL-VC") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(FLNK, "$(SYS):TRL-FAIL-COND") # THIS RECORD MUST IMMEDIATELY READ A FAIL CONDITION
+<<<<<<< HEAD
   field(CALC, "!A?!B?C?$(TRLPNK):$(VCOK):$(G4ON):$(DA004ON)")
   field(INPA, "$(SYS):TRL-DA004-CLSD PP") 
+=======
+  field(CALC, "!A?!B?C?$(TRLPNK):$(VCOK):$(G4ON):$(DA004AON)")
+  field(INPA, "$(SYS):TRL-DA004A-CLSD PP") 
+>>>>>>> vcsDevs_v1.0
   field(INPB, "$(SYS):TRL-G4-CLSD PP")
   field(INPC, "$(SYS):TRL-PNK PP")
   field(OUT,  "$(SYS):RST-TRL.PROC PP")  
@@ -127,10 +132,17 @@ record(calcout, "$(SYS):TRL-W35-STS") {
   field(DESC, "Vault clearance stage 3")
   field(SCAN, "Passive")
   field(PINI, "YES")
+<<<<<<< HEAD
   field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B35OFF):$(DA004S2OFF):$(DA004S1OFF):$(FAIL)")		  
   field(INPA, "$(SYS):TRL-FAIL-COND PP")
   field(INPB, "$(SYS):SW-I-TRL-A004.VAL")
   field(INPC, "$(SYS):SW-II-TRL-A004.VAL")
+=======
+  field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B35OFF):$(DA004AS2OFF):$(DA004AS1OFF):$(FAIL)")		  
+  field(INPA, "$(SYS):TRL-FAIL-COND PP")
+  field(INPB, "$(SYS):SW-I-TRL-A004A.VAL")
+  field(INPC, "$(SYS):SW-II-TRL-A004A.VAL")
+>>>>>>> vcsDevs_v1.0
   field(INPD, "$(SYS):TRL-WATCH-34b-RLSD PP")	
   field(INPE, "$(SYS):WS-BUT-TRL-35")	  
   field(OUT,  "$(SYS):TRLW35-WRT-OUTS.PROC PP")  

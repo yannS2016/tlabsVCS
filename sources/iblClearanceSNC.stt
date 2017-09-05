@@ -4,23 +4,13 @@ program iblClearanceSNC
 #include "vcs_var_mes.h" // define this here so C functions are seen
 	
 #define	VCOK       	0
-#define TOUT		5
-#define FAIL		-1 
-#define	DA13ON	    57	
+#define FAIL		-1 	
 #define	DA13S1OFF	65	
 #define	DA13S2OFF	66	
-#define IBLPNK      19 
-#define	GA1AON      56
-#define	GA1AS1ON    59  	
-#define	GA1AS2ON    60 
-#define	GA1AS3ON    61  	
-#define	GA1AS4ON    62 
 #define B9ON        58
 #define B8OFF       64
 #define B8ON  		63
 #define B7OFF		67  
-#define	A13AON     	145
-#define	RA13ON	    147
 }%
 /* Declare seq variables*/
 short IBL_INIT; 
@@ -54,9 +44,9 @@ monitor	IBL_FAIL_COND;
 
 ss IBL_clearance_status {
     state init {
-		when (delay(2)) {
+		when (delay(3.5)) {
 			initVault();
-			printf("\n%sISOTOPE BEAM LINE INITIALISATION COMPLETED%s\n",OK,DEF);
+			printf("%sISOTOPE BEAM LINE INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_9_pressed	
     }
 ///////////////////////////////////////////////////////////////
@@ -75,7 +65,7 @@ ss IBL_clearance_status {
 
 		when (!IBL_FAIL_COND) {
 			if(!released) {
-				printf("%sRECOVERING FROM FAILLURE: ENTERING W9 STATE%s\n",OK,DEF);
+				printf("%sRECOVERING FROM FAILLURE - ENTERING W9 STATE%s\n",OK,DEF);
 				released = TRUE;
 			}
 		} state  watchman_9_pressed
@@ -128,7 +118,7 @@ ss IBL_clearance_status {
 		} state  clearance_faillures
 			
 		when (IBL_W8_STS != B8ON) {
-			IBL_update_report(B8OFF);
+
 		} state door_a13_closed
 		
 	}
@@ -172,118 +162,50 @@ ss IBL_clearance_status {
 	state clearance_faillures { 			/* FAIL CONDITIONS*/
 		
 		option -e;
+		option -x;
 		entry {
 			printf("IBL CLEARANCE FAILURE CONDITION: ");
 			released = FALSE;
 			IBL_OLD_FAIL_COND = IBL_FAIL_COND;
 		}
 
-		when (IBL_FAIL_COND == RA13ON) {
-			IBL_update_failed(RA13ON);
-			printf("%sROOF A13 IS OPEN%s\n",ERROR,DEF);
-		} state recover_faillure
-
-		when (IBL_FAIL_COND == A13AON) {
-			
-			IBL_update_failed(A13AON);
-			printf("%sAREA A13A IS NOT CLEARED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-
-		when (IBL_FAIL_COND == TOUT) {
-			
-			IBL_update_failed(TOUT);
-			printf("%sTIME OUT ERROR: RELEASE ALL WATCHMEN%s\n",ERROR,DEF);
-		} state recover_faillure
-			
 		when () {
-		} state door_a1a_faillures			
-			
-	}
-//////////////////////////////////////////////////////////////////
-	state door_a1a_faillures { 			/* DOOR A1A FAIL CONDITIONS*/
-			
-		when (IBL_FAIL_COND == GA1AS1ON) {			
-			IBL_update_failed(GA1AS1ON);
-			printf("%sGATE G1 SWITCH 1 IS OPEN%s\n",ERROR,DEF);
-		} state recover_faillure
-
-			
-		when (IBL_FAIL_COND == GA1AS2ON) {
-			IBL_update_failed(GA1AS2ON);
-			printf("%sGATE G1 SWITCH 2 IS OPEN%s\n",ERROR,DEF);
-		} state recover_faillure
-
-
-		when (IBL_FAIL_COND == GA1AS3ON) {
-			IBL_update_failed(GA1AS3ON);
-			printf("%sGATE G1 SWITCH 3 IS OPEN%s\n",ERROR,DEF);
-		} state recover_faillure
-
-
-		when (IBL_FAIL_COND == GA1AS4ON) {
-			IBL_update_failed(GA1AS4ON);
-			printf("%sGATE G1 SWITCH 4 IS OPEN%s\n",ERROR,DEF);
+		
+			IBL_update_failed(IBL_FAIL_COND);
 		} state recover_faillure
 			
-		when () { // THIS MAY NOT BE NECCESSARY
-		} state recover_faillure
-			
+		exit {
+		    IBL_OLD_FAIL_COND = IBL_FAIL_COND;
+		}		
 	}
 ////////////////////////////////////////////////////////////////////////////
 	state vc_faillures { 			/* FAIL CONDITIONS*/
 		
 		option -e;
+		option -x;
 		entry {
 			printf("IBL LOW CLEAR FAILURE CONDITION: ");
 			released = FALSE;
 		}
 		
-		when (IBL_VC == RA13ON) {
-			IBL_update_failed(RA13ON);
-			printf("%sROOF A13 IS OPEN%s\n",ERROR,DEF);
-		} state recover_faillure
-			
-		when (IBL_VC == A13AON) {
-			
-			IBL_update_failed(A13AON);
-			printf("%sAREA A13A IS NOT CLEARED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		when (IBL_VC == GA1AON) {
-			
-			IBL_update_failed(GA1AON);
-			printf("%sGATE GA1A WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		
-		when (IBL_VC == DA13ON) {
-			
-			IBL_update_failed(DA13ON);
-			printf("%sDOOR A13 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
 
-		when (IBL_VC == IBLPNK) {
+		when () {
 			
-			IBL_update_failed(IBLPNK);
-			printf("%sA PANIC BUTTON WAS  PRESSED%s\n",ERROR,DEF);
+			IBL_update_failed(IBL_VC);
 		} state recover_faillure
+		
+		exit {
+		    IBL_OLD_FAIL_COND = IBL_FAIL_COND;
+		}
 	}
 }
-
+//////////////////////////////////////////////////////////////////////
 void initVault(){
-	IBL_INIT = FALSE;
+	IBL_INIT = TRUE;
+    IBL_OLD_FAIL_COND = IBL_FAIL_COND;
 	not_cleared(IBL_CLR_STATS);
 	report_error(IBL_INTLCK_STATS, 54);
 	pvPut(IBL_INIT, SYNC);
-	pvPut(IBL_CLR_STATS, SYNC);
-	pvPut(IBL_INTLCK_STATS, SYNC);
-}
-
-void resetStatus()
-{
-	not_cleared(IBL_CLR_STATS);
-	report_error(IBL_INTLCK_STATS, 54);
 	pvPut(IBL_CLR_STATS, SYNC);
 	pvPut(IBL_INTLCK_STATS, SYNC);
 }
@@ -294,6 +216,7 @@ void IBL_update_failed(short report)
 	pvPut(IBL_CLR_STATS, SYNC);
 	report_error(IBL_INTLCK_STATS, report);
 	pvPut(IBL_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,IBL_INTLCK_STATS,DEF);
 }
 /////////////////////////////////////////////////////////////////////////
 void IBL_update_report(short intlck) {
