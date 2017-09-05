@@ -1,0 +1,262 @@
+############ SELECT THE NEXT PROCESSING BRANCH ##################
+record(calc, "$(SYS):cnA-SEL-STAGE") {
+  field(DESC, "Select processing branch")
+  field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
+  field(CALC, "A?!B?C?$(S0):$(S1):$(PNK):$(NI)")
+  field(INPA, "$(SYS):cnA-INIT NPP")
+##IF BUTTON 38 IS STILL PRESSED PNK IS ACTIVE##
+  field(INPB, "$(SYS):cnA-PNK") 
+  field(INPC, "$(SYS):cnA-CLR NPP")
+  field(FLNK, "$(SYS):cnA-PROC-STAGE")
+}
+## THIS RECORDS PROPAGATE PROCESSING ##
+record(fanout, "$(SYS):cnA-PROC-STAGE") {
+  field(SCAN, "Passive")
+  field(SELM, "Specified")
+  field(SELL, "$(SYS):cnA-SEL-STAGE")
+  field(LNK1, "$(SYS):cnA-VC PP")
+  field(LNK2, "$(SYS):cnA-VNC PP")
+  field(LNK3, "$(SYS):cnA-PNK PP")
+}
+####################################################################
+# MONITOR THE STATUS OF INPUT CABLE
+## cnA-38 AND cnA-39 CANNOT BE PRESSED AT THE SAME TIME
+## THEREFORE IF cnA-38 IS OFF cnA-39 MUST BE ON
+## cnA-38 || cnA-39 ? (CABLE CONNECTED):(CABLE DISCONNECTED)
+## formula to monitor status of inputs and set output in stage 1
+record(calc, "$(SYS):cnA-INPCAB-STS") {
+  field(SCAN, "Passive") 
+  field(CALC, "A||B?0:0")
+  field(INPA, "$(SYS):WS-BUT-cnA-38.VAL")
+  field(INPB, "$(SYS):WS-BUT-cnA-39.VAL")   
+}
+##################################################################################
+# monitor status of inputs which may cause clearance faillure
+# SIGNAL TO SYS: cnA-VC?cnA-CLR && (HARDWARE STATUS RECORDS):FALSE
+record(calcout, "$(SYS):cnA-VC") { 
+  field(DESC, "cnA Vault clear stage")
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(FLNK, "$(SYS):cnA-FAIL-COND")
+  field(CALC, "A?!B?C?$(cnAPNK):$(VCOK):$(DA12AON):$(cnAON)")
+  field(INPA, "$(SYS):A12-A9-A15.VAL PP")# A12, A9, A15 MUST BE CLEARED
+  field(INPB, "$(SYS):cnA-DA12A-CLSD.VAL PP")  
+  field(INPC, "$(SYS):cnA-PNK.VAL PP")
+  field(OUT,  "$(SYS):RST-cnA PP")  
+  field(OOPT, "When Non-zero")
+}
+
+###################################################################################
+#CLEARANCE UNDERWAY FAIL CONDITIONS
+record(calcout, "$(SYS):cnA-FAIL-COND") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "A?!B?$(VCOK):$(TOUT):$(cnAON)") 
+  field(INPA, "$(SYS):A12-A9-A15.VAL PP")# cnA GROUND FLOOR MUST BE CLEARED
+  field(INPB, "$(SYS):cnA-TIMEOUT NPP") 
+  field(OUT,  "$(SYS):RST-cnA.PROC PP")  
+  field(OOPT, "Transition To Non-zero")  # STOP THIS RECORD TO KEEP RESETTING SHARED OUTPUT AFTER INIT 
+}
+
+####################### RESET VAULT #################
+record(seq, "$(SYS):RST-cnA") { # HANDLE BY SEQ
+  field(SCAN, "Passive")
+  field(PINI, "YES") # init status of outputs
+  field(DOL1, "0")
+  field(DOL2, "0")
+  field(DOL3, "0")
+  field(DOL4, "0")
+  field(DOL5, "0")
+  field(LNK1, "$(SYS):cnA-CLR PP")
+  field(LNK2, "$(SYS):LED-WS-cnA-38 PP")
+  field(LNK3, "$(SYS):LED-WS-cnA-39 PP")
+  field(LNK4, "$(SYS):cnA-COUNTER PP")
+  field(LNK5, "$(SYS):WATCHMAN-cnA-38-ACT PP")
+  field(SELM, "All")
+}
+#######################################################################################
+record(calc, "$(SYS):cnA-VNC") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(VCOK):A")
+  field(INPA, "$(SYS):cnA-W38-STS PP") 
+}
+###############################################################
+record(calcout, "$(SYS):cnA-W38-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?$(VCOK):$(B38ON):!C?$(B38NP):D:$(FAIL)")
+  field(INPA, "$(SYS):cnA-FAIL-COND PP")
+  field(INPB, "$(SYS):WS-BUT-cnA-38 NPP")
+  field(INPC, "$(SYS):WATCHMAN-cnA-38-ACT NPP")
+  field(INPD, "$(SYS):cnA-W39-STS PP")
+  field(OUT,  "$(SYS):cnAW38-WRT-OUTS PP")  
+  field(OOPT, "Transition To Zero")   
+}
+########################################################
+record(seq, "$(SYS):cnAW38-WRT-OUTS") { # MAY BE HANDLED BY SEQ
+  field(SCAN, "Passive")
+  field(SELM, "All")
+  field(DOL1, "1")
+  field(DOL2, "0")
+  field(DOL3, "1")
+  field(DOL4, "0")
+  field(LNK1, "$(SYS):LED-WS-cnA-38.VAL PP")
+  field(LNK2, "$(SYS):cnA-COUNTER.VAL PP")
+  field(LNK3, "$(SYS):WATCHMAN-cnA-38-ACT.VAL PP")
+  field(LNK4, "$(SYS):cnA-VC.VAL NPP") # RESET ANY PREVIOUS FAIL CONDITIONS
+}
+####################################################################################################
+# STAGE 2 CLERANCE EQUATIONS
+## IF WATCHMAN 38 RELEASE CONTINUE CLEARANCE
+## WE TEST IT IN "cnA-WATCH-38-RLSD" RECORD
+record(calcout, "$(SYS):cnA-W39-STS") {
+  field(DESC, "Vault clearance stage 2")
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B39OFF):$(DA12AS1OFF):$(DA12AS2OFF):$(FAIL)")
+  field(INPA, "$(SYS):cnA-FAIL-COND PP")
+  field(INPB, "$(SYS):SW-I-cnA-A12A NPP") 
+  field(INPC, "$(SYS):SW-II-cnA-A12A NPP") 
+  field(INPD, "$(SYS):cnA-WATCH-38-RLSD.VAL PP")
+  field(INPE, "$(SYS):WS-BUT-cnA-39 NPP")
+  field(OUT,  "$(SYS):cnAW39-WRT-OUTS PP")  
+  field(OOPT, "Transition To Zero") 
+}
+####################### STAGE 2 OUTPUTS STATUS  #################
+# THIS RECORDS IS PROCESSED ONLY WHEN cnA-VNCS2 RETRUN 0
+# THAT IS cnA INTERLOCKS ARE CORRECT IN STAGE 2
+record(seq, "$(SYS):cnAW39-WRT-OUTS") {
+  field(SELM, "All")
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DLY2, "0.02")
+  field(LNK1, "$(SYS):RST-cnA.PROC PP")
+  field(LNK2, "$(SYS):cnA-CLR.VAL PP")
+  field(LNK3, "$(SYS):LED-WS-cnA-39 PP")
+  field(SCAN, "Passive")
+}
+#################### A9, A12 , A15 STATE ##############################
+record(calc, "$(SYS):A12-A9-A15") {
+  field(CALC, "A&&B&&C?$(ON):$(OFF)")
+  field(INPA, "$(SYS):EXP-CLR.VAL")
+  field(INPB, "$(SYS):SPE-CLR.VAL")
+  field(INPC, "$(SYS):BSV-CLR.VAL")
+}
+########################## TIMER PROCEDURE #############################
+# IN VERSION 2 OF THE CODE WE USE THE SAME TIMER SET FROM GROUND FLOOR 
+record(calc, "$(SYS):cnA-COUNTER") {
+  field(SCAN, "Passive")
+  field(CALC, "B?A+1:0")
+  field(INPA, "$(SYS):cnA-COUNTER.VAL")
+  field(INPB, "$(SYS):WATCHMAN-cnA-38-ACT.VAL")
+}
+record(calc, "$(SYS):cnA-TIMEOUT") {
+  field(SCAN, "1 second")
+  field(CALC, "A>=$(cnATOUT)?$(ON):$(OFF)")
+  field(INPA, "$(SYS):cnA-COUNTER.VAL PP")
+}
+#################### WATCHMAN 38 RELEASE ##############################
+record(calc, "$(SYS):cnA-WATCH-38-RLSD") {
+  field(CALC, "A&&B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-cnA-38.VAL")
+  field(INPB, "$(SYS):WATCHMAN-cnA-38-ACT.VAL")
+}
+
+#################### RECOVER FROM PANIQUE ################
+record(calc, "$(SYS):cnA-PNK") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-cnA-38.VAL")
+}
+#################### DOOR A12A CLOSED ##################################
+record(calc, "$(SYS):cnA-DA12A-CLSD") {
+  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(INPA, "$(SYS):SW-I-cnA-A12A.VAL")
+  field(INPB, "$(SYS):SW-II-cnA-A12A.VAL")
+}
+########################### Outputs ##################################
+record(bo, "$(SYS):cnA-CLR") {
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-cnA-38") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-cnA-39") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(stringout, "$(SYS):cnA-CLR-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+
+record(stringout, "$(SYS):cnA-INTLCK-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+################ INPUTS ###############################
+########  INIT THIS RECORD TO FALSE ######
+record(bo, "$(SYS):WATCHMAN-cnA-38-ACT") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "0")
+}
+
+record(bi, "$(SYS):WS-BUT-cnA-38") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):WS-BUT-cnA-39") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-I-cnA-A12A") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-II-cnA-A12A") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+## THIS RECORDS MUST BE SET FROM THE SEQ ##
+record(bi, "$(SYS):cnA-INIT") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}

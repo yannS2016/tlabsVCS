@@ -127,13 +127,13 @@
        <item>
         <widget class="QERadioButton" name="qeradiobutton_4">
          <property name="text">
-          <string>switch_roof_A2_Closed</string>
+          <string>switch_roof_A2</string>
          </property>
          <property name="autoExclusive">
           <bool>false</bool>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:SW-RF-A2-CLSD</string>
+          <string>VCS:SW-RF-A2</string>
          </property>
          <property name="format" stdset="0">
           <enum>QERadioButton::LocalEnumeration</enum>

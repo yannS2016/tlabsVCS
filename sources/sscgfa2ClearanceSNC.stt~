@@ -47,7 +47,7 @@ monitor	SSCA2_FAIL_COND;
 
 ss SSCA2_clearance_status {
     state init {
-		when (delay(2.5)) {
+		when (delay(3.5)) {
 			initVault();
 			printf("%sSSC GROUND FLOOR AREA 2 INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_13_pressed	

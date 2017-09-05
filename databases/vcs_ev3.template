@@ -57,7 +57,7 @@ record(calcout, "$(SYS):EV3-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(CALC, "!A?!B?$(VCOK):$(TOUT):$(RA8ON)")
-  field(INPA, "$(SYS):SW-RF-A8-CLSD NPP") 
+  field(INPA, "$(SYS):SW-RF-A8 NPP") 
   field(INPB, "$(SYS):EV3-TIMEOUT NPP") 
   field(OUT,  "$(SYS):RST-EV3 PP")  
   field(OOPT, "Transition To Non-zero") # STOP THIS RECORD TO KEEP RESETTING SHARED OUTPUT AFTER INIT 
@@ -104,7 +104,7 @@ record(calcout, "$(SYS):EV3-W23-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B23OFF):$(DA8S2OFF):$(DA8S1OFF):$(FAIL)")
-  field(INPA, "$(SYS):EV3GF-FAIL-COND PP")
+  field(INPA, "$(SYS):EV3-FAIL-COND PP")
   field(INPB, "$(SYS):SW-I-EV3-A8.VAL NPP")
   field(INPC, "$(SYS):SW-II-EV3-A8.VAL NPP")
   field(INPD, "$(SYS):EV3-WATCH-22-RLSD.VAL PP")

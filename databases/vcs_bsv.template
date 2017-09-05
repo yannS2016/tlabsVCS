@@ -57,7 +57,7 @@ record(calcout, "$(SYS):BSV-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(CALC, "!A?!B?$(VCOK):$(TOUT):$(RA15ON)")
-  field(INPA, "$(SYS):SW-RF-A2-CLSD NPP") 
+  field(INPA, "$(SYS):SW-RF-A15 NPP") 
   field(INPB, "$(SYS):BSV-TIMEOUT NPP") 
   field(OUT,  "$(SYS):RST-BSV PP")  
   field(OOPT, "Transition To Non-zero") # STOP THIS RECORD TO KEEP RESETTING SHARED OUTPUT AFTER INIT 
@@ -104,7 +104,7 @@ record(calcout, "$(SYS):BSV-W37-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B37OFF):$(DA15S2OFF):$(DA15S1OFF):$(FAIL)")
-  field(INPA, "$(SYS):BSVGF-FAIL-COND PP")
+  field(INPA, "$(SYS):BSV-FAIL-COND PP")
   field(INPB, "$(SYS):SW-I-BSV-A15.VAL NPP")
   field(INPC, "$(SYS):SW-II-BSV-A15.VAL NPP")
   field(INPD, "$(SYS):BSV-WATCH-36-RLSD.VAL PP")
@@ -227,7 +227,7 @@ record(bi, "$(SYS):WS-BUT-BSV-36") {
 
 record(bi, "$(SYS):SW-RF-A15") {
   field(SCAN, "Passive")
-  field(VAL, "0")
+  field(VAL, "1")
   field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")

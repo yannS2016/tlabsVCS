@@ -42,7 +42,7 @@ ss SSCCAB_clearance_status {
     state init {
 		when (delay(1)) {
 			initVault();
-			printf("\n%sSSC CABLE WAY VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+			printf("%sSSC CABLE WAY VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_16_pressed	
     }
 ///////////////////////////////////////////////////////////////

@@ -44,7 +44,7 @@ monitor	IBL_FAIL_COND;
 
 ss IBL_clearance_status {
     state init {
-		when (delay(3.5)) {
+		when (delay(3)) {
 			initVault();
 			printf("%sISOTOPE BEAM LINE INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_9_pressed	

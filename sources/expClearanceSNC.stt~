@@ -5,6 +5,7 @@ program expClearanceSNC
 #include "vcs_var_mes.h" // define this here so C functions are seen
 /*******************************************************************/	
 #define	VCOK       	0
+#define TOUT		5
 #define FAIL		-1
 #define B26ON		69 
 #define B28bOFF		74
@@ -58,7 +59,7 @@ monitor	EXP_G10_STS;
 
 ss EXP_clearance_status {
     state init {
-		when (delay(4.5)) {
+		when (delay(1)) {
 			initVault();
 			printf("\n%sEXPERIMENTAL VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_26_pressed	

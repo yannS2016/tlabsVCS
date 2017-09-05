@@ -39,8 +39,8 @@ record(calcout, "$(SYS):SPC1L-VC") {
   field(PINI, "YES")
   field(FLNK, "$(SYS):SPC1L-FAIL-COND")
   field(CALC, "!A?B?!C?!D?!E?F?$(SPC1PNK):$(VCOK):$(DA005AON):$(DA005ON):$(DA001ON):$(A005ON):$(RA2ON)")
-  field(INPA, "$(SYS):SW-RF-A2-CLSD.VAL NPP")
-  field(INPB, "$(SYS):SPC1-GF-CLR.VAL NPP")# SPC1 GROUND FLOOR MUST BE CLEARED
+  field(INPA, "$(SYS):SW-RF-A2.VAL NPP")
+  field(INPB, "$(SYS):SPC1GF-CLR.VAL NPP")# SPC1 GROUND FLOOR MUST BE CLEARED
   field(INPC, "$(SYS):SPC1-DA001-CLSD.VAL PP") 
   field(INPD, "$(SYS):SPC1-DA005-CLSD.VAL PP")  
   field(INPE, "$(SYS):SPC1-DA005A-CLSD.VAL PP") 
@@ -54,8 +54,8 @@ record(calcout, "$(SYS):SPC1L-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(CALC, "!F?$(VCOK):!A?B?!C?!D?!E?$(VCOK):$(TOUT):$(DA005AON):$(DA001ON):$(A005ON):$(RA2ON)")
-  field(INPA, "$(SYS):SW-RF-A2-CLSD.VAL NPP") 
-  field(INPB, "$(SYS):SPC1-GF-CLR.VAL NPP")# SPC1 GROUND FLOOR MUST BE CLEARED
+  field(INPA, "$(SYS):SW-RF-A2.VAL NPP") 
+  field(INPB, "$(SYS):SPC1GF-CLR.VAL NPP")# SPC1 GROUND FLOOR MUST BE CLEARED
   field(INPC, "$(SYS):SPC1-DA001-CLSD PP") 
   field(INPD, "$(SYS):SPC1-DA005A-CLSD PP") 
   field(INPE, "$(SYS):SPC1L-TIMEOUT NPP") 
@@ -197,23 +197,6 @@ record(calc, "$(SYS):SPC1-DA005A-CLSD") {
   field(INPB, "$(SYS):SW-II-SPC1-A005A.VAL")
 }
 ########################### Outputs ##################################
-
-record(bo, "$(SYS):CS1-SPC1") {
-  field(SCAN, "Passive")
-  field(VAL, "0")
-  field(PINI, "YES")
-  field(ZNAM, "OFF")
-  field(ONAM, "ON")
-}
-
-record(bo, "$(SYS):CL1-SPC1") {
-  field(SCAN, "Passive")
-  field(VAL, "0")
-  field(PINI, "YES")
-  field(ZNAM, "OFF")
-  field(ONAM, "ON")
-}
-
 record(bo, "$(SYS):SPC1-CLR") {
   field(VAL, "0")
   field(PINI, "YES")
@@ -265,14 +248,6 @@ record(bi, "$(SYS):WS-BUT-SPC1-42") {
 }
 
 record(bi, "$(SYS):WS-BUT-SPC1-43") {
-  field(SCAN, "Passive")
-  field(VAL, "1")
-  field(PINI, "YES")
-  field(ZNAM, "OFF")
-  field(ONAM, "ON")
-}
-
-record(bi, "$(SYS):SW-RF-A2-CLSD") {
   field(SCAN, "Passive")
   field(VAL, "1")
   field(PINI, "YES")

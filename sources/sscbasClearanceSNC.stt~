@@ -302,7 +302,7 @@ ss SSCL_clearance_status {
 		}	
 	}
 }
-//////////////////////////////////////////////////////////////////////////////////
+
 void initVault(){
 	SSCL_INIT = TRUE;
 	not_cleared(SSCL_CLR_STATS);

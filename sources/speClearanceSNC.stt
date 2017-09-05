@@ -14,8 +14,8 @@ program speClearanceSNC
 /* Declare seq variables*/
 short SPE_INIT; 
 short SPE_VC;   
-short SSC_W24_STS;
-short SSC_W25_STS;
+short SPE_W24_STS;
+short SPE_W25_STS;
 short SPE_FAIL_COND;
 string SPE_CLR_STATS; 
 string SPE_INTLCK_STATS;
@@ -29,18 +29,18 @@ assign	SPE_INTLCK_STATS	to	"{SYS}:SPE-INTLCK-STATS";
 /* Associate SNL variables with epics input pv's*/
 assign 	SPE_VC 				to 	"{SYS}:SPE-VC"; 
 assign 	SPE_INIT 			to 	"{SYS}:SPE-INIT";
-assign 	SSC_W24_STS 		to 	"{SYS}:SSC-W24-STS";   
-assign 	SSC_W25_STS 		to 	"{SYS}:SSC-W25-STS";
+assign 	SPE_W24_STS 		to 	"{SYS}:SPE-W24-STS";   
+assign 	SPE_W25_STS 		to 	"{SYS}:SPE-W25-STS";
 assign	SPE_FAIL_COND		to	"{SYS}:SPE-FAIL-COND";
 
 monitor	SPE_VC;
-monitor SSC_W24_STS;  
-monitor SSC_W25_STS;
+monitor SPE_W24_STS;  
+monitor SPE_W25_STS;
 monitor	SPE_FAIL_COND;
 
 ss SPE_clearance_status {
     state init {
-		when (delay(0.8)) {
+		when (delay(5.5)) {
 			initVault();
 			printf("%sSPECTROMETER VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_24_pressed	
@@ -76,7 +76,7 @@ ss SPE_clearance_status {
 			SPE_OLD_FAIL_COND = SPE_FAIL_COND;
 		} state  clearance_faillures
 			
-		when (SSC_W24_STS == B24ON) {
+		when (SPE_W24_STS == B24ON) {
 			SPE_clear_underway();
 			SPE_update_report(B24ON);
 		} state watchman_24_released
@@ -88,7 +88,7 @@ ss SPE_clearance_status {
 
 		} state  clearance_faillures
 			
-		when (SSC_W24_STS != B24ON) {
+		when (SPE_W24_STS != B24ON) {
 		} state door_a9_closed
 	}
 //////////////////////////////////////////////////////////
@@ -98,11 +98,11 @@ ss SPE_clearance_status {
 
 		} state   clearance_faillures
 		
-		when (SSC_W25_STS == DA9S1OFF) {
+		when (SPE_W25_STS == DA9S1OFF) {
 			SPE_update_report(DA9S1OFF);
 		} state door_a9_closed
 
-		when (SSC_W25_STS == DA9S2OFF) {
+		when (SPE_W25_STS == DA9S2OFF) {
 			SPE_update_report(DA9S2OFF);
 		} state door_a9_closed
 
@@ -120,7 +120,7 @@ ss SPE_clearance_status {
 		} state  clearance_faillures
 			
 			
-		when (!SSC_W25_STS) {
+		when (!SPE_W25_STS) {
 
 			SPE_status();
 		} state vault_cleared

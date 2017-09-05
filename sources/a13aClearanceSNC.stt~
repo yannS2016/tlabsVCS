@@ -40,7 +40,7 @@ monitor	A13A_FAIL_COND;
 
 ss A13A_clearance_status {
     state init {
-		when (delay(3)) {
+		when (delay(3.5)) {
 			initVault();
 			printf("\n%sI-LINE AREA INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_9a_pressed	

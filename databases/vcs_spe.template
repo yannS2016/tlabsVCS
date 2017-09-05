@@ -57,7 +57,7 @@ record(calcout, "$(SYS):SPE-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(CALC, "!A?!B?$(VCOK):$(TOUT):$(RA9ON)")
-  field(INPA, "$(SYS):SW-RF-A2-CLSD NPP") 
+  field(INPA, "$(SYS):SW-RF-A9 NPP") 
   field(INPB, "$(SYS):SPE-TIMEOUT NPP") 
   field(OUT,  "$(SYS):RST-SPE PP")  
   field(OOPT, "Transition To Non-zero") # STOP THIS RECORD TO KEEP RESETTING SHARED OUTPUT AFTER INIT 
@@ -104,7 +104,7 @@ record(calcout, "$(SYS):SPE-W25-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B25OFF):$(DA9S2OFF):$(DA9S1OFF):$(FAIL)")
-  field(INPA, "$(SYS):SPEGF-FAIL-COND PP")
+  field(INPA, "$(SYS):SPE-FAIL-COND PP")
   field(INPB, "$(SYS):SW-I-SPE-A9.VAL NPP")
   field(INPC, "$(SYS):SW-II-SPE-A9.VAL NPP")
   field(INPD, "$(SYS):SPE-WATCH-24-RLSD.VAL PP")
@@ -227,7 +227,7 @@ record(bi, "$(SYS):WS-BUT-SPE-24") {
 
 record(bi, "$(SYS):SW-RF-A9") {
   field(SCAN, "Passive")
-  field(VAL, "0")
+  field(VAL, "1")
   field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")

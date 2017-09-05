@@ -89,13 +89,35 @@
        <item>
         <widget class="QERadioButton" name="qeradiobutton">
          <property name="text">
-          <string>switch_roof_A9_closed</string>
+          <string>spe_init</string>
          </property>
          <property name="autoExclusive">
           <bool>false</bool>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:SW-RF-A9-CLSD</string>
+          <string>VCS:SPE-INIT</string>
+         </property>
+         <property name="format" stdset="0">
+          <enum>QERadioButton::LocalEnumeration</enum>
+         </property>
+         <property name="pressText">
+          <string>0</string>
+         </property>
+         <property name="releaseText">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QERadioButton" name="qeradiobutton_3">
+         <property name="text">
+          <string>switch_roof_A9</string>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+         <property name="variable" stdset="0">
+          <string>VCS:SW-RF-A9</string>
          </property>
          <property name="format" stdset="0">
           <enum>QERadioButton::LocalEnumeration</enum>
@@ -201,7 +223,7 @@
           </color>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:SPE-SNC-CLR</string>
+          <string>VCS:SPE-CLR</string>
          </property>
         </widget>
        </item>

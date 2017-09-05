@@ -1,9 +1,8 @@
 program spc1gfClearanceSNC
 
 %{
-/*******************************************************************/
 #include "vcs_var_mes.h" // define this here so C functions are seen
-/*******************************************************************/
+	
 #define	VCOK       	0
 #define FAIL		-1 
 #define B40ON		176
