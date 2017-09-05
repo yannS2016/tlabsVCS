@@ -86,7 +86,7 @@ record(seq, "$(SYS):SSCW9a-WRT-OUTS") { # HANDLE BY SEQ
   field(DOL1, "1")
   field(DOL2, "0")
   field(DOL3, "1")
-  field(DOL3, "0")
+  field(DOL4, "0")
   field(SCAN, "Passive")
   field(LNK1, "$(SYS):LED-WS-A13A-9a.VAL PP")
   field(LNK2, "$(SYS):A13A-COUNTER.VAL PP")

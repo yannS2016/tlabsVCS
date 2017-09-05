@@ -134,16 +134,9 @@ ss SPC2L_clearance_status {
 			printf("SPC2 LOW CLEARANCE FAILURE CONDITION: ");
 			SPC2LUpdate = FALSE;
 		}
-	
-		when (SPC2L_FAIL_COND == DA007ON) {			
-			SPC2L_update_failed(DA007ON);
-			printf("%sDOOR A007 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
 		
-		
-		when (SPC2L_FAIL_COND == TOUT) {			
-			SPC2L_update_failed(TOUT);
-			printf("%sTIME OUT ERROR: RELEASE ALL WATCHMEN%s\n",ERROR,DEF);
+		when (SPC2L_FAIL_COND) {			
+			SPC2L_update_failed(SPC2L_FAIL_COND);
 		} state recover_faillure
 		
 		exit {
@@ -159,23 +152,10 @@ ss SPC2L_clearance_status {
 			printf("SPC2 LOW CLEAR FAILURE CONDITION: ");
 			SPC2LUpdate = FALSE;
 		}
-		
-		
-		when (SPC2L_VC == DA007ON) {
-			
-			SPC2L_update_failed(DA007ON);
-			printf("%sDOOR A007 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		when (SPC2L_VC == G6ON) {
-			SPC2L_update_failed(G6ON);
-			printf("%sGATE G6 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
 
 		
-		when (SPC2L_VC == SPC2LPNK) {			
-			SPC2L_update_failed(SPC2LPNK);
-			printf("%sA PANIC BUTTON WAS  PRESSED%s\n",ERROR,DEF);
+		when (SPC2L_VC) {			
+			SPC2L_update_failed(SPC2L_VC);
 		} state recover_faillure
 		
 		exit {
@@ -192,6 +172,7 @@ void initVault(){
 	pvPut(SPC2L_INIT, SYNC);
 	pvPut(SPC2L_CLR_STATS, SYNC);
 	pvPut(SPC2L_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,SPC2L_INTLCK_STATS,DEF);
 }
 ////////////////////////////////////////////////////////////////////////
 void SPC2L_update_failed(short report)

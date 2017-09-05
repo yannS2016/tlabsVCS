@@ -94,7 +94,7 @@ record(calcout, "$(SYS):SSCL-FAIL-COND") {
   field(INPE, "$(SYS):SSCL-W4-FAIL PP")
   field(INPF, "$(SYS):SSCL-INIT.VAL") 
   field(OUT,  "$(SYS):RST-SSCL.PROC PP")  
-  field(OOPT, "When Non-zero")  
+  field(OOPT, "Transition To Non-zero") # STOP THIS RECORD TO KEEP RESETTING SHARED OUTPUT AFTER INIT  
 }
 record(calcout, "$(SYS):SSCL-GD-FAIL") {
   field(SCAN, "Passive")

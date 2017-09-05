@@ -51,8 +51,9 @@ record(seq, "$(SYS):RST-SSCA2") { # HANDLE BY SEQ
   field(LNK3, "$(SYS):SSC-CLR PP")
   field(LNK4, "$(SYS):LED-WS-SSC-13 PP")
   field(LNK5, "$(SYS):LED-WS-SSC-14 PP")
-  field(LNK6, "$(SYS):SSCA2-COUNTER PP")
-  field(LNK7, "$(SYS):WATCHMAN-SSC-13-ACT PP")
+  field(LNK6, "$(SYS):LED-WS-SSC-15 PP")
+  field(LNK7, "$(SYS):SSCA2-COUNTER PP")
+  field(LNK8, "$(SYS):WATCHMAN-SSC-13-ACT PP")
   field(SELM, "All")
 }
 ###################################################################################
@@ -136,8 +137,8 @@ record(calcout, "$(SYS):SSC-W15-STS") {
   field(INPA, "$(SYS):SSCA2-FAIL-COND PP")
   field(INPB, "$(SYS):SW-I-SSC-A1 ")  
   field(INPC, "$(SYS):SW-II-SSC-A1 ")
-  field(INPD, "$(SYS):SSC-WATCH-13-RLSD PP")
-  field(INPE, "$(SYS):WS-BUT-SSC-14 NPP")
+  field(INPD, "$(SYS):SSC-WATCH-14-RLSD PP")
+  field(INPE, "$(SYS):WS-BUT-SSC-15 NPP")
   field(OUT,  "$(SYS):SSCW15-WRT-OUTS.PROC PP")  
   field(OOPT, "Transition To Zero") 
 }
@@ -279,6 +280,23 @@ record(bi, "$(SYS):WS-BUT-SSC-14") {
 }
 
 record(bi, "$(SYS):WS-BUT-SSC-15") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+
+record(bi, "$(SYS):SW-I-SSC-A1") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-II-SSC-A1") {
   field(SCAN, "Passive")
   field(VAL, "1")
   field(PINI, "YES")

@@ -68,7 +68,7 @@
             <set>Qt::AlignCenter</set>
            </property>
            <property name="variable" stdset="0">
-            <string>VCS:SSC-UPA1-CLR-STATS</string>
+            <string>VCS:SSCA1-CLR-STATS</string>
            </property>
            <property name="format" stdset="0">
             <enum>QELineEdit::Default</enum>
@@ -81,7 +81,7 @@
             <set>Qt::AlignCenter</set>
            </property>
            <property name="variable" stdset="0">
-            <string>VCS:SSC-UPA1-INTLCK-STATS</string>
+            <string>VCS:SSCA1-INTLCK-STATS</string>
            </property>
           </widget>
          </item>
@@ -98,13 +98,35 @@
        <item>
         <widget class="QERadioButton" name="qeradiobutton_3">
          <property name="text">
-          <string>switch_roof_A1_closed</string>
+          <string>ssc_gf_a1_init</string>
          </property>
          <property name="autoExclusive">
           <bool>false</bool>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:SW-RF-A1-CLSD</string>
+          <string>VCS:SSCA1-INIT</string>
+         </property>
+         <property name="format" stdset="0">
+          <enum>QERadioButton::LocalEnumeration</enum>
+         </property>
+         <property name="pressText">
+          <string>0</string>
+         </property>
+         <property name="releaseText">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QERadioButton" name="qeradiobutton_4">
+         <property name="text">
+          <string>switch_roof_A1</string>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+         <property name="variable" stdset="0">
+          <string>VCS:SW-RF-A1</string>
          </property>
          <property name="format" stdset="0">
           <enum>QERadioButton::LocalEnumeration</enum>
@@ -285,7 +307,7 @@
           </color>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:SSC-UPA1-CLEAR</string>
+          <string>VCS:SSCA1-CLR</string>
          </property>
         </widget>
        </item>
