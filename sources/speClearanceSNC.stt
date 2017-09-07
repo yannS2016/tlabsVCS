@@ -40,7 +40,7 @@ monitor	SPE_FAIL_COND;
 
 ss SPE_clearance_status {
     state init {
-		when (delay(5.5)) {
+		when (delay(6.5)) {
 			initVault();
 			printf("%sSPECTROMETER VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_24_pressed	

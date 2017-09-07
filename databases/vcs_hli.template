@@ -24,6 +24,7 @@ record(fanout, "$(SYS):HLI-PROC-STAGE") {
 record(calcout, "$(SYS):HLI-VC") { 
   field(DESC, "HLI Vault clear stage")
   field(SCAN, "Passive")
+  field(FLNK, "$(SYS):HLI-FAIL-COND") # THIS RECORD MUST IMMEDIATELY READ A FAIL CONDITION
   field(CALC, "!A?!B?C?$(HLIPNK):$(VCOK):$(DA14ON):$(RA14ON)")
   field(INPA, "$(SYS):SW-RF-A14.VAL")
   field(INPB, "$(SYS):HLI-DA14-CLSD.VAL PP") # FOR TESTING 
@@ -57,7 +58,7 @@ record(calcout, "$(SYS):HLI-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(CALC, "!A?!B?$(VCOK):$(TOUT):$(RA14ON)")
-  field(INPA, "$(SYS):SW-RF-A2-CLSD NPP") 
+  field(INPA, "$(SYS):SW-RF-A14 NPP") 
   field(INPB, "$(SYS):HLI-TIMEOUT NPP") 
   field(OUT,  "$(SYS):RST-HLI PP")  
   field(OOPT, "Transition To Non-zero") # STOP THIS RECORD TO KEEP RESETTING SHARED OUTPUT AFTER INIT 
@@ -104,7 +105,7 @@ record(calcout, "$(SYS):HLI-W31-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B31OFF):$(DA14S2OFF):$(DA14S1OFF):$(FAIL)")
-  field(INPA, "$(SYS):HLIGF-FAIL-COND PP")
+  field(INPA, "$(SYS):HLI-FAIL-COND PP")
   field(INPB, "$(SYS):SW-I-HLI-A14.VAL NPP")
   field(INPC, "$(SYS):SW-II-HLI-A14.VAL NPP")
   field(INPD, "$(SYS):HLI-WATCH-30-RLSD.VAL PP")
@@ -227,7 +228,7 @@ record(bi, "$(SYS):WS-BUT-HLI-30") {
 
 record(bi, "$(SYS):SW-RF-A14") {
   field(SCAN, "Passive")
-  field(VAL, "0")
+  field(VAL, "1")
   field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")

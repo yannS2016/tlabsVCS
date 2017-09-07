@@ -25,7 +25,7 @@ record(fanout, "$(SYS):SSCA1-PROC-STAGE") {
 record(calcout, "$(SYS):SSCA1-VC") { 
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(FLNK, "$(SYS):SSCA1-FAIL-COND")
+#  field(FLNK, "$(SYS):SSCA1-FAIL-COND")
   field(CALC, "!A?B?!C?!D?E?$(SSCPNK):$(VCOK):$(G3ON):$(GA1AON):$(A001ON):$(RA1ON)")
   field(INPA, "$(SYS):SW-RF-A1.VAL NPP") 
   field(INPB, "$(SYS):SSCL-CLR.VAL NPP")

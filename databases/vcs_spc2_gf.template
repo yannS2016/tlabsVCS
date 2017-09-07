@@ -37,7 +37,7 @@ record(calcout, "$(SYS):SPC2GF-VC") {
   field(DESC, "SPC2GF Vault clear stage")
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(FLNK, "$(SYS):SPC2GF-FAIL-COND")
+#  field(FLNK, "$(SYS):SPC2GF-FAIL-COND")
   field(CALC, "!A?B?!C?!D?!E?F?$(SPC2PNK):$(VCOK):$(DA3ON):$(G6aON):$(DA3aON):$(A007ON):$(RA3ON)")
   field(INPA, "$(SYS):SW-RF-A3-CLSD.VAL NPP")
   field(INPB, "$(SYS):SPC2L-CLR.VAL NPP")# SPC2 BASEMENT FLOOR MUST BE CLEARED
@@ -96,10 +96,15 @@ record(calc, "$(SYS):SPC2GF-VNC") {
   field(INPA, "$(SYS):SPC2-W46-STS PP") 
 }
 ###############################################################
+# WHEN SPC2-WX-STS RETURN 0 A SECOND OUTS WRITE IN DONE
+# THIS MUST BE AVOIDED FOR IT'S RESET COUNTER DURING CLEARANCE
+# WE DO NOT RETEURN THIS VAL IN SPC2-W46-STS
+# INSTEAD A FORWARD LINK IS USED TO PROCESS SPC2-WX-STS
+# WE MAY HAVE JUST USE SPC2-WX-STS IN PP MODE AS AN INPUT TO SPC2-W46-STS
 record(calcout, "$(SYS):SPC2-W46-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!A?!B?!C?$(VCOK):$(B46ON):!C?$(B46NP):D:$(FAIL)")
+  field(CALC, "!A?!B?!C?$(VCOK):$(B46ON):!C?$(B46NP):$(B47OFF):$(FAIL)")
   field(INPA, "$(SYS):SPC2GF-FAIL-COND PP")
   field(INPB, "$(SYS):WS-BUT-SPC2-46 NPP")
   field(INPC, "$(SYS):WATCHMAN-SPC2-46-ACT NPP")

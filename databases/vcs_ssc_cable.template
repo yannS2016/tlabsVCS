@@ -24,7 +24,8 @@ record(fanout, "$(SYS):SSCCAB-PROC-STAGE") {
 record(calcout, "$(SYS):SSCCAB-VC") { 
   field(DESC, "SSCCAB Vault clear stage")
   field(SCAN, "Passive")
-  field(CALC, "!A?!B?C?$(CABPNK):$(VCOK):$(G5ON):$(DA001AON)")
+  field(FLNK, "$(SYS):SSCCAB-FAIL-COND")
+  field(CALC, "A?!B?C?$(CABPNK):$(VCOK):$(G5ON):$(DA001AON)")
 # IN LIVE APP USE A FLNK FROM  SW-I-SSC-A001A OR SW-I-SSC-A001A (SCAN=Intr) TO PROCESS THIS RECORD
 # AND ACCES IT HERE WITH NPP OR ACCES IT WITH PP BUT USE NPP ON ITS INPUTS
   field(INPA, "$(SYS):SSC-A001A-CLSD.VAL PP")  
@@ -55,6 +56,7 @@ record(seq, "$(SYS):RST-SSCCAB") { # HANDLE BY SEQ
 record(calcout, "$(SYS):SSCCAB-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")
+  field(FLNK, "$(SYS):SSC-A001A-CLSD PP")
   field(CALC, "!A?!B?!C?$(VCOK):$(TOUT):$(DA001AS2ON):$(DA001AS1ON)") 
   field(INPA, "$(SYS):SW-I-SSC-A001A.VAL NPP")
   field(INPB, "$(SYS):SW-II-SSC-A001A.VAL NPP")
@@ -143,7 +145,7 @@ record(calc, "$(SYS):SSC-WATCH-16-RLSD") {
 }
 #################### DOOR A001A CLOSED ##################################
 record(calc, "$(SYS):SSC-A001A-CLSD") {
-  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(CALC, "!A&&!B?$(ON):$(OFF)")
   field(INPA, "$(SYS):SW-I-SSC-A001A.VAL")
   field(INPB, "$(SYS):SW-II-SSC-A001A.VAL")
 }
@@ -218,7 +220,7 @@ record(bi, "$(SYS):WS-BUT-SSC-16") {
 
 record(bi, "$(SYS):SW-I-SSC-A001A") {
   field(SCAN, "Passive")
-  field(VAL, "1")
+  field(VAL, "0")
   field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")
@@ -226,7 +228,7 @@ record(bi, "$(SYS):SW-I-SSC-A001A") {
 
 record(bi, "$(SYS):SW-II-SSC-A001A") {
   field(SCAN, "Passive")
-  field(VAL, "1")
+  field(VAL, "0")
   field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")

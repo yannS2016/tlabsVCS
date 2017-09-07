@@ -24,6 +24,7 @@ record(fanout, "$(SYS):SPE-PROC-STAGE") {
 record(calcout, "$(SYS):SPE-VC") { 
   field(DESC, "SPE Vault clear stage")
   field(SCAN, "Passive")
+  field(FLNK, "$(SYS):SPE-FAIL-COND")
   field(CALC, "!A?!B?C?$(SPEPNK):$(VCOK):$(DA9ON):$(RA9ON)")
   field(INPA, "$(SYS):SW-RF-A9.VAL")
   field(INPB, "$(SYS):SPE-DA9-CLSD.VAL PP") # FOR TESTING 

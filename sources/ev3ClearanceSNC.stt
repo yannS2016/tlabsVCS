@@ -14,8 +14,8 @@ program ev3ClearanceSNC
 /* Declare seq variables*/
 short EV3_INIT; 
 short EV3_VC;   
-short SSC_W22_STS;
-short SSC_W23_STS;
+short EV3_W22_STS;
+short EV3_W23_STS;
 short EV3_FAIL_COND;
 string EV3_CLR_STATS; 
 string EV3_INTLCK_STATS;
@@ -29,20 +29,20 @@ assign	EV3_INTLCK_STATS	to	"{SYS}:EV3-INTLCK-STATS";
 /* Associate SNL variables with epics input pv's*/
 assign 	EV3_VC 				to 	"{SYS}:EV3-VC"; 
 assign 	EV3_INIT 			to 	"{SYS}:EV3-INIT";
-assign 	SSC_W22_STS 		to 	"{SYS}:SSC-W22-STS";   
-assign 	SSC_W23_STS 		to 	"{SYS}:SSC-W23-STS";
+assign 	EV3_W22_STS 		to 	"{SYS}:EV3-W22-STS";   
+assign 	EV3_W23_STS 		to 	"{SYS}:EV3-W23-STS";
 assign	EV3_FAIL_COND		to	"{SYS}:EV3-FAIL-COND";
 
 monitor	EV3_VC;
-monitor SSC_W22_STS;  
-monitor SSC_W23_STS;
+monitor EV3_W22_STS;  
+monitor EV3_W23_STS;
 monitor	EV3_FAIL_COND;
 
 ss EV3_clearance_status {
     state init {
-		when (delay(0.8)) {
+		when (delay(6)) {
 			initVault();
-			printf("%sEXPERIMENTAL VAULT 1 INITIALISATION COMPLETED%s\n",OK,DEF);
+			printf("%sEXPERIMENTAL VAULT 3 INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_22_pressed	
     }
 ///////////////////////////////////////////////////////////////
@@ -50,7 +50,7 @@ ss EV3_clearance_status {
     state vault_cleared {
 		option -e;
 		entry {
-			printf("%sEXPERIMENTAL VAULT 1 IN CLEARED STATE%s\n",CLR,DEF);
+			printf("%sEXPERIMENTAL VAULT 3 IN CLEARED STATE%s\n",CLR,DEF);
 		} 
 		when (EV3_VC != VCOK) {
 
@@ -76,7 +76,7 @@ ss EV3_clearance_status {
 			EV3_OLD_FAIL_COND = EV3_FAIL_COND;
 		} state  clearance_faillures
 			
-		when (SSC_W22_STS == B22ON) {
+		when (EV3_W22_STS == B22ON) {
 			EV3_clear_underway();
 			EV3_update_report(B22ON);
 		} state watchman_22_released
@@ -88,7 +88,7 @@ ss EV3_clearance_status {
 
 		} state  clearance_faillures
 			
-		when (SSC_W22_STS != B22ON) {
+		when (EV3_W22_STS != B22ON) {
 		} state door_a8_closed
 	}
 //////////////////////////////////////////////////////////
@@ -98,11 +98,11 @@ ss EV3_clearance_status {
 
 		} state   clearance_faillures
 		
-		when (SSC_W23_STS == DA8S1OFF) {
+		when (EV3_W23_STS == DA8S1OFF) {
 			EV3_update_report(DA8S1OFF);
 		} state door_a8_closed
 
-		when (SSC_W23_STS == DA8S2OFF) {
+		when (EV3_W23_STS == DA8S2OFF) {
 			EV3_update_report(DA8S2OFF);
 		} state door_a8_closed
 
@@ -120,7 +120,7 @@ ss EV3_clearance_status {
 		} state  clearance_faillures
 			
 			
-		when (!SSC_W23_STS) {
+		when (!EV3_W23_STS) {
 
 			EV3_status();
 		} state vault_cleared

@@ -52,7 +52,7 @@ monitor	SPC2GF_FAIL_COND;
 
 ss SPC2GF_clearance_status {
     state init {
-		when (delay(1.5)) {
+		when (delay(8.5)) {
 			initVault();
 			printf("%sSPC2 GROUND-FLOOR INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_46_pressed	
@@ -170,7 +170,7 @@ ss SPC2GF_clearance_status {
 			spc2GFUpdate= FALSE;
 		}
 
-		when (SPC2GF_FAIL_COND) {
+		when () {
 					
 			SPC2GF_update_failed(SPC2GF_FAIL_COND);
 		} state recover_faillure
@@ -209,7 +209,6 @@ void initVault(){
 	pvPut(SPC2GF_INIT, SYNC);
 	pvPut(SPC2GF_CLR_STATS, SYNC);
 	pvPut(SPC2GF_INTLCK_STATS, SYNC);
-	printf("%s%s%s\n",ERROR,SPC2GF_INTLCK_STATS,DEF);
 }
 ////////////////////////////////////////////////////////////////////////
 void SPC2GF_update_failed(short report)
@@ -218,6 +217,7 @@ void SPC2GF_update_failed(short report)
 	pvPut(SPC2GF_CLR_STATS, SYNC);
 	report_error(SPC2GF_INTLCK_STATS, report);
 	pvPut(SPC2GF_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,SPC2GF_INTLCK_STATS,DEF);
 }
 /////////////////////////////////////////////////////////////////////////
 void SPC2GF_update_report(short intlck) {

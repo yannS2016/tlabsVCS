@@ -41,7 +41,7 @@ monitor	cnA_FAIL_COND;
 
 ss cnA_clearance_status {
     state init {
-		when (delay(6)) {
+		when (delay(7.5)) {
 			initVault();
 			printf("%sNORTHERN PASSAGE WAY OF A-BLOCK INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_38_pressed	

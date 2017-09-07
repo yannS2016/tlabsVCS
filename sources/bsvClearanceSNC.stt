@@ -40,7 +40,7 @@ monitor	BSV_FAIL_COND;
 
 ss BSV_clearance_status {
     state init {
-		when (delay(5.0)) {
+		when (delay(7.0)) {
 			initVault();
 			printf("%sBEAM SWINGER VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_36_pressed	

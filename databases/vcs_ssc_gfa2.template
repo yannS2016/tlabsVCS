@@ -76,11 +76,15 @@ record(calc, "$(SYS):SSCA2-VNC") {
   field(INPA, "$(SYS):SSC-W13-STS PP")  
 }
 ###############################################################
-
+# WHEN SSC-WX-STS RETURN 0 A SECOND OUTS WRITE IN DONE
+# THIS MUST BE AVOIDED FOR IT'S RESET COUNTER DURING CLEARANCE
+# WE DO NOT RETEURN THIS VAL IN SSC-W13-STS
+# INSTEAD A FORWARD LINK IS USED TO PROCESS SSC-WX-STS
+# WE MAY HAVE JUST USE SSC-WX-STS IN PP MODE AS AN INPUT TO SSC-W13-STS
 record(calcout, "$(SYS):SSC-W13-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!A?!B?!C?$(VCOK):$(B13ON):!C?$(B13NP):D:$(FAIL)")
+  field(CALC, "!A?!B?!C?$(VCOK):$(B13ON):!C?$(B13NP):$(B14OFF):$(FAIL)")
   field(INPA, "$(SYS):SSCA2-FAIL-COND PP")
   field(INPB, "$(SYS):WS-BUT-SSC-13.VAL")
   field(INPC, "$(SYS):WATCHMAN-SSC-13-ACT NPP")

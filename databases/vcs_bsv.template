@@ -24,6 +24,7 @@ record(fanout, "$(SYS):BSV-PROC-STAGE") {
 record(calcout, "$(SYS):BSV-VC") { 
   field(DESC, "BSV Vault clear stage")
   field(SCAN, "Passive")
+  field(FLNK, "$(SYS):BSV-FAIL-COND")
   field(CALC, "!A?!B?C?$(BSVPNK):$(VCOK):$(DA15ON):$(RA15ON)")
   field(INPA, "$(SYS):SW-RF-A15.VAL")
   field(INPB, "$(SYS):BSV-DA15-CLSD.VAL PP") # FOR TESTING 

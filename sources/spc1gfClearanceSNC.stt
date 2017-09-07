@@ -61,7 +61,6 @@ ss SPC1GF_clearance_status {
 		
 		when (!SPC1GF_FAIL_COND) {
 			if(!spc1GFUpdate) {
-				printf("%sRECOVERING FROM FAILLURE - ENTERING W40 STATE: %d%s\n",OK,SPC1_W40_STS,DEF);
 				spc1GFUpdate = TRUE;
 			}
 		} state  watchman_40_pressed

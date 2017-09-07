@@ -281,7 +281,7 @@ record(bi, "$(SYS):SW-II-SPC2-A007") {
 ## THIS RECORDS MUST BE SET FROM THE SEQ ##
 record(bi, "$(SYS):SPC2L-INIT") {
   field(SCAN, "Passive")
-  field(VAL, "0")
+  field(VAL, "1")
   field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")

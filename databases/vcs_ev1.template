@@ -22,6 +22,7 @@ record(fanout, "$(SYS):EV1-PROC-STAGE") {
 record(calcout, "$(SYS):EV1-VC") { 
   field(DESC, "EV1 Vault clear stage")
   field(SCAN, "Passive")
+  field(FLNK, "$(SYS):EV1-FAIL-COND")
   field(CALC, "!A?!B?!C?D?$(EV1PNK):$(VCOK):$(DA6ON):$(RA7ON):$(RA6ON)")
   field(INPA, "$(SYS):SW-RF-A6.VAL")
   field(INPB, "$(SYS):SW-RF-A7.VAL")
@@ -54,7 +55,7 @@ record(seq, "$(SYS):RST-EV1") { # HANDLE BY SEQ
 record(calcout, "$(SYS):EV1-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!A?!B?!C?$(VCOK):$(TOUT):$(RA6ON):$(RA7ON)")
+  field(CALC, "!A?!B?!C?$(VCOK):$(TOUT):$(RA7ON):$(RA6ON)")
   field(INPA, "$(SYS):SW-RF-A6 NPP") 
   field(INPB, "$(SYS):SW-RF-A7 NPP")
   field(INPC, "$(SYS):EV1-TIMEOUT NPP") 
@@ -224,13 +225,14 @@ record(bi, "$(SYS):WS-BUT-EV1-18") {
   field(ONAM, "ON")
 }
 
-record(bi, "$(SYS):SW-RF-A7") {
+record(bi, "$(SYS):SW-RF-A6") {
   field(SCAN, "Passive")
-  field(VAL, "0")
+  field(VAL, "1")
   field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")
 }
+
 
 record(bi, "$(SYS):SW-I-EV1-A6") {
   field(SCAN, "Passive")

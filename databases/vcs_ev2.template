@@ -24,6 +24,7 @@ record(fanout, "$(SYS):EV2-PROC-STAGE") {
 record(calcout, "$(SYS):EV2-VC") { 
   field(DESC, "EV2 Vault clear stage")
   field(SCAN, "Passive")
+  field(FLNK, "$(SYS):EV2-FAIL-COND")
   field(CALC, "!A?!B?C?$(EV2PNK):$(VCOK):$(DA7ON):$(RA7ON)")
   field(INPA, "$(SYS):SW-RF-A7.VAL")
   field(INPB, "$(SYS):EV2-DA7-CLSD.VAL PP") # FOR TESTING 
@@ -227,11 +228,11 @@ record(bi, "$(SYS):WS-BUT-EV2-20") {
 
 record(bi, "$(SYS):SW-RF-A7") {
   field(SCAN, "Passive")
-  field(VAL, "0")
+  field(VAL, "1")
   field(PINI, "YES")
   field(ZNAM, "OFF")
   field(ONAM, "ON")
-}
+} 
 
 record(bi, "$(SYS):SW-I-EV2-A7") {
   field(SCAN, "Passive")

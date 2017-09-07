@@ -58,10 +58,8 @@ record(calcout, "$(SYS):IBL-VC") {
   field(DESC, "IBL Vault clear stage")
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(FLNK, "$(SYS):IBL-FAIL-COND") # THIS RECORD MUST IMMEDIATELY READ A FAIL CONDITION
+  field(FLNK, "$(SYS):IBL-FAIL-COND")
   field(CALC, "!A?B?!C?!D?E?$(IBLPNK):$(VCOK):$(DA13ON):$(GA1AON):$(A13AON):$(RA13ON)")
-# IN LIVE APP USE A FLNK FROM  SW-I-SSC-A1A OR SW-I-SSC-A1A (SCAN=Intr) TO PROCESS THIS RECORD
-# AND ACCES IT HERE WITH NPP OR ACCES IT WITH PP BUT USE NPP ON ITS INPUTS
   field(INPA, "$(SYS):SW-RF-A13.VAL NPP") 
   field(INPB, "$(SYS):A13A-CLR.VAL NPP")
   field(INPC, "$(SYS):SSC-GA1A-CLSD PP")
@@ -96,12 +94,16 @@ record(seq, "$(SYS):RST-IBL") { # MAY BE HANDLE BY SEQ
   field(SELM, "All")
 }
 ########################################################################
-# formula to monitor status of inputs and set output in stage 1
+# WHEN IBL-WX-STS RETURN 0 A SECOND OUTS WRITE IN DONE
+# THIS MUST BE AVOIDED FOR IT'S RESET COUNTER DURING CLEARANCE
+# WE DO NOT RETEURN THIS VAL IN IBL-W26-STS
+# INSTEAD A FORWARD LINK IS USED TO PROCESS IBL-WX-STS
+# WE MAY HAVE JUST USE IBL-WX-STS IN PP MODE AS AN INPUT TO IBL-W26-STS
 record(calcout, "$(SYS):IBL-W9-STS") {
   field(DESC, "Vault clearance stage 1")
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!A?!B?!C?$(VCOK):$(B9ON):!C?$(B9NP):D:$(FAIL)")
+  field(CALC, "!A?!B?!C?$(VCOK):$(B9ON):!C?$(B9NP):$(B8OFF):$(FAIL)")
   field(INPA, "$(SYS):IBL-FAIL-COND.VAL PP") 
   field(INPB, "$(SYS):WS-BUT-IBL-9.VAL")
   field(INPC, "$(SYS):WATCHMAN-IBL-9-ACT.VAL")
@@ -126,12 +128,6 @@ record(seq, "$(SYS):IBLW9-WRT-OUTS") { # MAY BE HANDLED BY SEQ
 }
 
 ##################################################################
-# 
-# !E||F IS USED FOR 2  CONDITION
-# B8ON IS NOT RETURN AFTER B8 IS PRESSED AND RELEASED
-# IBL-VNCS2 RETURN 0 SO WE CAN PROCEED TO STAGE 3.
-# A?!B?C?!D?!E?!F?!G?!H?(!I||J)?$(VCOK):$(B8OFF):$(GA1AS4ON):$(GA1AS3ON):$(GA1AS2ON):$(GA1AS1ON):$(TOUT):$(A13AON):$(RA13ON):$(B9ON)
-# !A?!B?!C?$(VCOK):$(B9ON):!C?$(B9NP):D
 record(calcout, "$(SYS):IBL-W8-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")

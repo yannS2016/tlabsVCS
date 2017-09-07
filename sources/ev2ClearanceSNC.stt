@@ -14,8 +14,8 @@ program ev2ClearanceSNC
 /* Declare seq variables*/
 short EV2_INIT; 
 short EV2_VC;   
-short SSC_W20_STS;
-short SSC_W21_STS;
+short EV2_W20_STS;
+short EV2_W21_STS;
 short EV2_FAIL_COND;
 string EV2_CLR_STATS; 
 string EV2_INTLCK_STATS;
@@ -29,18 +29,18 @@ assign	EV2_INTLCK_STATS	to	"{SYS}:EV2-INTLCK-STATS";
 /* Associate SNL variables with epics input pv's*/
 assign 	EV2_VC 				to 	"{SYS}:EV2-VC"; 
 assign 	EV2_INIT 			to 	"{SYS}:EV2-INIT";
-assign 	SSC_W20_STS 		to 	"{SYS}:SSC-W20-STS";   
-assign 	SSC_W21_STS 		to 	"{SYS}:SSC-W21-STS";
+assign 	EV2_W20_STS 		to 	"{SYS}:EV2-W20-STS";   
+assign 	EV2_W21_STS 		to 	"{SYS}:EV2-W21-STS";
 assign	EV2_FAIL_COND		to	"{SYS}:EV2-FAIL-COND";
 
 monitor	EV2_VC;
-monitor SSC_W20_STS;  
-monitor SSC_W21_STS;
+monitor EV2_W20_STS;  
+monitor EV2_W21_STS;
 monitor	EV2_FAIL_COND;
 
 ss EV2_clearance_status {
     state init {
-		when (delay(0.8)) {
+		when (delay(5.5)) {
 			initVault();
 			printf("%sEXPERIMENTAL VAULT 2 INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_20_pressed	
@@ -76,7 +76,7 @@ ss EV2_clearance_status {
 			EV2_OLD_FAIL_COND = EV2_FAIL_COND;
 		} state  clearance_faillures
 			
-		when (SSC_W20_STS == B20ON) {
+		when (EV2_W20_STS == B20ON) {
 			EV2_clear_underway();
 			EV2_update_report(B20ON);
 		} state watchman_20_released
@@ -88,7 +88,7 @@ ss EV2_clearance_status {
 
 		} state  clearance_faillures
 			
-		when (SSC_W20_STS != B20ON) {
+		when (EV2_W20_STS != B20ON) {
 		} state door_a7_closed
 	}
 //////////////////////////////////////////////////////////
@@ -98,11 +98,11 @@ ss EV2_clearance_status {
 
 		} state   clearance_faillures
 		
-		when (SSC_W21_STS == DA7S1OFF) {
+		when (EV2_W21_STS == DA7S1OFF) {
 			EV2_update_report(DA7S1OFF);
 		} state door_a7_closed
 
-		when (SSC_W21_STS == DA7S2OFF) {
+		when (EV2_W21_STS == DA7S2OFF) {
 			EV2_update_report(DA7S2OFF);
 		} state door_a7_closed
 
@@ -120,7 +120,7 @@ ss EV2_clearance_status {
 		} state  clearance_faillures
 			
 			
-		when (!SSC_W21_STS) {
+		when (!EV2_W21_STS) {
 
 			EV2_status();
 		} state vault_cleared

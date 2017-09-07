@@ -14,8 +14,8 @@ program hliClearanceSNC
 /* Declare seq variables*/
 short HLI_INIT; 
 short HLI_VC;   
-short SSC_W30_STS;
-short SSC_W31_STS;
+short HLI_W30_STS;
+short HLI_W31_STS;
 short HLI_FAIL_COND;
 string HLI_CLR_STATS; 
 string HLI_INTLCK_STATS;
@@ -29,18 +29,18 @@ assign	HLI_INTLCK_STATS	to	"{SYS}:HLI-INTLCK-STATS";
 /* Associate SNL variables with epics input pv's*/
 assign 	HLI_VC 				to 	"{SYS}:HLI-VC"; 
 assign 	HLI_INIT 			to 	"{SYS}:HLI-INIT";
-assign 	SSC_W30_STS 		to 	"{SYS}:SSC-W30-STS";   
-assign 	SSC_W31_STS 		to 	"{SYS}:SSC-W31-STS";
+assign 	HLI_W30_STS 		to 	"{SYS}:HLI-W30-STS";   
+assign 	HLI_W31_STS 		to 	"{SYS}:HLI-W31-STS";
 assign	HLI_FAIL_COND		to	"{SYS}:HLI-FAIL-COND";
 
 monitor	HLI_VC;
-monitor SSC_W30_STS;  
-monitor SSC_W31_STS;
+monitor HLI_W30_STS;  
+monitor HLI_W31_STS;
 monitor	HLI_FAIL_COND;
 
 ss HLI_clearance_status {
     state init {
-		when (delay(0.8)) {
+		when (delay(9.0)) {
 			initVault();
 			printf("%sHORIZONTAL LINE VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_30_pressed	
@@ -76,7 +76,7 @@ ss HLI_clearance_status {
 			HLI_OLD_FAIL_COND = HLI_FAIL_COND;
 		} state  clearance_faillures
 			
-		when (SSC_W30_STS == B30ON) {
+		when (HLI_W30_STS == B30ON) {
 			HLI_clear_underway();
 			HLI_update_report(B30ON);
 		} state watchman_30_released
@@ -88,7 +88,7 @@ ss HLI_clearance_status {
 
 		} state  clearance_faillures
 			
-		when (SSC_W30_STS != B30ON) {
+		when (HLI_W30_STS != B30ON) {
 		} state door_a14_closed
 	}
 //////////////////////////////////////////////////////////
@@ -98,11 +98,11 @@ ss HLI_clearance_status {
 
 		} state   clearance_faillures
 		
-		when (SSC_W31_STS == DA14S1OFF) {
+		when (HLI_W31_STS == DA14S1OFF) {
 			HLI_update_report(DA14S1OFF);
 		} state door_a14_closed
 
-		when (SSC_W31_STS == DA14S2OFF) {
+		when (HLI_W31_STS == DA14S2OFF) {
 			HLI_update_report(DA14S2OFF);
 		} state door_a14_closed
 
@@ -120,7 +120,7 @@ ss HLI_clearance_status {
 		} state  clearance_faillures
 			
 			
-		when (!SSC_W31_STS) {
+		when (!HLI_W31_STS) {
 
 			HLI_status();
 		} state vault_cleared

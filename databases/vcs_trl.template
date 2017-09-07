@@ -78,7 +78,7 @@ record(seq, "$(SYS):RST-TRL") { # MAY BE HANDLE BY SEQ
 record(calcout, "$(SYS):TRL-W34a-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!A?!B?$(VCOK):$(B34aON):!B?$(B34aNP):C")
+  field(CALC, "!A?!B?$(VCOK):$(B34aON):!B?$(B34aNP):$(B34bOFF)")
   field(INPA, "$(SYS):WS-BUT-TRL-34a.VAL")
   field(INPB, "$(SYS):WATCHMAN-TRL-34a-ACT.VAL")
   field(INPC, "$(SYS):TRL-W34b-STS PP")	  

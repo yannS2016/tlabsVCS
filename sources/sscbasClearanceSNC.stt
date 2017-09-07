@@ -104,8 +104,9 @@ ss SSCL_clearance_status {
 
 	state watchman_1_pressed {
 
-		when (SSC_W1_STS == FAIL) {
+		when (SSCL_FAIL_COND != VCOK) {
 			SSCL_OLD_FAIL_COND = SSCL_FAIL_COND;
+		    //printf("%sFAIL COND: %d%s\n",OK,SSCL_FAIL_COND,DEF);
 		} state  clearance_faillures
 			
 		when (!SSC_W1_STS) {
@@ -262,22 +263,21 @@ ss SSCL_clearance_status {
 			SSCL_status();
 		} state vault_cleared
 	}
-//////////////////////////////////////////////////////////////////
-	
+//////////////////////////////////////////////////////////////////	
 	state clearance_faillures { 			/* FAIL CONDITIONS*/
 		option -e;
 		option -x;
+		
 		entry {
 			printf("SSC LOW CLEARANCE FAILURE CONDITION: ");
 			released = FALSE;
-			SSCL_OLD_FAIL_COND = SSCL_FAIL_COND;
 		}
 
 		when () {
 			
 			SSCL_update_failed(SSCL_FAIL_COND);
 		} state recover_faillure
-		
+
 		exit {
 		    SSCL_OLD_FAIL_COND = SSCL_FAIL_COND;
 		}
@@ -286,23 +286,43 @@ ss SSCL_clearance_status {
 	state vc_faillures { 			/* FAIL CONDITIONS*/
 		
 		option -e;
-		option -x;
 		entry {
 			printf("SSC LOW CLEAR FAILURE CONDITION: ");
 			released = FALSE;
 		}
 
-		when () {
+		when (SSCL_VC == A001AON) {
 			
-			SSCL_update_failed(SSCL_VC);
+			SSCL_update_failed(A001AON);
+			printf("%sSSC CABLE LABYRINTH NOT CLEARED%s\n",ERROR,DEF);
 		} state recover_faillure
 		
-		exit {
-		    SSCL_OLD_FAIL_COND = SSCL_FAIL_COND;
-		}	
+		when (SSCL_VC == G1ON) {
+			
+			SSCL_update_failed(G1ON);
+			printf("%sGATE G1 WAS OPENED%s\n",ERROR,DEF);
+		} state recover_faillure
+		
+		when (SSCL_VC == G2ON) {
+			
+			SSCL_update_failed(G2ON);
+			printf("%sGATE G2 WAS OPENED%s\n",ERROR,DEF);
+		} state recover_faillure
+		
+		when (SSCL_VC == DA001ON) {
+			
+			SSCL_update_failed(DA001ON);
+			printf("%sDOOR A001 WAS OPENED%s\n",ERROR,DEF);
+		} state recover_faillure
+
+		when (SSCL_VC == SSCLPNK) {
+			
+			SSCL_update_failed(SSCLPNK);
+			printf("%sPANIC BUTTON WAS  PRESSED%s\n",ERROR,DEF);
+		} state recover_faillure
 	}
 }
-//////////////////////////////////////////////////////////////////////////////////
+
 void initVault(){
 	SSCL_INIT = TRUE;
 	not_cleared(SSCL_CLR_STATS);

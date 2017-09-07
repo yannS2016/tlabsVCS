@@ -46,7 +46,7 @@ monitor	VLI_FAIL_COND;
 
 ss VLI_clearance_status {
     state init {
-		when (delay(0.8)) {
+		when (delay(9.5)) {
 			initVault();
 			printf("%sVERTICAL BEAMLINE VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_32_pressed	

@@ -23,8 +23,8 @@ record(fanout, "$(SYS):EXP-PROC-STAGE") {
 record(calcout, "$(SYS):EXP-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!E?$(VCOK):!A?!B?!C?!D?$(VCOK):$(G10ON):$(TOUT):$(G9ON):$(RA12ON)")
-  field(INPA, "$(SYS):SW-RF-A12-CLSD NPP") 
+  field(CALC, "!A?!B?!C?!D?$(VCOK):$(G10ON):$(TOUT):$(G9ON):$(RA12ON)")
+  field(INPA, "$(SYS):SW-RF-A12 NPP") 
   field(INPB, "$(SYS):SW-G9-EXP-A12 NPP")
   field(INPC, "$(SYS):EXP-TIMEOUT NPP")
   field(INPD, "$(SYS):EXP-G10-FAIL PP") 
@@ -45,15 +45,15 @@ record(calcout, "$(SYS):EXP-VC") {
   field(DESC, "EXP Vault clear stage")
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(FLNK, "$(SYS):EXP-FAIL-COND") 
+  field(FLNK, "$(SYS):EXP-FAIL-COND")
   field(CALC, "!A?!B?!C?!D?E?$(EXPPNK):$(VCOK):$(G10ON):$(G9ON):$(DA12ON):$(RA12ON)")
-  field(INPA, "$(SYS):SW-RF-A12-CLSD.VAL NPP")
+  field(INPA, "$(SYS):SW-RF-A12.VAL NPP")
   field(INPB, "$(SYS):EXP-DA12-CLSD.VAL.VAL PP")  
   field(INPC, "$(SYS):SW-G9-EXP-A12.VAL NPP")
   field(INPD, "$(SYS):SW-G10-EXP-A12.VAL NPP")
   field(INPE, "$(SYS):EXP-PNK.VAL PP")
   field(OUT,  "$(SYS):RST-EXP PP")  
-  field(OOPT, "When Non-zero")
+  field(OOPT, "Transition To Non-zero")
 }
 
 ####################### RESET VAULT #################
@@ -93,13 +93,11 @@ record(seq, "$(SYS):RST-EXP-FLAGS") { # MAY BE HANDLE BY SEQ
   field(DOL3, "0")
   field(DOL4, "0")
   field(DOL5, "0")
-  field(DOL6, "0")
   field(LNK1, "$(SYS):WATCHMAN-EXP-26-ACT PP")
   field(LNK2, "$(SYS):WATCHMAN-EXP-28b-ACT PP")
   field(LNK3, "$(SYS):WATCHMAN-EXP-28a-ACT PP")
   field(LNK4, "$(SYS):WATCHMAN-EXP-27-ACT PP")
-  field(LNK5, "$(SYS):WATCHMAN-EXP-29-ACT PP")
-  field(LNK6, "$(SYS):EXP-G10-ACT PP")
+  field(LNK5, "$(SYS):EXP-G10-ACT PP")
   field(SELM, "All")
 }
 #######################################################################
@@ -111,11 +109,17 @@ record(calc, "$(SYS):EXP-VNC") {
   field(INPA, "$(SYS):EXP-W26-STS PP")   	  
 }
 ########################################################################
+# WHEN EXP-WX-STS RETURN 0 A SECOND OUTS WRITE IN DONE
+# THIS MUST BE AVOIDED FOR IT'S RESET COUNTER DURING CLEARANCE
+# WE DO NOT RETEURN THIS VAL IN EXP-W26-STS
+# INSTEAD A FORWARD LINK IS USED TO PROCESS EXP-WX-STS
+# WE MAY HAVE JUST USE EXP-WX-STS IN PP MODE AS AN INPUT TO EXP-W26-STS
 record(calcout, "$(SYS):EXP-W26-STS") {
   field(DESC, "Vault clearance")
   field(SCAN, "Passive")
-  field(PINI, "YES") 
-  field(CALC, "!A?!B?!C?$(VCOK):$(B26ON):!C?$(B26NP):D:$(FAIL)")
+  field(PINI, "YES")
+#  field(FLNK, "$(SYS):EXP-W28b-STS") 
+  field(CALC, "!A?!B?!C?$(VCOK):$(B26ON):!C?$(B26NP):$(B28bOFF):$(FAIL)")
   field(INPA, "$(SYS):EXP-FAIL-COND PP")
   field(INPB, "$(SYS):WS-BUT-EXP-26 NPP")
   field(INPC, "$(SYS):WATCHMAN-EXP-26-ACT NPP") 
@@ -138,18 +142,12 @@ record(seq, "$(SYS):EXPW26-WRT-OUTS") { # MAY BE HANDLED BY SEQ
   field(SCAN, "Passive")
   field(SELM, "All")
 }
-# IN THE NEXT FORMAT HAVE STAGE 3 AS SEPARATE LINK OF STAGE 2 AND CALLED STAGE 2 IN STAGE 3
-##################################################################
-# 
-# !E||F IS USED FOR 2  CONDITION
-# B28bON IS NOT RETURN AFTER B28b IS PRESSED AND RELEASED
-# EXP-VNCS2 RETURN 0 SO WE CAN PROCEED TO STAGE 3.
-#
+########################################################################################################
 record(calcout, "$(SYS):EXP-W28b-STS") {
   field(DESC, "Vault clearance stage 2")
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!A?!B?C&&!D?!E?$(VCOK):$(B28bON):!E?$(B28bOFF):F:B:$(FAIL)")
+  field(CALC, "!A?!B?C&&!D?!E?$(VCOK):$(B28bON):!E?$(B28bOFF):1:B:$(FAIL)")
   field(INPA, "$(SYS):EXP-FAIL-COND PP")# THIS MUST BE CALLED IN PP	  	  	   
   field(INPB, "$(SYS):EXP-G10-STS.VAL PP")   # THIS MUST BE CALLED IN PP
   field(INPC, "$(SYS):EXP-WATCH-26-RLSD PP") # THIS MUST BE CALLED IN PP
@@ -158,6 +156,17 @@ record(calcout, "$(SYS):EXP-W28b-STS") {
   field(INPF, "$(SYS):EXP-W28a-STS PP")	
   field(OUT,  "$(SYS):EXPW28b-WRT-OUTS.PROC PP")  
   field(OOPT, "Transition To Zero")
+}
+#####################################################################################
+# OFF IS USE TO INDICATE THAT THE DOOR IS IN CLOSED STATE SO WE CAN CONTINU CLEARANCE
+# A&&!B FAIL WHEN A UNDERWENT A STATE TRANSITION AS B LATCHES
+record(calc, "$(SYS):EXP-G10-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+#  field(FLNK, "$(SYS):EXP-FAIL-COND") # THIS RECORD MUST IMMEDIATELY READ A FAIL CONDITION
+  field(CALC, "!A?$(VCOK):!B?$(G10OFF):$(G10ON)")	  	   
+  field(INPA, "$(SYS):SW-G10-EXP-A12 NPP")
+  field(INPB, "$(SYS):EXP-G10-ACT NPP")
 }
 ###################################################################################################
 # THIS RECORDS IS PROCESSED ONLY WHEN EXP-VNCS2 RETURN 0
@@ -171,17 +180,6 @@ record(seq, "$(SYS):EXPW28b-WRT-OUTS") {
   field(LNK2, "$(SYS):LED-WS-EXP-28b PP")
   field(LNK3, "$(SYS):EXP-G10-ACT PP")
   field(SCAN, "Passive")
-}
-#####################################################################################
-# OFF IS USE TO INDICATE THAT THE DOOR IS IN CLOSED STATE SO WE CAN CONTINU CLEARANCE
-# A&&!B FAIL WHEN A UNDERWENT A STATE TRANSITION AS B LATCHES
-record(calc, "$(SYS):EXP-G10-STS") {
-  field(SCAN, "Passive")
-  field(PINI, "YES")
-  field(FLNK, "$(SYS):EXP-FAIL-COND") # THIS RECORD MUST IMMEDIATELY READ A FAIL CONDITION
-  field(CALC, "!A?$(VCOK):!B?$(G10OFF):$(G10ON)")	  	   
-  field(INPA, "$(SYS):SW-G10-EXP-A12 NPP")
-  field(INPB, "$(SYS):EXP-G10-ACT NPP")
 }
 ########################################################################################
 record(calcout, "$(SYS):EXP-W28a-STS") {
@@ -259,13 +257,12 @@ record(seq, "$(SYS):EXPW29-WRT-OUTS") {
   field(DOL3, "1")
   field(DOL4, "1")
   field(DLY2, "0.02")
-  field(LNK1, "$(SYS):RST-EXP PP")
+  field(LNK1, "$(SYS):RST-EXP.PROC PP")
   field(LNK2, "$(SYS):EXP-CLR PP")
   field(LNK3, "$(SYS):LED-WS-EXP-29 PP")
   field(LNK4, "$(SYS):EXP-G10-ACT PP")
   field(SCAN, "Passive")
 }
-
 
 ##########################################################################
 # WATCHMAN 26 RELEASED
@@ -536,7 +533,7 @@ record(bi, "$(SYS):SW-G10-EXP-A12") {
   field(ONAM, "ON")
 }
 #ROOF
-record(bi, "$(SYS):SW-RF-A12-CLSD") {
+record(bi, "$(SYS):SW-RF-A12") {
   field(SCAN, "Passive")
   field(VAL, "1")
   field(PINI, "YES")
