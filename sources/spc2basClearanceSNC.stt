@@ -47,7 +47,7 @@ ss SPC2L_clearance_status {
     state init {
 		when (delay(8)) {
 			initVault();
-			printf("%sSPC2 BASEMENT VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+			printf("\n%sSPC2 BASEMENT VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_44_pressed	
     }
 ///////////////////////////////////////////////////////////////
@@ -66,13 +66,12 @@ ss SPC2L_clearance_status {
 		
 		when (!SPC2L_FAIL_COND) {
 			if(!SPC2LUpdate) {
-				printf("%sSPC2 LOW RECOVERING FROM FAILLURE - ENTERING W44 STATE: %d%s\n",OK,SPC2_W44_STS,DEF);
+				printf("%sSPC2 LOW RECOVERING FROM FAILLURE - ENTERING W44 STATE%s\n",OK,DEF);
 				SPC2LUpdate = TRUE;
 			}
 		} state  watchman_44_pressed
 			
 		when (SPC2L_FAIL_COND != SPC2L_OLD_FAIL_COND) {
-			printf("%sNEW FAILLURE %d  %d %s\n",OK,SPC2L_OLD_FAIL_COND,SPC2L_FAIL_COND,DEF);
 		} state  clearance_faillures
 	}
 //////////////////////////////////////////////////////////

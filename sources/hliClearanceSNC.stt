@@ -42,7 +42,7 @@ ss HLI_clearance_status {
     state init {
 		when (delay(9.0)) {
 			initVault();
-			printf("%sHORIZONTAL LINE VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+			printf("\n%sHORIZONTAL LINE VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_30_pressed	
     }
 ///////////////////////////////////////////////////////////////

@@ -43,7 +43,7 @@ short SSCL_FAIL_COND;
 short SSCL_OLD_FAIL_COND;
 string SSCL_CLR_STATS; 
 string SSCL_INTLCK_STATS;
-short released = FALSE;
+short ssclUpdate = FALSE;
 /* Associate SNL variables with epics output pv's*/
 assign	SSCL_CLR_STATS		to	"{SYS}:SSCL-CLR-STATS"; 
 assign	SSCL_INTLCK_STATS	to	"{SYS}:SSCL-INTLCK-STATS"; 
@@ -90,9 +90,9 @@ ss SSCL_clearance_status {
 	state recover_faillure {
 
 		when (!SSCL_FAIL_COND) {
-			if(!released) {
+			if(!ssclUpdate) {
 				printf("%sRECOVERING FROM FAILLURE: ENTERING W1 STATE%s\n",OK,DEF);
-				released = TRUE;
+				ssclUpdate = TRUE;
 			}
 		} state  watchman_1_pressed
 		
@@ -106,7 +106,6 @@ ss SSCL_clearance_status {
 
 		when (SSCL_FAIL_COND != VCOK) {
 			SSCL_OLD_FAIL_COND = SSCL_FAIL_COND;
-		    //printf("%sFAIL COND: %d%s\n",OK,SSCL_FAIL_COND,DEF);
 		} state  clearance_faillures
 			
 		when (!SSC_W1_STS) {
@@ -124,7 +123,6 @@ ss SSCL_clearance_status {
 		
 		when (SSC_W2_STS == B2ON) {
 			SSCL_update_report(B2ON);
-			printf("%sLAST VALUE %d%s\n",OK,SSC_W2_STS,DEF);
 		} state watchman_2_released
 	}
 //////////////////////////////////////////////////////////
@@ -136,7 +134,6 @@ ss SSCL_clearance_status {
 		
 		when (SSC_W2_STS == B3OFF) {
 			SSCL_update_report(B3OFF);
-			printf("%sLAST VALUE %d%s\n",OK,SSC_W2_STS,DEF);
 		} state watchman_3_pressed
 	}
 ///////////////////////////////////////////////////////////
@@ -270,7 +267,7 @@ ss SSCL_clearance_status {
 		
 		entry {
 			printf("SSC LOW CLEARANCE FAILURE CONDITION: ");
-			released = FALSE;
+			ssclUpdate = FALSE;
 		}
 
 		when () {
@@ -286,40 +283,21 @@ ss SSCL_clearance_status {
 	state vc_faillures { 			/* FAIL CONDITIONS*/
 		
 		option -e;
+		option -x;
+		
 		entry {
 			printf("SSC LOW CLEAR FAILURE CONDITION: ");
-			released = FALSE;
+			ssclUpdate = FALSE;
 		}
 
-		when (SSCL_VC == A001AON) {
+		when () {
 			
-			SSCL_update_failed(A001AON);
-			printf("%sSSC CABLE LABYRINTH NOT CLEARED%s\n",ERROR,DEF);
+			SSCL_update_failed(SSCL_VC);
 		} state recover_faillure
 		
-		when (SSCL_VC == G1ON) {
-			
-			SSCL_update_failed(G1ON);
-			printf("%sGATE G1 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		when (SSCL_VC == G2ON) {
-			
-			SSCL_update_failed(G2ON);
-			printf("%sGATE G2 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-		
-		when (SSCL_VC == DA001ON) {
-			
-			SSCL_update_failed(DA001ON);
-			printf("%sDOOR A001 WAS OPENED%s\n",ERROR,DEF);
-		} state recover_faillure
-
-		when (SSCL_VC == SSCLPNK) {
-			
-			SSCL_update_failed(SSCLPNK);
-			printf("%sPANIC BUTTON WAS  PRESSED%s\n",ERROR,DEF);
-		} state recover_faillure
+		exit {
+		    SSCL_OLD_FAIL_COND = SSCL_FAIL_COND;
+		}
 	}
 }
 

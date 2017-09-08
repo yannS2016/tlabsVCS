@@ -42,7 +42,7 @@ ss SPE_clearance_status {
     state init {
 		when (delay(6.5)) {
 			initVault();
-			printf("%sSPECTROMETER VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+			printf("\n%sSPECTROMETER VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
 		} state watchman_24_pressed	
     }
 ///////////////////////////////////////////////////////////////
