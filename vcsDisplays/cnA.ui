@@ -225,52 +225,46 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_10">
      <item>
-      <widget class="QEPushButton" name="qepushbutton">
+      <widget class="QERadioButton" name="qeradiobutton_6">
        <property name="text">
         <string>WS_button_cnA_38</string>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>12</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
        </property>
        <property name="variable" stdset="0">
         <string>VCS:WS-BUT-cnA-38</string>
        </property>
-       <property name="writeOnPress">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnRelease">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnClick">
-        <bool>false</bool>
-       </property>
-       <property name="pressText">
-        <string>0</string>
-       </property>
-       <property name="releaseText">
-        <string>1</string>
+       <property name="format" stdset="0">
+        <enum>QERadioButton::Integer</enum>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QEPushButton" name="qepushbutton_2">
+      <widget class="QERadioButton" name="qeradiobutton_5">
        <property name="text">
         <string>WS_button_cnA_39</string>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>12</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
        </property>
        <property name="variable" stdset="0">
         <string>VCS:WS-BUT-cnA-39</string>
        </property>
-       <property name="writeOnPress">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnRelease">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnClick">
-        <bool>false</bool>
-       </property>
-       <property name="pressText">
-        <string>0</string>
-       </property>
-       <property name="releaseText">
-        <string>1</string>
+       <property name="format" stdset="0">
+        <enum>QERadioButton::Integer</enum>
        </property>
       </widget>
      </item>
@@ -552,11 +546,6 @@
    <class>QELineEdit</class>
    <extends>QLineEdit</extends>
    <header>QELineEdit.h</header>
-  </customwidget>
-  <customwidget>
-   <class>QEPushButton</class>
-   <extends>QPushButton</extends>
-   <header>QEPushButton.h</header>
   </customwidget>
   <customwidget>
    <class>QERadioButton</class>

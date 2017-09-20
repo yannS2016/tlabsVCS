@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>645</width>
-    <height>455</height>
+    <height>404</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -89,13 +89,13 @@
        <item>
         <widget class="QERadioButton" name="qeradiobutton">
          <property name="text">
-          <string>switch_roof_A7_closed</string>
+          <string>switch_roof_A7</string>
          </property>
          <property name="autoExclusive">
           <bool>false</bool>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:SW-RF-A7-CLSD</string>
+          <string>VCS:SW-RF-A7</string>
          </property>
          <property name="format" stdset="0">
           <enum>QERadioButton::LocalEnumeration</enum>
@@ -113,11 +113,14 @@
          <property name="text">
           <string>switch_I_EV1_A7</string>
          </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
          <property name="variable" stdset="0">
           <string>VCS:SW-I-EV2-A7</string>
          </property>
          <property name="format" stdset="0">
-          <enum>QERadioButton::LocalEnumeration</enum>
+          <enum>QERadioButton::Integer</enum>
          </property>
         </widget>
        </item>
@@ -195,7 +198,7 @@
           </color>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:EV2-SNC-CLR</string>
+          <string>VCS:EV2-CLR</string>
          </property>
         </widget>
        </item>
@@ -219,46 +222,44 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_10">
      <item>
-      <widget class="QEPushButton" name="qepushbutton">
+      <widget class="QERadioButton" name="qeradiobutton_6">
        <property name="text">
         <string>WS_button_EV2_20</string>
        </property>
        <property name="variable" stdset="0">
         <string>VCS:WS-BUT-EV2-20</string>
        </property>
-       <property name="writeOnPress">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnRelease">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnClick">
-        <bool>false</bool>
-       </property>
-       <property name="pressText">
-        <string>0</string>
-       </property>
-       <property name="releaseText">
-        <string>1</string>
+       <property name="format" stdset="0">
+        <enum>QERadioButton::LocalEnumeration</enum>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QEPushButton" name="qepushbutton_2">
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QERadioButton" name="qeradiobutton_3">
        <property name="text">
         <string>WS_button_EV2_21</string>
+       </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
        </property>
        <property name="variable" stdset="0">
         <string>VCS:WS-BUT-EV2-21</string>
        </property>
-       <property name="writeOnPress">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnRelease">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnClick">
-        <bool>false</bool>
+       <property name="format" stdset="0">
+        <enum>QERadioButton::LocalEnumeration</enum>
        </property>
        <property name="pressText">
         <string>0</string>
@@ -497,11 +498,6 @@
    <class>QELineEdit</class>
    <extends>QLineEdit</extends>
    <header>QELineEdit.h</header>
-  </customwidget>
-  <customwidget>
-   <class>QEPushButton</class>
-   <extends>QPushButton</extends>
-   <header>QEPushButton.h</header>
   </customwidget>
   <customwidget>
    <class>QERadioButton</class>

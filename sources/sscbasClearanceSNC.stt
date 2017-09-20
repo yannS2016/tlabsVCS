@@ -5,17 +5,7 @@ program sscbasClearanceSNC
 #include "vcs_var_mes.h" // define this here so C functions are seen
 /*******************************************************************/	
 #define	VCOK       	0
-#define TOUT		5
 #define FAIL		-1
-#define	A001AON     15  
-#define	DA001ON	    16	
-#define	DA001S1ON	22	
-#define	DA001S2ON	23	
-#define SSCLPNK     19 
-#define	G1ON        17
-#define	G1S1ON      24  	
-#define	G1S2ON      25 
-#define	G2ON       	18
 #define	G2OFF       32
 #define B1ON        37
 #define W1ON        20

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>826</width>
+    <width>886</width>
     <height>646</height>
    </rect>
   </property>
@@ -124,13 +124,13 @@
        <item>
         <widget class="QERadioButton" name="qeradiobutton">
          <property name="text">
-          <string>switch_roof_A12_closed</string>
+          <string>switch_roof_A12</string>
          </property>
          <property name="autoExclusive">
           <bool>false</bool>
          </property>
          <property name="variable" stdset="0">
-          <string>VCS:SW-RF-A12-CLSD</string>
+          <string>VCS:SW-RF-A12</string>
          </property>
          <property name="format" stdset="0">
           <enum>QERadioButton::LocalEnumeration</enum>
@@ -313,21 +313,18 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_10">
      <item>
-      <widget class="QEPushButton" name="qepushbutton">
+      <widget class="QERadioButton" name="qeradiobutton_7">
        <property name="text">
         <string>WS_button_EXP_26</string>
+       </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
        </property>
        <property name="variable" stdset="0">
         <string>VCS:WS-BUT-EXP-26</string>
        </property>
-       <property name="writeOnPress">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnRelease">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnClick">
-        <bool>false</bool>
+       <property name="format" stdset="0">
+        <enum>QERadioButton::LocalEnumeration</enum>
        </property>
        <property name="pressText">
         <string>0</string>
@@ -338,21 +335,18 @@
       </widget>
      </item>
      <item>
-      <widget class="QEPushButton" name="qepushbutton_3">
+      <widget class="QERadioButton" name="qeradiobutton_8">
        <property name="text">
         <string>WS_button_EXP_28b</string>
+       </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
        </property>
        <property name="variable" stdset="0">
         <string>VCS:WS-BUT-EXP-28b</string>
        </property>
-       <property name="writeOnPress">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnRelease">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnClick">
-        <bool>false</bool>
+       <property name="format" stdset="0">
+        <enum>QERadioButton::LocalEnumeration</enum>
        </property>
        <property name="pressText">
         <string>0</string>
@@ -363,46 +357,18 @@
       </widget>
      </item>
      <item>
-      <widget class="QEPushButton" name="qepushbutton_4">
-       <property name="text">
-        <string>WS_button_EXP_28a</string>
-       </property>
-       <property name="variable" stdset="0">
-        <string>VCS:WS-BUT-EXP-28a</string>
-       </property>
-       <property name="writeOnPress">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnRelease">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnClick">
-        <bool>false</bool>
-       </property>
-       <property name="pressText">
-        <string>0</string>
-       </property>
-       <property name="releaseText">
-        <string>1</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QEPushButton" name="qepushbutton_5">
+      <widget class="QERadioButton" name="qeradiobutton_11">
        <property name="text">
         <string>WS_button_EXP_27</string>
+       </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
        </property>
        <property name="variable" stdset="0">
         <string>VCS:WS-BUT-EXP-27</string>
        </property>
-       <property name="writeOnPress">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnRelease">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnClick">
-        <bool>false</bool>
+       <property name="format" stdset="0">
+        <enum>QERadioButton::LocalEnumeration</enum>
        </property>
        <property name="pressText">
         <string>0</string>
@@ -413,21 +379,40 @@
       </widget>
      </item>
      <item>
-      <widget class="QEPushButton" name="qepushbutton_2">
+      <widget class="QERadioButton" name="qeradiobutton_10">
+       <property name="text">
+        <string>WS_button_EXP_28a</string>
+       </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
+       </property>
+       <property name="variable" stdset="0">
+        <string>VCS:WS-BUT-EXP-28a</string>
+       </property>
+       <property name="format" stdset="0">
+        <enum>QERadioButton::LocalEnumeration</enum>
+       </property>
+       <property name="pressText">
+        <string>0</string>
+       </property>
+       <property name="releaseText">
+        <string>1</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QERadioButton" name="qeradiobutton_9">
        <property name="text">
         <string>WS_button_EXP_29</string>
+       </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
        </property>
        <property name="variable" stdset="0">
         <string>VCS:WS-BUT-EXP-29</string>
        </property>
-       <property name="writeOnPress">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnRelease">
-        <bool>true</bool>
-       </property>
-       <property name="writeOnClick">
-        <bool>false</bool>
+       <property name="format" stdset="0">
+        <enum>QERadioButton::LocalEnumeration</enum>
        </property>
        <property name="pressText">
         <string>0</string>
@@ -813,11 +798,6 @@
    <class>QELineEdit</class>
    <extends>QLineEdit</extends>
    <header>QELineEdit.h</header>
-  </customwidget>
-  <customwidget>
-   <class>QEPushButton</class>
-   <extends>QPushButton</extends>
-   <header>QEPushButton.h</header>
   </customwidget>
   <customwidget>
    <class>QERadioButton</class>
