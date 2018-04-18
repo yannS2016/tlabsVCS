@@ -257,8 +257,26 @@ static const dset * const devsl[40] = {
 };
 
 epicsShareExtern void (*pvar_func_asSub)(void);
-epicsShareExtern void (*pvar_func_sncExampleRegistrar)(void);
 epicsShareExtern void (*pvar_func_ev1ClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_spc1gfClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_spc1basClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_ssccabClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_sscbasClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_sscgfa1ClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_sscgfa2ClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_a13aClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_iblClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_expClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_bsvClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_speClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_cnaClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_ev2ClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_ev3ClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_spc2basClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_spc2gfClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_hliClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_vliClearanceSNCRegistrar)(void);
+epicsShareExtern void (*pvar_func_trlClearanceSNCRegistrar)(void);
 
 epicsShareExtern int *pvar_int_asCaDebug;
 epicsShareExtern int *pvar_int_dbRecordsOnceOnly;
@@ -274,7 +292,7 @@ static struct iocshVarDef vardefs[] = {
 
 int vcs_registerRecordDeviceDriver(DBBASE *pbase)
 {
-    const char *bldTop = "/epics/testIOC";
+    const char *bldTop = "/tlabsVCS/VCSIOCAG10";
     const char *envTop = getenv("TOP");
 
     if (envTop && strcmp(envTop, bldTop)) {
@@ -291,8 +309,26 @@ int vcs_registerRecordDeviceDriver(DBBASE *pbase)
     registerRecordTypes(pbase, 28, recordTypeNames, rtl);
     registerDevices(pbase, 40, deviceSupportNames, devsl);
     (*pvar_func_asSub)();
-    (*pvar_func_sncExampleRegistrar)();
     (*pvar_func_ev1ClearanceSNCRegistrar)();
+    (*pvar_func_spc1gfClearanceSNCRegistrar)();
+    (*pvar_func_spc1basClearanceSNCRegistrar)();
+    (*pvar_func_ssccabClearanceSNCRegistrar)();
+    (*pvar_func_sscbasClearanceSNCRegistrar)();
+    (*pvar_func_sscgfa1ClearanceSNCRegistrar)();
+    (*pvar_func_sscgfa2ClearanceSNCRegistrar)();
+    (*pvar_func_a13aClearanceSNCRegistrar)();
+    (*pvar_func_iblClearanceSNCRegistrar)();
+    (*pvar_func_expClearanceSNCRegistrar)();
+    (*pvar_func_bsvClearanceSNCRegistrar)();
+    (*pvar_func_speClearanceSNCRegistrar)();
+    (*pvar_func_cnaClearanceSNCRegistrar)();
+    (*pvar_func_ev2ClearanceSNCRegistrar)();
+    (*pvar_func_ev3ClearanceSNCRegistrar)();
+    (*pvar_func_spc2basClearanceSNCRegistrar)();
+    (*pvar_func_spc2gfClearanceSNCRegistrar)();
+    (*pvar_func_hliClearanceSNCRegistrar)();
+    (*pvar_func_vliClearanceSNCRegistrar)();
+    (*pvar_func_trlClearanceSNCRegistrar)();
     iocshRegisterVariable(vardefs);
     return 0;
 }
