@@ -1,0 +1,25 @@
+<QEGuiConfig>
+ <Config Name="ExitSave">
+  <Component Name="QEGui">
+   <MainWindows>1</MainWindows>
+   <UserLevel>USERLEVEL_USER</UserLevel>
+  </Component>
+  <Component Name="QEGuiMainWindow_0">
+   <Identity id="0">
+    <Title>QEGui SPC2</Title>
+   </Identity>
+   <Geometry X="2387" Width="694" Y="335" Height="704"/>
+   <State Flags="0"/>
+   <Gui Name="/home/eitvcs/tlabsVCS/epicsQtDisplays/SPC2.ui" ID="QEGui_window_0_form_0" CurrentGui="1">
+    <Title>QEGui SPC2</Title>
+    <Presentation>Tab</Presentation>
+   </Gui>
+   <Gui Name="/home/eitvcs/tlabsVCS/epicsQtDisplays/SPC2-LOW.ui" ID="QEGui_window_0_form_1">
+    <Title>QEGui SPC2-LOW</Title>
+    <Presentation>Tab</Presentation>
+   </Gui>
+  </Component>
+  <Component Name="QEGui_window_0_form_0_QEForm"/>
+  <Component Name="QEGui_window_0_form_1_QEForm"/>
+ </Config>
+</QEGuiConfig>

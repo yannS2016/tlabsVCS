@@ -1,0 +1,1 @@
+/home/eitvcs/tlabsVCS/Databases/st.cmd

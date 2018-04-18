@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>681</width>
+    <height>355</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_3">
+   <item>
+    <widget class="QLabel" name="label_4">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>21</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>       AREA                                   STATUS                              INTERLOCKS </string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <layout class="QFormLayout" name="formLayout_2">
+       <property name="fieldGrowthPolicy">
+        <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+       </property>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>  A001A-SSC CABLE PASSGEWAY</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QELineEdit" name="qelineedit_2">
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="variable" stdset="0">
+            <string>VCS:SSCCAB-CLR-STATS</string>
+           </property>
+           <property name="format" stdset="0">
+            <enum>QELineEdit::Default</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QELineEdit" name="qelineedit">
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="variable" stdset="0">
+            <string>VCS:SSCCAB-INTLCK-STATS</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_9">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QERadioButton" name="qeradiobutton_6">
+         <property name="text">
+          <string>ssc_cab_init</string>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+         <property name="variable" stdset="0">
+          <string>VCS:SSCCAB-INIT</string>
+         </property>
+         <property name="format" stdset="0">
+          <enum>QERadioButton::LocalEnumeration</enum>
+         </property>
+         <property name="pressText">
+          <string>0</string>
+         </property>
+         <property name="releaseText">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QERadioButton" name="qeradiobutton_5">
+         <property name="text">
+          <string>switch_I_SSC_G5</string>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+         <property name="variable" stdset="0">
+          <string>VCS:SW-I-SSC-G5</string>
+         </property>
+         <property name="format" stdset="0">
+          <enum>QERadioButton::LocalEnumeration</enum>
+         </property>
+         <property name="pressText">
+          <string>0</string>
+         </property>
+         <property name="releaseText">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QERadioButton" name="qeradiobutton">
+         <property name="text">
+          <string>switch_II_SSC_G5</string>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+         <property name="variable" stdset="0">
+          <string>VCS:SW-II-SSC-G5</string>
+         </property>
+         <property name="format" stdset="0">
+          <enum>QERadioButton::LocalEnumeration</enum>
+         </property>
+         <property name="pressText">
+          <string>0</string>
+         </property>
+         <property name="releaseText">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QERadioButton" name="qeradiobutton_4">
+         <property name="text">
+          <string>switch_I_SSC_A001A</string>
+         </property>
+         <property name="variable" stdset="0">
+          <string>VCS:SW-I-SSC-A001A</string>
+         </property>
+         <property name="format" stdset="0">
+          <enum>QERadioButton::LocalEnumeration</enum>
+         </property>
+         <property name="pressText">
+          <string>0</string>
+         </property>
+         <property name="releaseText">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QERadioButton" name="qeradiobutton_2">
+         <property name="text">
+          <string>switch_II_SSC_A001A</string>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+         <property name="variable" stdset="0">
+          <string>VCS:SW-II-SSC-A001A</string>
+         </property>
+         <property name="format" stdset="0">
+          <enum>QERadioButton::Integer</enum>
+         </property>
+         <property name="pressText">
+          <string>0</string>
+         </property>
+         <property name="releaseText">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_8">
+       <item>
+        <widget class="QLabel" name="label_9">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>ssc_cable_clear</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QEBitStatus" name="qebitstatus_3">
+         <property name="minimumSize">
+          <size>
+           <width>61</width>
+           <height>41</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>61</width>
+           <height>41</height>
+          </size>
+         </property>
+         <property name="numberOfBits">
+          <number>1</number>
+         </property>
+         <property name="shape">
+          <enum>QBitStatus::Circle</enum>
+         </property>
+         <property name="offColour">
+          <color>
+           <red>0</red>
+           <green>77</green>
+           <blue>0</blue>
+          </color>
+         </property>
+         <property name="variable" stdset="0">
+          <string>VCS:SSCCAB-CLR</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_10">
+     <item>
+      <widget class="QERadioButton" name="qeradiobutton_8">
+       <property name="text">
+        <string>WS_button_SSC_16</string>
+       </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
+       </property>
+       <property name="variable" stdset="0">
+        <string>VCS:WS-BUT-SSC-16</string>
+       </property>
+       <property name="format" stdset="0">
+        <enum>QERadioButton::LocalEnumeration</enum>
+       </property>
+       <property name="pressText">
+        <string>0</string>
+       </property>
+       <property name="releaseText">
+        <string>1</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QERadioButton" name="qeradiobutton_7">
+       <property name="text">
+        <string>WS_button_SSC_17</string>
+       </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
+       </property>
+       <property name="variable" stdset="0">
+        <string>VCS:WS-BUT-SSC-17</string>
+       </property>
+       <property name="format" stdset="0">
+        <enum>QERadioButton::LocalEnumeration</enum>
+       </property>
+       <property name="pressText">
+        <string>0</string>
+       </property>
+       <property name="releaseText">
+        <string>1</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_7">
+     <item>
+      <widget class="QLabel" name="label_8">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>LED_WS_SSC_16</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QEBitStatus" name="qebitstatus_5">
+       <property name="minimumSize">
+        <size>
+         <width>61</width>
+         <height>41</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>61</width>
+         <height>41</height>
+        </size>
+       </property>
+       <property name="numberOfBits">
+        <number>1</number>
+       </property>
+       <property name="shape">
+        <enum>QBitStatus::Circle</enum>
+       </property>
+       <property name="offColour">
+        <color>
+         <red>0</red>
+         <green>76</green>
+         <blue>0</blue>
+        </color>
+       </property>
+       <property name="variable" stdset="0">
+        <string>VCS:LED-WS-SSC-16</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <item>
+      <widget class="QLabel" name="label_7">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>LED_WS_SSC_17</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QEBitStatus" name="qebitstatus_4">
+       <property name="minimumSize">
+        <size>
+         <width>61</width>
+         <height>41</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>61</width>
+         <height>41</height>
+        </size>
+       </property>
+       <property name="numberOfBits">
+        <number>1</number>
+       </property>
+       <property name="shape">
+        <enum>QBitStatus::Circle</enum>
+       </property>
+       <property name="offColour">
+        <color>
+         <red>0</red>
+         <green>70</green>
+         <blue>0</blue>
+        </color>
+       </property>
+       <property name="variable" stdset="0">
+        <string>VCS:LED-WS-SSC-17</string>
+       </property>
+       <property name="variableSubstitutions" stdset="0">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+  <zorder>label_4</zorder>
+  <zorder></zorder>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QEBitStatus</class>
+   <extends>QBitStatus</extends>
+   <header>QEBitStatus.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QELineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>QELineEdit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QERadioButton</class>
+   <extends>QRadioButton</extends>
+   <header>QERadioButton.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QBitStatus</class>
+   <extends>QWidget</extends>
+   <header>QBitStatus.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

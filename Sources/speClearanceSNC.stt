@@ -1,0 +1,210 @@
+program speClearanceSNC
+
+%{
+/*******************************************************************/
+#include "vcs_var_mes.h" // define this here so C functions are seen
+/*******************************************************************/
+#define	VCOK       	0
+#define FAIL		-1
+#define	B25OFF      119
+#define	B24ON      	118
+#define DA9S1OFF	121 
+#define DA9S2OFF	120
+}%
+/* Declare seq variables*/
+short SPE_INIT; 
+short SPE_VC;   
+short SPE_W24_STS;
+short SPE_W25_STS;
+short SPE_FAIL_COND;
+string SPE_CLR_STATS; 
+string SPE_INTLCK_STATS;
+// CONTROL FLAGS
+short SPEUpdate;
+short SPE_OLD_FAIL_COND;
+
+/* Associate SNL variables with epics output pv's*/
+assign	SPE_CLR_STATS		to	"{SYS}:SPE-CLR-STATS"; 
+assign	SPE_INTLCK_STATS	to	"{SYS}:SPE-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	SPE_VC 				to 	"{SYS}:SPE-VC"; 
+assign 	SPE_INIT 			to 	"{SYS}:SPE-INIT";
+assign 	SPE_W24_STS 		to 	"{SYS}:SPE-W24-STS";   
+assign 	SPE_W25_STS 		to 	"{SYS}:SPE-W25-STS";
+assign	SPE_FAIL_COND		to	"{SYS}:SPE-FAIL-COND";
+
+monitor	SPE_VC;
+monitor SPE_W24_STS;  
+monitor SPE_W25_STS;
+monitor	SPE_FAIL_COND;
+
+ss SPE_clearance_status {
+    state init {
+		when (delay(6.5)) {
+			initVault();
+			printf("\n%sSPECTROMETER VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_24_pressed	
+    }
+///////////////////////////////////////////////////////////////
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("%sSPECTROMETER VAULT IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (SPE_VC != VCOK) {
+
+		} state vc_faillures
+	}
+//////////////////////////////////////////////////////////
+	state recover_faillure {
+		
+		when (!SPE_FAIL_COND) {
+			if(!SPEUpdate) {
+				printf("%sRECOVERING FROM FAILLURE - ENTERING W24 STATE%s\n",OK,DEF);
+				SPEUpdate = TRUE;
+			}
+		} state  watchman_24_pressed
+			
+		when (SPE_FAIL_COND != SPE_OLD_FAIL_COND) {
+		} state  clearance_faillures
+	}
+//////////////////////////////////////////////////////////
+	state watchman_24_pressed {
+
+		when (SPE_FAIL_COND != VCOK) {
+			SPE_OLD_FAIL_COND = SPE_FAIL_COND;
+		} state  clearance_faillures
+			
+		when (SPE_W24_STS == B24ON) {
+			SPE_clear_underway();
+			SPE_update_report(B24ON);
+		} state watchman_24_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_24_released {
+		
+		when (SPE_FAIL_COND != VCOK) {
+
+		} state  clearance_faillures
+			
+		when (SPE_W24_STS != B24ON) {
+		} state door_a9_closed
+	}
+//////////////////////////////////////////////////////////
+	state door_a9_closed {
+
+		when (SPE_FAIL_COND != VCOK) {
+
+		} state   clearance_faillures
+		
+		when (SPE_W25_STS == DA9S1OFF) {
+			SPE_update_report(DA9S1OFF);
+		} state door_a9_closed
+
+		when (SPE_W25_STS == DA9S2OFF) {
+			SPE_update_report(DA9S2OFF);
+		} state door_a9_closed
+
+
+		when () {
+			SPE_update_report(B25OFF);
+		} state watchman_25_pressed
+	}
+
+///////////////////////////////////////////////////////////
+	state watchman_25_pressed {
+		
+		when (SPE_FAIL_COND != VCOK) {
+
+		} state  clearance_faillures
+			
+			
+		when (!SPE_W25_STS) {
+
+			SPE_status();
+		} state vault_cleared
+	}
+///////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("SPE CLEARANCE FAILURE CONDITION: ");
+			SPEUpdate = FALSE;
+		}
+
+		when () {
+			SPE_update_failed(SPE_FAIL_COND);
+		} state recover_faillure
+		
+		exit {
+		    SPE_OLD_FAIL_COND = SPE_FAIL_COND;	
+		}			
+	}
+////////////////////////////////////////////////////////////////////////////
+	state vc_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("SPE CLEAR FAILURE CONDITION: ");
+			SPEUpdate = FALSE;
+		}
+		
+		when () {			
+			SPE_update_failed(SPE_VC);
+		} state recover_faillure
+		
+		exit {
+		    SPE_OLD_FAIL_COND = SPE_FAIL_COND;
+		}
+	}
+}
+///////////////////////////////////////////////////////////////////////////////
+void initVault(){
+	SPE_INIT = TRUE;
+	SPE_OLD_FAIL_COND = SPE_FAIL_COND;
+	not_cleared(SPE_CLR_STATS);
+	report_error(SPE_INTLCK_STATS, 54);
+	pvPut(SPE_INIT, SYNC);
+	pvPut(SPE_CLR_STATS, SYNC);
+	pvPut(SPE_INTLCK_STATS, SYNC);
+}
+
+void resetStatus()
+{
+	not_cleared(SPE_CLR_STATS);
+	report_error(SPE_INTLCK_STATS, 54);
+	pvPut(SPE_CLR_STATS, SYNC);
+	pvPut(SPE_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SPE_update_failed(short report)
+{
+	clear_failed(SPE_CLR_STATS);
+	pvPut(SPE_CLR_STATS, SYNC);
+	report_error(SPE_INTLCK_STATS, report);
+	pvPut(SPE_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,SPE_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void SPE_update_report(short intlck) {
+	report_error(SPE_INTLCK_STATS, intlck);
+	pvPut(SPE_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SPE_status()
+{
+	cleared(SPE_CLR_STATS);
+	pvPut(SPE_CLR_STATS, SYNC); 		
+	report_error(SPE_INTLCK_STATS, 54);
+	pvPut(SPE_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void SPE_clear_underway()
+{  
+	clear_underway(SPE_CLR_STATS);
+	pvPut(SPE_CLR_STATS, SYNC); 		
+}

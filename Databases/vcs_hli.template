@@ -1,0 +1,267 @@
+############ SELECT THE NEXT PROCESSING BRANCH ##################
+record(calc, "$(SYS):HLI-SEL-STAGE") {
+  field(DESC, "Select processing branch")
+  field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
+  field(CALC, "A?!B?C?$(S0):$(S1):$(PNK):$(NI)")
+  field(INPA, "$(SYS):HLI-INIT NPP")
+##IF BUTTON 42 IS STILL PRESSED PNK IS ACTIVE##
+  field(INPB, "$(SYS):HLI-PNK") 
+  field(INPC, "$(SYS):HLI-CLR NPP")
+  field(FLNK, "$(SYS):HLI-PROC-STAGE")
+}
+## THIS RECORDS PROPAGATE PROCESSING ##
+record(fanout, "$(SYS):HLI-PROC-STAGE") {
+  field(SCAN, "Passive")
+  field(SELM, "Specified")
+  field(SELL, "$(SYS):HLI-SEL-STAGE")
+  field(LNK1, "$(SYS):HLI-VC PP")
+  field(LNK2, "$(SYS):HLI-VNC PP")
+  field(LNK3, "$(SYS):HLI-PNK PP")
+}
+##################################################################################
+# monitor status of inputs which may cause clearance faillure
+# SIGNAL TO SYS: HLI-VC?HLI-CLR && (HARDWARE STATUS RECORDS):FALSE
+record(calcout, "$(SYS):HLI-VC") { 
+  field(DESC, "HLI Vault clear stage")
+  field(SCAN, "Passive")
+  field(FLNK, "$(SYS):HLI-FAIL-COND") # THIS RECORD MUST IMMEDIATELY READ A FAIL CONDITION
+  field(CALC, "!A?!B?C?$(HLIPNK):$(VCOK):$(DA14ON):$(RA14ON)")
+  field(INPA, "$(SYS):SW-RF-A14.VAL")
+  field(INPB, "$(SYS):HLI-DA14-CLSD.VAL PP") # FOR TESTING 
+  field(INPC, "$(SYS):HLI-PNK.VAL PP")
+  field(OUT,  "$(SYS):RST-HLI.PROC PP")  
+  field(OOPT, "When Non-zero")
+  field(PINI, "YES")
+  field(VAL, "1") 
+}
+####################### RESET VAULT #################
+record(seq, "$(SYS):RST-HLI") { # HANDLE BY SEQ
+  field(SCAN, "Passive")
+  field(DOL1, "0")
+  field(DOL2, "0")
+  field(DOL3, "0")
+  field(DOL4, "0")
+  field(DOL5, "0")
+  field(DOL6, "0")
+  field(DOL7, "0")
+  field(LNK1, "$(SYS):CS6-HLI PP")
+  field(LNK2, "$(SYS):CL6-HLI PP")
+  field(LNK3, "$(SYS):HLI-CLR PP")
+  field(LNK4, "$(SYS):LED-WS-HLI-30 PP")
+  field(LNK5, "$(SYS):LED-WS-HLI-31 PP")
+  field(LNK6, "$(SYS):HLI-COUNTER PP")
+  field(LNK7, "$(SYS):WATCHMAN-HLI-30-ACT PP")
+  field(SELM, "All")
+}
+#CLEARANCE UNDERWAY FAIL CONDITIONS
+record(calcout, "$(SYS):HLI-FAIL-COND") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?$(VCOK):$(TOUT):$(RA14ON)")
+  field(INPA, "$(SYS):SW-RF-A14 NPP") 
+  field(INPB, "$(SYS):HLI-TIMEOUT NPP") 
+  field(OUT,  "$(SYS):RST-HLI PP")  
+  field(OOPT, "Transition To Non-zero") # STOP THIS RECORD TO KEEP RESETTING SHARED OUTPUT AFTER INIT 
+}
+#######################################################################################
+record(calc, "$(SYS):HLI-VNC") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(VCOK):A")
+  field(INPA, "$(SYS):HLI-W30-STS PP")  
+}
+########################################################################
+# formula to monitor status of inputs and set output in stage 1
+record(calcout, "$(SYS):HLI-W30-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?$(VCOK):$(B30ON):!C?$(B30NP):D:$(FAIL)")
+  field(INPA, "$(SYS):HLI-FAIL-COND PP")
+  field(INPB, "$(SYS):WS-BUT-HLI-30.VAL")
+  field(INPC, "$(SYS):WATCHMAN-HLI-30-ACT NPP")
+  field(INPD, "$(SYS):HLI-W31-STS PP")
+  field(OUT,  "$(SYS):HLIW30-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
+}
+####################### STAGE 1 OUTPUTS STATUS  #################
+record(seq, "$(SYS):HLIW30-WRT-OUTS") { # HANDLE BY SEQ
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DOL4, "0")
+  field(DOL5, "1")
+  field(DOL6, "0")
+  field(LNK1, "$(SYS):CS6-HLI PP")
+  field(LNK2, "$(SYS):CL6-HLI PP")
+  field(LNK3, "$(SYS):LED-WS-HLI-30 PP")
+  field(LNK4, "$(SYS):HLI-COUNTER PP")
+  field(LNK5, "$(SYS):WATCHMAN-HLI-30-ACT PP")
+  field(LNK6, "$(SYS):HLI-VC.VAL NPP") # RESET ANY PREVIOUS FAIL CONDITIONS
+  field(SCAN, "Passive")
+  field(SELM, "All")
+}
+####################################################################################
+record(calcout, "$(SYS):HLI-W31-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B31OFF):$(DA14S2OFF):$(DA14S1OFF):$(FAIL)")
+  field(INPA, "$(SYS):HLI-FAIL-COND PP")
+  field(INPB, "$(SYS):SW-I-HLI-A14.VAL NPP")
+  field(INPC, "$(SYS):SW-II-HLI-A14.VAL NPP")
+  field(INPD, "$(SYS):HLI-WATCH-30-RLSD.VAL PP")
+  field(INPE, "$(SYS):WS-BUT-HLI-31 NPP")
+  field(OUT,  "$(SYS):HLIW31-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
+}
+####################### STAGE 2 OUTPUTS STATUS  #################
+# THIS RECORDS IS PROCESSED ONLY WHEN HLI-VNCS2 RETRUN 0
+# THAT IS HLI INTERLOCKS ARE CORRECT IN STAGE 2
+record(seq, "$(SYS):HLIW31-WRT-OUTS") {
+  field(SELM, "All")
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DLY2, "0.02")
+  field(LNK1, "$(SYS):RST-HLI.PROC PP")
+  field(LNK2, "$(SYS):HLI-CLR.VAL PP")
+  field(LNK3, "$(SYS):LED-WS-HLI-31.VAL PP")
+  field(SCAN, "Passive")
+}
+#################### RECOVER FROM PANIQUE ################
+record(calc, "$(SYS):HLI-PNK") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-HLI-30.VAL")
+  field(VAL, "0")
+}
+#################### WATCHMAN 30 RELEASE ##############################
+record(calc, "$(SYS):HLI-WATCH-30-RLSD") {
+  field(CALC, "A&&B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-HLI-30.VAL")
+  field(INPB, "$(SYS):WATCHMAN-HLI-30-ACT.VAL")
+}
+#################### DOOR A14 CLOSED ##################################
+record(calc, "$(SYS):HLI-DA14-CLSD") {
+  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(INPA, "$(SYS):SW-I-HLI-A14.VAL")
+  field(INPB, "$(SYS):SW-II-HLI-A14.VAL")
+}
+########################## TIMER PROCEDURE #############################
+record(calc, "$(SYS):HLI-COUNTER") {
+  field(SCAN, "Passive")
+  field(CALC, "B?A+1:0")
+  field(INPA, "$(SYS):HLI-COUNTER.VAL")
+  field(INPB, "$(SYS):WATCHMAN-HLI-30-ACT.VAL")
+}
+record(calc, "$(SYS):HLI-TIMEOUT") {
+  field(SCAN, "1 second")
+  field(CALC, "A>=$(HLITOUT)?$(ON):$(OFF)")
+  field(INPA, "$(SYS):HLI-COUNTER.VAL PP")
+}
+########################### Outputs ##################################
+
+record(bo, "$(SYS):CS6-HLI") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):CL6-HLI") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):HLI-CLR") {
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-HLI-30") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-HLI-31") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(stringout, "$(SYS):HLI-CLR-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+
+record(stringout, "$(SYS):HLI-INTLCK-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+################ INPUTS ###############################
+########  INIT THIS RECORD TO FALSE ######
+record(bo, "$(SYS):WATCHMAN-HLI-30-ACT") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "0")
+}
+record(bi, "$(SYS):WS-BUT-HLI-30") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-RF-A14") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-I-HLI-A14") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-II-HLI-A14") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+## THIS RECORDS MUST BE SET FROM THE SEQ ##
+record(bi, "$(SYS):HLI-INIT") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):WS-BUT-HLI-31") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
