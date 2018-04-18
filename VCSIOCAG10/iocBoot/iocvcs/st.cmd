@@ -1,1 +1,1 @@
-/home/eitvcs/tlabsVCS/Databases/st.cmd
+/tlabsVCS/Databases/./st.cmd
