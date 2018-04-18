@@ -1,5 +1,5 @@
-epicsEnvSet("ARCH","linux-x86_64")
+epicsEnvSet("ARCH","linux-x86")
 epicsEnvSet("IOC","iocvcs")
-epicsEnvSet("TOP","/epics/VCSIOCAG10")
+epicsEnvSet("TOP","/tlabsVCS/VCSIOCAG10")
 epicsEnvSet("EPICS_BASE","/epics/base")
 epicsEnvSet("SNCSEQ","/epics/support/seq-2-2-1")
