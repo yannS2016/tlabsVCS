@@ -1,0 +1,231 @@
+program trlClearanceSNC
+
+%{
+/*******************************************************************/
+#include "vcs_var_mes.h" // define this here so C functions are seen
+/*******************************************************************/
+#define	VCOK       	0
+#define FAIL		-1
+#define TRLPNK      19
+#define	G4ON		82
+#define B34aON		85	  	       		  			
+#define B34bOFF		87		
+#define B34bON		86  	
+#define B35OFF		90			
+#define DA004AS1OFF	88		     	
+#define DA004AS2OFF	89 
+}%
+/* Declare seq variables*/
+short TRL_INIT; 
+short TRL_VC;   
+short TRL_W34a_STS;
+short TRL_W34b_STS;
+short TRL_W35_STS;
+short TRL_FAIL_COND;
+string TRL_CLR_STATS; 
+string TRL_INTLCK_STATS;
+// CONTROL FLAGS
+short trlUpdate;
+short TRL_OLD_FAIL_COND;
+
+/* Associate SNL variables with epics output pv's*/
+assign	TRL_CLR_STATS		to	"{SYS}:TRL-CLR-STATS"; 
+assign	TRL_INTLCK_STATS	to	"{SYS}:TRL-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	TRL_VC 				to 	"{SYS}:TRL-VC"; 
+assign 	TRL_INIT 			to 	"{SYS}:TRL-INIT";
+assign 	TRL_W34a_STS 		to 	"{SYS}:TRL-W34a-STS";   
+assign 	TRL_W34b_STS 		to 	"{SYS}:TRL-W34b-STS";
+assign 	TRL_W35_STS 		to 	"{SYS}:TRL-W35-STS";
+assign	TRL_FAIL_COND		to	"{SYS}:TRL-FAIL-COND";
+
+monitor	TRL_VC;
+monitor TRL_W34a_STS;  
+monitor TRL_W34b_STS;
+monitor TRL_W35_STS;
+monitor	TRL_FAIL_COND;
+
+ss TRL_clearance_status {
+    state init {
+		when (delay(10)) {
+			initVault();
+			printf("%sTROLLEY PASSAGEWAY VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_34a_pressed	
+    }
+///////////////////////////////////////////////////////////////
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("%sTROLLEY PASSAGEWAY VAULT IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (TRL_VC != VCOK) {
+
+		} state vc_faillures
+	}
+//////////////////////////////////////////////////////////
+	state recover_faillure {
+		
+		when (!TRL_FAIL_COND) {
+			if(!trlUpdate) {
+				printf("%sRECOVERING FROM FAILLURE - ENTERING W34a STATE: %d%s\n",OK,TRL_W34a_STS,DEF);
+				trlUpdate = TRUE;
+			}
+		} state  watchman_34a_pressed
+			
+		when (TRL_FAIL_COND != TRL_OLD_FAIL_COND) {
+		} state  clearance_faillures
+	}
+//////////////////////////////////////////////////////////
+
+	state watchman_34a_pressed {
+
+		when (TRL_FAIL_COND != VCOK) {
+			TRL_OLD_FAIL_COND = TRL_FAIL_COND;
+		} state  clearance_faillures
+			
+		when (TRL_W34a_STS == B34aON) {
+			TRL_clear_underway();
+			TRL_update_report(B34aON);
+		} state watchman_34a_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_34a_released {
+		
+		when (TRL_FAIL_COND != VCOK) {
+
+		} state  clearance_faillures
+			
+		when (TRL_W34a_STS != B34aON) {
+			TRL_update_report(B34bOFF);
+		} state watchman_34b_pressed
+	}
+//////////////////////////////////////////////////////////
+
+	state watchman_34b_pressed {
+
+		when (TRL_FAIL_COND != VCOK) {
+			TRL_OLD_FAIL_COND = TRL_FAIL_COND;
+		} state  clearance_faillures
+			
+		when (TRL_W34b_STS == B34bON) {
+		} state watchman_34b_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_34b_released {
+		
+		when (TRL_W34b_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+		when (TRL_W34b_STS != B34bON) {
+		} state door_a004a_closed
+	}
+//////////////////////////////////////////////////////////
+	state door_a004a_closed {
+
+		when (TRL_FAIL_COND != VCOK) {
+
+		} state   clearance_faillures
+		
+		when (TRL_W35_STS == DA004AS1OFF) {
+			TRL_update_report(DA004AS1OFF);
+		} state door_a004a_closed
+
+		when (TRL_W35_STS == DA004AS2OFF) {
+			TRL_update_report(DA004AS2OFF);
+		} state door_a004a_closed
+		
+		when () {
+			TRL_update_report(B35OFF);
+		} state watchman_35_pressed
+	}
+
+///////////////////////////////////////////////////////////
+	state watchman_35_pressed {
+		
+		when (TRL_FAIL_COND != VCOK) {
+
+		} state  clearance_faillures
+			
+			
+		when (!TRL_W35_STS) {
+
+			TRL_status();
+		} state vault_cleared
+	}
+///////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("TRL CLEARANCE FAILURE CONDITION: ");
+			trlUpdate = FALSE;
+		}
+
+		when () {
+			TRL_update_failed(TRL_FAIL_COND);
+		} state recover_faillure
+		
+		exit {
+		    TRL_OLD_FAIL_COND = TRL_FAIL_COND;	
+		}			
+	}
+////////////////////////////////////////////////////////////////////////////
+	state vc_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("TRL CLEAR FAILURE CONDITION: ");
+			trlUpdate = FALSE;
+		}
+		
+		when () {			
+			TRL_update_failed(TRL_VC);
+		} state recover_faillure
+		
+		exit {
+		    TRL_OLD_FAIL_COND = TRL_FAIL_COND;
+		}
+	}
+}
+///////////////////////////////////////////////////////////////////////////////
+void initVault(){
+	TRL_INIT = TRUE;
+	TRL_OLD_FAIL_COND = TRL_FAIL_COND;
+	not_cleared(TRL_CLR_STATS);
+	report_error(TRL_INTLCK_STATS, 54);
+	pvPut(TRL_INIT, SYNC);
+	pvPut(TRL_CLR_STATS, SYNC);
+	pvPut(TRL_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void TRL_update_failed(short report)
+{
+	clear_failed(TRL_CLR_STATS);
+	pvPut(TRL_CLR_STATS, SYNC);
+	report_error(TRL_INTLCK_STATS, report);
+	pvPut(TRL_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,TRL_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void TRL_update_report(short intlck) {
+	report_error(TRL_INTLCK_STATS, intlck);
+	pvPut(TRL_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void TRL_status()
+{
+	cleared(TRL_CLR_STATS);
+	pvPut(TRL_CLR_STATS, SYNC); 		
+	report_error(TRL_INTLCK_STATS, 54);
+	pvPut(TRL_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void TRL_clear_underway()
+{  
+	clear_underway(TRL_CLR_STATS);
+	pvPut(TRL_CLR_STATS, SYNC); 		
+}

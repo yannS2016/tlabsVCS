@@ -1,0 +1,354 @@
+program ssclClearanceSNC
+%{
+	#define	VC       	0
+	#define TOUT		5
+	#define	A001AON     15  
+	#define	DA001ON	    16	
+	#define	DA001S1ON	22	
+	#define	DA001S2ON	23	
+	#define SSCLPNK     19 
+	#define	G1ON        17
+	#define	G1S1ON      24  	
+	#define	G1S2ON      25 
+	#define	G2ON       	18
+	#define	G2OFF       32
+	#define B1ON        37
+	#define W1ON        20
+	#define B2OFF       21
+	#define B2ON  		35
+	#define B3OFF		26  
+	#define B3ON 		36 
+	#define B4OFF		27  
+	#define B4ON 		31 
+	#define W4ON		29  
+	#define B5OFF		28  
+	#define B5ON 		33
+	#define B6OFF		34
+}%
+/* Declare seq variables*/
+short SSCL_INIT; 
+short SSCL_SEL_STAGE;
+
+short SSCL_VC; 
+short SSCL_VNCS1;   
+short SSCL_VNCS2;  
+short SSC_W1_STS;
+short SSC_W2_STS;
+short SSC_W3_STS;
+short SSC_W4S1_STS;
+short SSC_W4S2_STS;
+short SSC_W5_STS;
+short SSC_W6_STS;
+short SSC_FAIL_COND;
+string SSCL_CLR_STATS; 
+string SSCL_INTLCK_STATS;
+/* Associate SNL variables with epics output pv's*/
+assign	SSCL_CLR_STATS		to	"{SYS}:SSCL-CLR-STATS"; 
+assign	SSCL_INTLCK_STATS	to	"{SYS}:SSCL-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	SSCL_VC 			to 	"{SYS}:SSCL-VC"; 
+assign 	SSCL_VNCS1 			to  "{SYS}:SSCL-VNCS1";   
+assign 	SSCL_VNCS2 			to 	"{SYS}:SSCL-VNCS2";
+assign 	SSCL_INIT 			to 	"{SYS}:SSCL-INIT";
+assign	SSCL_SEL_STAGE		to	"{SYS}:SSCL-SEL-STAGE";
+
+assign 	SSC_W1_STS 			to 	"{SYS}:SSC-W1-STS"; 
+assign 	SSC_W2_STS 			to  "{SYS}:SSC-W2-STS";   
+assign 	SSC_W3_STS 			to 	"{SYS}:SSC-W3-STS";
+assign 	SSC_W4S1_STS 		to 	"{SYS}:SSC-W4S1-STS";
+assign 	SSC_W4S2_STS 		to 	"{SYS}:SSC-W4S2-STS";
+assign	SSC_W5_STS			to	"{SYS}:SSC-W5-STS";
+assign	SSC_W6_STS			to	"{SYS}:SSC-W6-STS";
+assign	SSC_FAIL_COND		to	"{SYS}:SSCL-FAIL-COND";
+
+monitor	SSCL_VC;
+monitor	SSCL_VNCS1;
+monitor	SSCL_VNCS2;
+monitor	SSCL_SEL_STAGE;
+monitor SSC_W1_STS; 
+monitor SSC_W2_STS;   
+monitor SSC_W3_STS;
+monitor SSC_W4S1_STS;
+monitor SSC_W4S2_STS;
+monitor	SSC_W5_STS;
+monitor	SSC_W6_STS;
+monitor	SSC_FAIL_COND;
+
+ss SSCL_clearance_status {
+    state init {
+		when (delay(4)) {
+			initVault();
+			printf("SSC LOW INITIALISATION COMPLETED\n");
+		} state watchman_1_status	
+    }
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("SSC LOW IN CLEARED STATE\n");
+		} 
+
+		when (SSCL_VC == A001AON) {
+			SSCL_update_failed(A001AON);
+			//printf("SSC cable labyrinth NOT cleared\n");
+
+		} state watchman_1_status
+		
+		
+		when (SSCL_VC == DA001ON) {
+			SSCL_update_failed(DA001ON);
+			//printf("Door A001 was opened\n");
+		} state watchman_1_status
+		
+		
+		when (SSCL_VC == G1ON) {
+			SSCL_update_failed(G1ON);
+			//printf("Gate G1 was opened\n");
+		} state watchman_1_status
+			
+		when (SSCL_VC == G2ON) {
+			SSCL_update_failed(G2ON);
+			//printf("Gate G2 was opened\n");
+		} state watchman_1_status
+
+
+		when (SSCL_VC == SSCLPNK) {
+			SSCL_update_failed(SSCLPNK);
+			//printf("A Panic button was activated\n");
+		} state watchman_1_status
+	}
+
+	/*VAULT NOT CLEARED STAGE 1*/
+	state watchman_1_status {
+
+		when (!SSC_W1_STS) {
+			SSCL_update_report(B2OFF);
+			SSCL_clear_underway();
+			//printf("Hold watchman 1 and press 2\n");
+		} state watchman_2_status
+
+		when () {
+
+		} state fail_conditions
+
+	}
+/////////////////////////////////////////////////////////////////////////////////////
+	state watchman_2_status {
+
+		when (!SSC_W2_STS) {
+			SSCL_update_report(B3OFF);
+		} state watchman_3_status
+
+		when (SSC_W2_STS == B2OFF) {
+			SSCL_update_report(B2OFF);
+			//printf("Hold watchman 1 and press 2\n");
+		} state watchman_2_status
+		
+		when () {
+
+		} state fail_conditions
+
+	}
+/////////////////////////////////////////////////////////////////////////////////////////////////
+	state watchman_3_status {
+
+		when (!SSC_W3_STS) {
+			SSCL_update_report(B4OFF);
+		} state watchman_4_stage_1_status
+			
+
+		when (SSC_W3_STS == B2ON) {
+			SSCL_update_report(B2ON);
+			//printf("Hold watchman 1 and release 2\n");
+		} state watchman_3_status
+			
+
+		when (SSC_W3_STS == B3OFF) {
+			SSCL_update_report(B3OFF);
+			//printf("Hold watchman 1 and press 3\n");
+		} state watchman_3_status
+			
+		
+		when () {
+
+		} state fail_conditions
+
+	}	
+/////////////////////////////////////////////////////////////////////////////////////////////////
+	state watchman_4_stage_1_status {
+
+		when (!SSC_W4S1_STS) {
+
+		} state  watchman_4_stage_2_status
+
+			
+		when (SSC_W4S1_STS == B4OFF) {
+			SSCL_update_report(B4OFF);
+			//printf("Hold watchman 1 and release 3\n");
+		} state watchman_4_stage_1_status
+
+			
+		when (SSC_W4S1_STS == B3ON) {
+			SSCL_update_report(B3ON);
+			//printf("Hold watchman 1 and release 3\n");
+		} state watchman_4_stage_1_status
+			
+
+		when () {
+
+		} state fail_conditions
+			
+
+	}	
+	
+	state watchman_4_stage_2_status {
+
+		when (!SSC_W4S2_STS) {
+			SSCL_update_report(B5ON);
+		} state  watchman_5_status
+
+		when (SSC_W4S2_STS == B5ON) {
+			SSCL_update_report(B5ON);
+			//printf("Hold watchman 1 and release 3\n");
+		} state watchman_4_stage_2_status
+			
+		when () {
+
+		} state fail_conditions
+
+
+	}
+	// Transition stage: W1 must be released and W4S1 maintain pressed
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+	state watchman_5_status {
+
+		when (!SSC_W5_STS) {
+			SSCL_update_report(30);
+		} state watchman_6_status
+
+		when (SSC_W5_STS == B4ON) {
+			SSCL_update_report(B4ON);
+		} state watchman_5_status
+			
+
+		when (SSC_W5_STS == B5OFF) {
+			SSCL_update_report(B5OFF);
+		} state watchman_5_status
+		
+		when () {
+
+		} state fail_conditions
+
+	}
+/////////////////////////////////////////////////////////////////////////////////////////////////
+	state watchman_6_status {
+
+		when (!SSC_W6_STS) {
+
+		} state vault_cleared
+			
+		when (SSC_W6_STS == G2ON) {
+			SSCL_update_report(G2ON);
+		} state watchman_5_status
+			
+		when (SSC_W6_STS == G2ON) {
+			SSCL_update_report(G2ON);
+		} state watchman_5_status
+		
+		when () {
+
+		} state fail_conditions
+
+	}
+//////////////////////////////////////////////////////////////////////////////////////////////
+	/* FAIL CONDITIONS*/
+	state fail_conditions {
+		
+		when (!SSC_FAIL_COND) {
+
+		} state watchman_1_status
+			
+
+		when (SSC_W1_STS == A001AON) {
+			SSCL_update_failed(A001AON);
+			printf("SSC cable labyrinth NOT cleared\n");
+		} state watchman_1_status
+
+
+		when (SSC_W1_STS == DA001S1ON) {
+			SSCL_update_failed(DA001S1ON);
+			printf("Door A001 switch 1 is open\n");
+		} state watchman_1_status
+			
+		when (SSC_W1_STS == DA001S2ON) {
+			SSCL_update_failed(DA001S2ON);
+			printf("Door A001 switch 2 is open\n");
+		} state watchman_1_status
+			
+			
+		when (SSC_W1_STS == G1S1ON) {
+			SSCL_update_failed(G1S1ON);
+			printf("Gate G1 switch 1 is open\n");
+		} state watchman_1_status
+			
+		when (SSC_W1_STS == G1S2ON) {
+			SSCL_update_failed(G1S2ON);
+			printf("Gate G2 switch 2 is open\n");
+		} state watchman_1_status	
+			
+		when (SSC_W1_STS == W1ON) {
+			SSCL_update_failed(W1ON);
+			printf("Watchman 1 was released too soon\n");
+		} state watchman_1_status
+
+		when (SSC_W1_STS == W4ON) {
+			SSCL_update_failed(W4ON);
+			printf("Watchman 4 was released too soon\n");
+		} state watchman_1_status
+	
+	}
+	
+	
+}
+
+void initVault(){
+	SSCL_INIT = TRUE;
+	not_cleared(SSCL_CLR_STATS);
+	report_error(SSCL_INTLCK_STATS, 54);
+	pvPut(SSCL_INIT, SYNC);
+	pvPut(SSCL_CLR_STATS, SYNC);
+	pvPut(SSCL_INTLCK_STATS, SYNC);
+}
+
+////////////////////////////////////////////////////////////////////////
+void SSCL_update_failed(short report)
+{
+	clear_failed(SSCL_CLR_STATS);
+	pvPut(SSCL_CLR_STATS, SYNC);
+	report_error(SSCL_INTLCK_STATS, report);
+	pvPut(SSCL_INTLCK_STATS, SYNC);
+}
+/////////////////////////////////////////////////////////////////////////
+void SSCL_update_report(short intlck) {
+	report_error(SSCL_INTLCK_STATS, intlck);
+	pvPut(SSCL_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SSCL_status()
+{  
+	cleared(SSCL_CLR_STATS);
+	pvPut(SSCL_CLR_STATS, SYNC); 		
+	report_error(SSCL_INTLCK_STATS, 54);
+	pvPut(SSCL_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void SSCL_clear_underway()
+{  
+	clear_underway(SSCL_CLR_STATS);
+	pvPut(SSCL_CLR_STATS, SYNC); 		
+}
+/**********************************************************/
+%{
+	#include "vcs_var_mes.h"
+}%

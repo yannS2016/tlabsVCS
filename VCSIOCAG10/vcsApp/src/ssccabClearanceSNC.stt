@@ -1,0 +1,203 @@
+program ssccabClearanceSNC
+
+%{
+/*******************************************************************/
+#include "vcs_var_mes.h" // define this here so C functions are seen
+/*******************************************************************/
+#define	VCOK       	0
+#define FAIL		-1
+#define	G5S1OFF		8
+#define	G5S2OFF		9
+#define	B17OFF      10
+#define	B16ON      	11
+}%
+/* Declare seq variables*/
+short SSCCAB_INIT; 
+short SSCCAB_VC;   
+short SSC_W16_STS;
+short SSC_W17_STS;
+short SSCCAB_FAIL_COND;
+string SSCCAB_CLR_STATS; 
+string SSCCAB_INTLCK_STATS;
+// CONTROL FLAGS
+short SSCCABUpdate;
+short SSCCAB_OLD_FAIL_COND;
+
+/* Associate SNL variables with epics output pv's*/
+assign	SSCCAB_CLR_STATS	to	"{SYS}:SSCCAB-CLR-STATS"; 
+assign	SSCCAB_INTLCK_STATS	to	"{SYS}:SSCCAB-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	SSCCAB_VC 			to 	"{SYS}:SSCCAB-VC"; 
+assign 	SSCCAB_INIT 		to 	"{SYS}:SSCCAB-INIT";
+assign 	SSC_W16_STS 		to 	"{SYS}:SSC-W16-STS";   
+assign 	SSC_W17_STS 		to 	"{SYS}:SSC-W17-STS";
+assign	SSCCAB_FAIL_COND	to	"{SYS}:SSCCAB-FAIL-COND";
+
+monitor	SSCCAB_VC;
+monitor SSC_W16_STS;  
+monitor SSC_W17_STS;
+monitor	SSCCAB_FAIL_COND;
+
+ss SSCCAB_clearance_status {
+    state init {
+		when (delay(1)) {
+			initVault();
+			printf("\n%sSSC CABLE WAY VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_16_pressed	
+    }
+///////////////////////////////////////////////////////////////
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("%sSSC CABLE WAY VAULT IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (SSCCAB_VC != VCOK) {
+
+		} state vc_faillures
+	}
+//////////////////////////////////////////////////////////
+	state recover_faillure {
+		
+		when (!SSCCAB_FAIL_COND) {
+			if(!SSCCABUpdate) {
+				printf("%sRECOVERING FROM FAILLURE - ENTERING W16 STATE%s\n",OK,DEF);
+				SSCCABUpdate = TRUE;
+			}
+		} state  watchman_16_pressed
+			
+		when (SSCCAB_FAIL_COND != SSCCAB_OLD_FAIL_COND) {
+		} state  clearance_faillures
+	}
+//////////////////////////////////////////////////////////
+
+	state watchman_16_pressed {
+
+		when (SSCCAB_FAIL_COND != VCOK) {
+			SSCCAB_OLD_FAIL_COND = SSCCAB_FAIL_COND;
+		} state  clearance_faillures
+			
+		when (SSC_W16_STS == B16ON) {
+			SSCCAB_clear_underway();
+			SSCCAB_update_report(B16ON);
+		} state watchman_16_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_16_released {
+		
+		when (SSCCAB_FAIL_COND != VCOK) {
+
+		} state  clearance_faillures
+			
+		when (SSC_W16_STS != B16ON) {
+		} state gate_g5_closed
+	}
+//////////////////////////////////////////////////////////
+	state gate_g5_closed {
+
+		when (SSCCAB_FAIL_COND != VCOK) {
+
+		} state   clearance_faillures
+		
+		when (SSC_W17_STS == G5S1OFF) {
+			SSCCAB_update_report(G5S1OFF);
+		} state gate_g5_closed
+
+		when (SSC_W17_STS == G5S2OFF) {
+			SSCCAB_update_report(G5S2OFF);
+		} state gate_g5_closed
+
+
+		when () {
+			SSCCAB_update_report(B17OFF);
+		} state watchman_17_pressed
+	}
+
+///////////////////////////////////////////////////////////
+	state watchman_17_pressed {
+		
+		when (SSCCAB_FAIL_COND != VCOK) {
+
+		} state  clearance_faillures
+			
+			
+		when (!SSC_W17_STS) {
+
+			SSCCAB_status();
+		} state vault_cleared
+	}
+///////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("SSC CAB CLEARANCE FAILURE CONDITION: ");
+			SSCCABUpdate = FALSE;
+		}
+
+		when () {
+			SSCCAB_update_failed(SSCCAB_FAIL_COND);
+		} state recover_faillure
+		
+		exit {
+		    SSCCAB_OLD_FAIL_COND = SSCCAB_FAIL_COND;	
+		}			
+	}
+////////////////////////////////////////////////////////////////////////////
+	state vc_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("SSC CAB CLEAR FAILURE CONDITION: ");
+			SSCCABUpdate = FALSE;
+		}
+		
+		when () {			
+			SSCCAB_update_failed(SSCCAB_VC);
+		} state recover_faillure
+		
+		exit {
+		    SSCCAB_OLD_FAIL_COND = SSCCAB_FAIL_COND;
+		}
+	}
+}
+///////////////////////////////////////////////////////////////////////////////
+void initVault(){
+	SSCCAB_INIT = TRUE;
+	SSCCAB_OLD_FAIL_COND = SSCCAB_FAIL_COND;
+	not_cleared(SSCCAB_CLR_STATS);
+	report_error(SSCCAB_INTLCK_STATS, 54);
+	pvPut(SSCCAB_INIT, SYNC);
+	pvPut(SSCCAB_CLR_STATS, SYNC);
+	pvPut(SSCCAB_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SSCCAB_update_failed(short report)
+{
+	clear_failed(SSCCAB_CLR_STATS);
+	pvPut(SSCCAB_CLR_STATS, SYNC);
+	report_error(SSCCAB_INTLCK_STATS, report);
+	pvPut(SSCCAB_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,SSCCAB_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void SSCCAB_update_report(short intlck) {
+	report_error(SSCCAB_INTLCK_STATS, intlck);
+	pvPut(SSCCAB_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SSCCAB_status()
+{
+	cleared(SSCCAB_CLR_STATS);
+	pvPut(SSCCAB_CLR_STATS, SYNC); 		
+	report_error(SSCCAB_INTLCK_STATS, 54);
+	pvPut(SSCCAB_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void SSCCAB_clear_underway()
+{  
+	clear_underway(SSCCAB_CLR_STATS);
+	pvPut(SSCCAB_CLR_STATS, SYNC); 		
+}

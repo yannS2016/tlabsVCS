@@ -1,0 +1,242 @@
+program spc2gfClearanceSNC
+
+%{ 
+/**********************************************************/
+	#include "vcs_var_mes.h" // define this here so C functions/variables are seen
+/**********************************************************/	
+#define	VCOK       	0
+#define TOUT		5
+#define FAIL		-1 
+#define SPC2GFPNK   19 
+#define B46ON       165
+#define B47OFF      168
+#define B47ON  		169
+#define B48OFF		166  
+#define	RA3ON	    147
+#define	A007ON     	162
+#define	DA3ON	    163	
+#define	DA3OFF		167	
+#define	DA3aON		170	
+#define	G6aON       164
+
+}%
+/* Declare seq variables*/
+short SPC2GF_INIT; 
+short SPC2GF_VC;   
+short SPC2_W46_STS;
+short SPC2_W47_STS;
+short SPC2_W48_STS;
+
+short SPC2GF_FAIL_COND;
+short SPC2GF_OLD_FAIL_COND;
+string SPC2GF_CLR_STATS; 
+string SPC2GF_INTLCK_STATS;
+short spc2GFUpdate = FALSE;
+/* Associate SNL variables with epics output pv's*/
+assign	SPC2GF_CLR_STATS		to	"{SYS}:SPC2GF-CLR-STATS"; 
+assign	SPC2GF_INTLCK_STATS		to	"{SYS}:SPC2GF-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	SPC2GF_VC 				to 	"{SYS}:SPC2GF-VC"; 
+assign 	SPC2GF_INIT 			to 	"{SYS}:SPC2GF-INIT";
+
+assign 	SPC2_W46_STS 			to 	"{SYS}:SPC2-W46-STS"; 
+assign 	SPC2_W47_STS 			to  "{SYS}:SPC2-W47-STS";   
+assign 	SPC2_W48_STS 			to 	"{SYS}:SPC2-W48-STS";
+assign	SPC2GF_FAIL_COND		to	"{SYS}:SPC2GF-FAIL-COND";
+
+monitor	SPC2GF_VC;
+monitor SPC2_W46_STS; 
+monitor SPC2_W47_STS;   
+monitor SPC2_W48_STS;
+monitor	SPC2GF_FAIL_COND;
+
+ss SPC2GF_clearance_status {
+    state init {
+		when (delay(8.5)) {
+			initVault();
+			printf("%sSPC2 GROUND-FLOOR INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_46_pressed	
+    }
+///////////////////////////////////////////////////////////////
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("%sSPC2 GROUND-FLOOR IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (SPC2GF_VC != VCOK) {
+
+		} state vc_faillures
+	}
+//////////////////////////////////////////////////////////
+	state recover_faillure {
+
+		when (!SPC2GF_FAIL_COND) {
+			if(!spc2GFUpdate) {
+				printf("%sSPC2 GF RECOVERING FROM FAILLURE - ENTERING W46 STATE%s\n",OK,DEF);
+				spc2GFUpdate= TRUE;
+			}
+		} state  watchman_46_pressed
+			
+		when (SPC2GF_FAIL_COND != SPC2GF_OLD_FAIL_COND) {
+
+		} state  clearance_faillures
+	}
+//////////////////////////////////////////////////////////
+
+	state watchman_46_pressed {
+
+		when (SPC2_W46_STS == FAIL) {
+			SPC2GF_OLD_FAIL_COND = SPC2GF_FAIL_COND;
+		} state  clearance_faillures
+			
+		when (SPC2_W46_STS == B46ON) {
+			SPC2GF_clear_underway();
+			SPC2GF_update_report(B46ON);
+		} state watchman_46_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_46_released{
+		
+		when (SPC2_W46_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+		when (SPC2_W46_STS != B46ON) {
+			SPC2GF_update_report(B47OFF);
+		} state watchman_47_pressed
+	}
+//////////////////////////////////////////////////////////
+	state watchman_47_pressed {
+
+		when (SPC2_W46_STS == FAIL) {
+
+		} state   clearance_faillures
+		
+		
+		when (SPC2_W47_STS == B47ON) {
+			SPC2GF_update_report(B47ON);
+		} state watchman_47_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_47_released{
+		
+		when (SPC2_W46_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+		when (SPC2_W47_STS != B47ON) {
+			SPC2GF_update_report(DA3OFF);
+		} state door_A3_closed
+		
+	}
+///////////////////////////////////////////////////////////
+	state watchman_48_pressed {
+		
+		when (SPC2_W46_STS == FAIL) {
+
+		} state  clearance_faillures
+
+			
+		when (!SPC2_W48_STS) {
+
+			SPC2GF_status();
+		} state vault_cleared
+	}
+///////////////////////////////////////////////////////////
+	state door_A3_closed {
+		
+		when (SPC2_W46_STS == FAIL) {
+
+		} state  clearance_faillures
+		
+		when (SPC2_W48_STS == DA3OFF) {			
+
+		} state door_A3_closed
+
+			
+		when () {
+			SPC2GF_update_report(B48OFF);
+		} state watchman_48_pressed
+	}
+//////////////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		
+		entry {
+			printf("SPC2 GF CLEARANCE FAILURE CONDITION: ");
+			spc2GFUpdate= FALSE;
+		}
+
+		when () {
+					
+			SPC2GF_update_failed(SPC2GF_FAIL_COND);
+		} state recover_faillure
+		
+		exit {
+		    SPC2GF_OLD_FAIL_COND = SPC2GF_FAIL_COND;	
+		}	
+	}
+////////////////////////////////////////////////////////////////////////////
+	state vc_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		
+		entry {
+			printf("SPC2 GF CLEAR FAILURE CONDITION: ");
+			spc2GFUpdate= FALSE;
+		}
+		
+		when () {
+			SPC2GF_update_failed(SPC2GF_VC);
+		} state recover_faillure
+				
+		
+		exit {
+		    SPC2GF_OLD_FAIL_COND = SPC2GF_FAIL_COND;	
+		}
+	}
+}
+////////////////////////////////////////////////////////////////////////////
+void initVault(){
+	SPC2GF_INIT = TRUE;
+	SPC2GF_OLD_FAIL_COND = SPC2GF_FAIL_COND;
+	not_cleared(SPC2GF_CLR_STATS);
+	report_error(SPC2GF_INTLCK_STATS, 54);
+	pvPut(SPC2GF_INIT, SYNC);
+	pvPut(SPC2GF_CLR_STATS, SYNC);
+	pvPut(SPC2GF_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SPC2GF_update_failed(short report)
+{
+	clear_failed(SPC2GF_CLR_STATS);
+	pvPut(SPC2GF_CLR_STATS, SYNC);
+	report_error(SPC2GF_INTLCK_STATS, report);
+	pvPut(SPC2GF_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,SPC2GF_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void SPC2GF_update_report(short intlck) {
+	report_error(SPC2GF_INTLCK_STATS, intlck);
+	pvPut(SPC2GF_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SPC2GF_status()
+{  
+	cleared(SPC2GF_CLR_STATS);
+	pvPut(SPC2GF_CLR_STATS, SYNC); 		
+	report_error(SPC2GF_INTLCK_STATS, 54);
+	pvPut(SPC2GF_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void SPC2GF_clear_underway()
+{  
+	clear_underway(SPC2GF_CLR_STATS);
+	pvPut(SPC2GF_CLR_STATS, SYNC); 		
+}
+/**********************************************************/
+

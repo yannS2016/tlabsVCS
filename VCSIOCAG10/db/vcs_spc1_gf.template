@@ -1,0 +1,304 @@
+############ SELECT THE NEXT PROCESSING BRANCH ##################
+record(calc, "$(SYS):SPC1GF-SEL-STAGE") {
+  field(DESC, "Select processing branch")
+  field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
+  field(CALC, "A?!B?C?$(S0):$(S1):$(PNK):$(NI)")
+  field(INPA, "$(SYS):SPC1GF-INIT NPP")
+##IF BUTTON 42 IS STILL PRESSED PNK IS ACTIVE##
+  field(INPB, "$(SYS):SPC1GF-PNK") 
+  field(INPC, "$(SYS):SPC1GF-CLR NPP")
+  field(FLNK, "$(SYS):SPC1GF-PROC-STAGE")
+}
+## THIS RECORDS PROPAGATE PROCESSING ##
+record(fanout, "$(SYS):SPC1GF-PROC-STAGE") {
+  field(SCAN, "Passive")
+  field(SELM, "Specified")
+  field(SELL, "$(SYS):SPC1GF-SEL-STAGE")
+  field(LNK1, "$(SYS):SPC1GF-VC PP")
+  field(LNK2, "$(SYS):SPC1GF-VNC PP")
+  field(LNK3, "$(SYS):SPC1GF-PNK PP")
+}
+####################################################################
+# MONITOR THE STATUS OF INPUT CABLE
+## SPC1-40 AND SPC1-41 CANNOT BE PRESSED AT THE SAME TIME
+## THEREFORE IF SPC1-40 IS OFF SPC1-41 MUST BE ON
+## SPC1-40 || SPC1-41 ? (CABLE CONNECTED):(CABLE DISCONNECTED)
+## formula to monitor status of inputs and set output in stage 1
+record(calc, "$(SYS):SPC1GF-INPCAB-STS") {
+  field(SCAN, "Passive") 
+  field(CALC, "A||B?0:0")
+  field(INPA, "$(SYS):WS-BUT-SPC1-40.VAL")
+  field(INPB, "$(SYS):WS-BUT-SPC1-41.VAL")   
+}
+##################################################################################
+# monitor status of inputs which may cause clearance faillure
+# SIGNAL TO SYS: SPC1GF-VC?SPC1GF-CLR && (HARDWARE STATUS RECORDS):FALSE
+record(calcout, "$(SYS):SPC1GF-VC") { 
+  field(DESC, "SPC1GF Vault clear stage")
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(FLNK, "$(SYS):SPC1GF-FAIL-COND")
+  field(CALC, "!A?!B?!C?D?$(SPC1PNK):$(VCOK):$(G7ON):$(DA2ON):$(RA2ON)")
+  field(INPA, "$(SYS):SW-RF-A2.VAL")
+  field(INPB, "$(SYS):SPC1-DA2-CLSD.VAL PP") 
+  field(INPC, "$(SYS):SW-G7-A2.VAL")  
+  field(INPD, "$(SYS):SPC1GF-PNK.VAL PP")
+  field(OUT,  "$(SYS):RST-SPC1GF.PROC PP")  
+  field(OOPT, "When Non-zero")
+
+}
+####################### RESET VAULT #################
+record(seq, "$(SYS):RST-SPC1GF") { # HANDLE BY SEQ
+  field(SCAN, "Passive")
+  field(PINI, "YES") # init status of outputs
+  field(DOL1, "0")
+  field(DOL2, "0")
+  field(DOL3, "0")
+  field(DOL4, "0")
+  field(DOL5, "0")
+  field(DOL6, "0")
+  field(DOL7, "0")
+  field(DOL8, "0")
+  field(LNK1, "$(SYS):CS1-SPC1 PP")
+  field(LNK2, "$(SYS):CL1-SPC1 PP")
+  field(LNK3, "$(SYS):SPC1GF-CLR PP")
+  field(LNK4, "$(SYS):LED-WS-SPC1-40 PP")
+  field(LNK5, "$(SYS):LED-WS-SPC1-41 PP")
+  field(LNK6, "$(SYS):SPC1GF-COUNTER PP")
+  field(LNK7, "$(SYS):WATCHMAN-SPC1-40-ACT PP")
+#  field(LNK8, "$(SYS):SPC1L-INIT PP") 
+  field(SELM, "All")
+}
+#CLEARANCE UNDERWAY FAIL CONDITIONS
+record(calcout, "$(SYS):SPC1GF-FAIL-COND") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?$(VCOK):$(TOUT):$(DA2ON):$(RA2ON)")
+  field(INPA, "$(SYS):SW-RF-A2 NPP") 
+  field(INPB, "$(SYS):SPC1-DA2-CLSD PP")
+  field(INPC, "$(SYS):SPC1GF-TIMEOUT NPP")
+  field(INPD, "$(SYS):SPC1GF-INIT") 
+  field(OUT,  "$(SYS):RST-SPC1GF.PROC PP")  
+  field(OOPT, "Transition To Non-zero") # STOP THIS RECORD TO KEEP RESETTING SHARED OUTPUT AFTER INIT 
+}
+#######################################################################################
+record(calc, "$(SYS):SPC1GF-VNC") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(VCOK):A")
+  field(INPA, "$(SYS):SPC1-W40-STS PP")  
+}
+###############################################################
+# ONLY CHNAGE OUTS STATE WHEN B40 IS PRESSED WHILE ROOF
+# A2 AND DOOR A2 ARE CLOSED: THIS ENSURE WE DONT UNECCESSARLY WRITE TO OUTS
+
+record(calcout, "$(SYS):SPC1-W40-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?$(VCOK):$(B40ON):!C?$(B40NP):D:$(FAIL)")
+  field(INPA, "$(SYS):SPC1GF-FAIL-COND PP")
+  field(INPB, "$(SYS):WS-BUT-SPC1-40.VAL")
+  field(INPC, "$(SYS):WATCHMAN-SPC1-40-ACT NPP")
+  field(INPD, "$(SYS):SPC1-W41-STS PP")
+  field(OUT,  "$(SYS):SPC1W40-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
+}
+record(seq, "$(SYS):SPC1W40-WRT-OUTS") { # HANDLE BY SEQ
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DOL4, "0")
+  field(DOL5, "1")
+  field(DOL6, "0")
+  field(LNK1, "$(SYS):CS1-SPC1 PP")
+  field(LNK2, "$(SYS):CL1-SPC1 PP")
+  field(LNK3, "$(SYS):LED-WS-SPC1-40 PP")
+  field(LNK4, "$(SYS):SPC1GF-COUNTER PP")
+  field(LNK5, "$(SYS):WATCHMAN-SPC1-40-ACT PP")
+  field(LNK6, "$(SYS):SPC1GF-VC.VAL NPP") # RESET ANY PREVIOUS FAIL CONDITIONS
+  field(SCAN, "Passive")
+  field(SELM, "All")
+}
+# monitor status of inputs and set output in stage 2
+####################################################################################################
+
+record(calcout, "$(SYS):SPC1-W41-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?C&&!D?$(VCOK):$(B41OFF):$(G7OFF):$(FAIL)")
+  field(INPA, "$(SYS):SPC1GF-FAIL-COND PP")
+  field(INPB, "$(SYS):SW-G7-A2 NPP")
+  field(INPC, "$(SYS):SPC1-WATCH-40-RLSD.VAL PP")
+  field(INPD, "$(SYS):WS-BUT-SPC1-41 NPP")
+  field(OUT,  "$(SYS):SPC1W41-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
+}
+
+# THIS RECORDS IS PROCESSED ONLY WHEN SPC1GF-VNCS2 RETRUN 0
+# THAT IS SPC1GF INTERLOCKS ARE CORRECT IN STAGE 2
+record(seq, "$(SYS):SPC1W41-WRT-OUTS") {
+  field(SELM, "All")
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DOL3, "1")
+  field(DOL4, "1")
+  field(DLY2, "0.02")
+  field(LNK1, "$(SYS):RST-SPC1GF.PROC PP")
+  field(LNK2, "$(SYS):SPC1GF-CLR.VAL PP")
+  field(LNK3, "$(SYS):LED-WS-SPC1-41.VAL PP")
+ # field(LNK4, "$(SYS):SPC1L-INIT.VAL PP")# PREVENT LOW VAULT FROM PROCESSING SHARED OUTPUTS
+  field(SCAN, "Passive")
+}
+#################### RECOVER FROM PANIQUE ################
+
+record(calc, "$(SYS):SPC1GF-PNK") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-SPC1-40.VAL")
+  field(VAL, "0")
+}
+
+#################### WATCHMAN 40 RELEASE ##############################
+record(calc, "$(SYS):SPC1-WATCH-40-RLSD") {
+  field(CALC, "A&&B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-SPC1-40.VAL")
+  field(INPB, "$(SYS):WATCHMAN-SPC1-40-ACT.VAL")
+}
+#################### DOOR A2 CLOSED ##################################
+record(calc, "$(SYS):SPC1-DA2-CLSD") {
+  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(INPA, "$(SYS):SW-I-SPC1-A2.VAL")
+  field(INPB, "$(SYS):SW-II-SPC1-A2.VAL")
+}
+########################## TIMER PROCEDURE #############################
+# IN VERSION 2 OF THE CODE WE USE THE SAME TIMER SET FROM GROUND FLOOR 
+record(calc, "$(SYS):SPC1GF-COUNTER") {
+  field(SCAN, "Passive")
+  field(CALC, "B?A+1:0")
+  field(INPA, "$(SYS):SPC1GF-COUNTER.VAL")
+  field(INPB, "$(SYS):WATCHMAN-SPC1-40-ACT.VAL")
+}
+record(calc, "$(SYS):SPC1GF-TIMEOUT") {
+  field(SCAN, "1 second")
+  field(CALC, "A>=$(SPC1TOUT)?$(ON):$(OFF)")
+  field(INPA, "$(SYS):SPC1GF-COUNTER.VAL PP")
+}
+########################### Outputs ##################################
+
+record(bo, "$(SYS):CS1-SPC1") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):CL1-SPC1") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):SPC1GF-CLR") {
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-SPC1-40") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-SPC1-41") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(stringout, "$(SYS):SPC1GF-CLR-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+
+record(stringout, "$(SYS):SPC1GF-INTLCK-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+################ INPUTS ###############################
+########  INIT THIS RECORD TO FALSE ######
+record(bo, "$(SYS):WATCHMAN-SPC1-40-ACT") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "0")
+}
+
+record(bi, "$(SYS):WS-BUT-SPC1-40") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):WS-BUT-SPC1-41") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-G7-A2") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-I-SPC1-A2") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-II-SPC1-A2") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-RF-A2") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+## THIS RECORDS MUST BE SET FROM THE SEQ ##
+record(bi, "$(SYS):SPC1GF-INIT") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+

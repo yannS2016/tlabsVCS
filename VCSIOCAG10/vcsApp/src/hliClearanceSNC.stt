@@ -1,0 +1,202 @@
+program hliClearanceSNC
+
+%{
+/*******************************************************************/
+#include "vcs_var_mes.h" // define this here so C functions are seen
+/*******************************************************************/
+#define	VCOK       	0
+#define FAIL		-1
+#define	B31OFF      95
+#define	B30ON      	92
+#define DA14S1OFF	93 
+#define DA14S2OFF	94
+}%
+/* Declare seq variables*/
+short HLI_INIT; 
+short HLI_VC;   
+short HLI_W30_STS;
+short HLI_W31_STS;
+short HLI_FAIL_COND;
+string HLI_CLR_STATS; 
+string HLI_INTLCK_STATS;
+// CONTROL FLAGS
+short HLIUpdate;
+short HLI_OLD_FAIL_COND;
+
+/* Associate SNL variables with epics output pv's*/
+assign	HLI_CLR_STATS		to	"{SYS}:HLI-CLR-STATS"; 
+assign	HLI_INTLCK_STATS	to	"{SYS}:HLI-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	HLI_VC 				to 	"{SYS}:HLI-VC"; 
+assign 	HLI_INIT 			to 	"{SYS}:HLI-INIT";
+assign 	HLI_W30_STS 		to 	"{SYS}:HLI-W30-STS";   
+assign 	HLI_W31_STS 		to 	"{SYS}:HLI-W31-STS";
+assign	HLI_FAIL_COND		to	"{SYS}:HLI-FAIL-COND";
+
+monitor	HLI_VC;
+monitor HLI_W30_STS;  
+monitor HLI_W31_STS;
+monitor	HLI_FAIL_COND;
+
+ss HLI_clearance_status {
+    state init {
+		when (delay(9.0)) {
+			initVault();
+			printf("\n%sHORIZONTAL LINE VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_30_pressed	
+    }
+///////////////////////////////////////////////////////////////
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("%sHORIZONTAL LINE VAULT IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (HLI_VC != VCOK) {
+
+		} state vc_faillures
+	}
+//////////////////////////////////////////////////////////
+	state recover_faillure {
+		
+		when (!HLI_FAIL_COND) {
+			if(!HLIUpdate) {
+				printf("%sRECOVERING FROM FAILLURE - ENTERING W30 STATE%s\n",OK,DEF);
+				HLIUpdate = TRUE;
+			}
+		} state  watchman_30_pressed
+			
+		when (HLI_FAIL_COND != HLI_OLD_FAIL_COND) {
+		} state  clearance_faillures
+	}
+//////////////////////////////////////////////////////////
+	state watchman_30_pressed {
+
+		when (HLI_FAIL_COND != VCOK) {
+			HLI_OLD_FAIL_COND = HLI_FAIL_COND;
+		} state  clearance_faillures
+			
+		when (HLI_W30_STS == B30ON) {
+			HLI_clear_underway();
+			HLI_update_report(B30ON);
+		} state watchman_30_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_30_released {
+		
+		when (HLI_FAIL_COND != VCOK) {
+
+		} state  clearance_faillures
+			
+		when (HLI_W30_STS != B30ON) {
+		} state door_a14_closed
+	}
+//////////////////////////////////////////////////////////
+	state door_a14_closed {
+
+		when (HLI_FAIL_COND != VCOK) {
+
+		} state   clearance_faillures
+		
+		when (HLI_W31_STS == DA14S1OFF) {
+			HLI_update_report(DA14S1OFF);
+		} state door_a14_closed
+
+		when (HLI_W31_STS == DA14S2OFF) {
+			HLI_update_report(DA14S2OFF);
+		} state door_a14_closed
+
+
+		when () {
+			HLI_update_report(B31OFF);
+		} state watchman_31_pressed
+	}
+
+///////////////////////////////////////////////////////////
+	state watchman_31_pressed {
+		
+		when (HLI_FAIL_COND != VCOK) {
+
+		} state  clearance_faillures
+			
+			
+		when (!HLI_W31_STS) {
+
+			HLI_status();
+		} state vault_cleared
+	}
+///////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("HLI CLEARANCE FAILURE CONDITION: ");
+			HLIUpdate = FALSE;
+		}
+
+		when () {
+			HLI_update_failed(HLI_FAIL_COND);
+		} state recover_faillure
+		
+		exit {
+		    HLI_OLD_FAIL_COND = HLI_FAIL_COND;	
+		}			
+	}
+////////////////////////////////////////////////////////////////////////////
+	state vc_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("HLI CLEAR FAILURE CONDITION: ");
+			HLIUpdate = FALSE;
+		}
+		
+		when () {			
+			HLI_update_failed(HLI_VC);
+		} state recover_faillure
+		
+		exit {
+		    HLI_OLD_FAIL_COND = HLI_FAIL_COND;
+		}
+	}
+}
+///////////////////////////////////////////////////////////////////////////////
+void initVault(){
+	HLI_INIT = TRUE;
+	HLI_OLD_FAIL_COND = HLI_FAIL_COND;
+	not_cleared(HLI_CLR_STATS);
+	report_error(HLI_INTLCK_STATS, 54);
+	pvPut(HLI_INIT, SYNC);
+	pvPut(HLI_CLR_STATS, SYNC);
+	pvPut(HLI_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void HLI_update_failed(short report)
+{
+	clear_failed(HLI_CLR_STATS);
+	pvPut(HLI_CLR_STATS, SYNC);
+	report_error(HLI_INTLCK_STATS, report);
+	pvPut(HLI_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,HLI_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void HLI_update_report(short intlck) {
+	report_error(HLI_INTLCK_STATS, intlck);
+	pvPut(HLI_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void HLI_status()
+{
+	cleared(HLI_CLR_STATS);
+	pvPut(HLI_CLR_STATS, SYNC); 		
+	report_error(HLI_INTLCK_STATS, 54);
+	pvPut(HLI_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void HLI_clear_underway()
+{  
+	clear_underway(HLI_CLR_STATS);
+	pvPut(HLI_CLR_STATS, SYNC); 		
+}

@@ -1,0 +1,607 @@
+############ SELECT THE NEXT PROCESSING BRANCH ##################
+record(calc, "$(SYS):SSCL-SEL-STAGE") {
+  field(DESC, "Select processing branch")
+  field(SCAN, "$(SCAN)") 						# THIS RECORD INIT PROCESSING
+  field(CALC, "A?!B?C?$(S0):$(S1):$(PNK):$(NI)")
+  field(INPA, "$(SYS):SSCL-INIT")
+  field(INPB, "$(SYS):SSCL-PNK") 
+  field(INPC, "$(SYS):SSCL-CLR")
+  field(FLNK, "$(SYS):SSCL-PROC-STAGE")
+}
+## THIS RECORDS PROPAGATE PROCESSING ##
+record(fanout, "$(SYS):SSCL-PROC-STAGE") {
+  field(SCAN, "Passive")
+  field(SELM, "Specified")
+  field(SELL, "$(SYS):SSCL-SEL-STAGE")
+  field(LNK1, "$(SYS):SSCL-VC")
+  field(LNK2, "$(SYS):SSCL-VNC")
+  field(LNK3, "$(SYS):SSCL-PNK")
+}
+##################################################################################
+# monitor status of inputs which may cause clearance faillure
+# SIGNAL TO SYS: SSCL-VC?SSCL-CLR && (HARDWARE STATUS RECORDS):FALSE
+record(calcout, "$(SYS):SSCL-VC") { 
+  field(DESC, "SSCL Vault clear stage")
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(FLNK, "$(SYS):SSCL-FAIL-COND") # THIS RECORD MUST IMMEDIATELY READ A FAIL CONDITION 
+  field(CALC, "!F?$(VCOK):A?!B?!C?!D?E?$(SSCPNK):$(VCOK):$(G2ON):$(G1ON):$(DA001ON):$(A001AON)")
+  field(INPA, "$(SYS):SSCCAB-CLR.VAL NPP")
+  field(INPB, "$(SYS):SSC-DA001-CLSD.VAL PP")
+  field(INPC, "$(SYS):SSC-G1-CLSD.VAL.VAL PP")  
+  field(INPD, "$(SYS):SSC-G2-CLSD.VAL PP")
+  field(INPE, "$(SYS):SSCL-PNK.VAL PP")
+  field(INPF, "$(SYS):SSCL-INIT.VAL") 
+  field(OUT,  "$(SYS):RST-SSCL.PROC PP")  
+  field(OOPT, "When Non-zero")
+}
+####################### RESET VAULT #################
+record(fanout, "$(SYS):RST-SSCL") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(SELM, "All")
+  field(LNK1, "$(SYS):RST-SSCL-OUTS PP")
+  field(LNK2, "$(SYS):RST-SSCL-FLAGS PP")
+}
+record(seq, "$(SYS):RST-SSCL-OUTS") { # MAY BE HANDLE BY SEQ
+  field(SCAN, "Passive")
+  field(DOL1, "0")
+  field(DOL2, "0")
+  field(DOL3, "0")
+  field(DOL4, "0")
+  field(DOL5, "0")
+  field(DOL6, "0")
+  field(DOL7, "0")
+  field(DOL8, "0")
+  field(DOL9, "0")
+  field(DOLA, "0")
+  field(LNK1, "$(SYS):SSCL-CLR.VAL PP")
+  field(LNK2, "$(SYS):CL4-SSC.VAL PP")
+  field(LNK3, "$(SYS):CS4-SSC.VAL PP")
+  field(LNK4, "$(SYS):LED-WS-SSC-1.VAL PP")
+  field(LNK5, "$(SYS):LED-WS-SSC-2.VAL PP")
+  field(LNK6, "$(SYS):LED-WS-SSC-3.VAL PP")
+  field(LNK7, "$(SYS):LED-WS-SSC-4.VAL PP")
+  field(LNK8, "$(SYS):LED-WS-SSC-5.VAL PP")
+  field(LNK9, "$(SYS):LED-WS-SSC-6.VAL PP")
+  field(LNKA, "$(SYS):SSCL-COUNTER.VAL PP")
+  field(SELM, "All")
+}
+record(seq, "$(SYS):RST-SSCL-FLAGS") { # MAY BE HANDLE BY SEQ
+  field(SCAN, "Passive")
+  field(DOL1, "0")
+  field(DOL2, "0")
+  field(DOL3, "0")
+  field(DOL4, "0")
+  field(DOL5, "0")
+  field(LNK1, "$(SYS):WATCHMAN-SSC-1-ACT.VAL PP")
+  field(LNK2, "$(SYS):WATCHMAN-SSC-2-ACT.VAL PP")
+  field(LNK3, "$(SYS):WATCHMAN-SSC-3-ACT.VAL PP")
+  field(LNK4, "$(SYS):WATCHMAN-SSC-4-ACT.VAL PP")
+  field(LNK5, "$(SYS):WATCHMAN-SSC-5-ACT.VAL PP")
+  field(SELM, "All")
+}
+################################################################################################################
+#CLEARANCE UNDERWAY FAIL CONDITIONS
+record(calcout, "$(SYS):SSCL-FAIL-COND") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!F?$(VCOK):A?!B?!C?!D?!E?$(VCOK):E:D:$(TOUT):B:$(A001AON)")
+  field(INPA, "$(SYS):SSCCAB-CLR.VAL NPP") 
+  field(INPB, "$(SYS):SSCL-GD-FAIL PP")
+  field(INPC, "$(SYS):SSCL-TIMEOUT.VAL NPP") 
+  field(INPD, "$(SYS):SSCL-W1-FAIL PP") 
+  field(INPE, "$(SYS):SSCL-W4-FAIL PP")
+  field(INPF, "$(SYS):SSCL-INIT.VAL") 
+  field(OUT,  "$(SYS):RST-SSCL.PROC PP")  
+  field(OOPT, "Transition To Non-zero") # STOP THIS RECORD TO KEEP RESETTING SHARED OUTPUT AFTER INIT  
+}
+record(calcout, "$(SYS):SSCL-GD-FAIL") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?!D?$(VCOK):$(G1S2ON):$(G1S1ON):$(DA001S2ON):$(DA001S1ON)")
+  field(INPA, "$(SYS):SW-I-SSC-A001.VAL NPP")
+  field(INPB, "$(SYS):SW-II-SSC-A001.VAL NPP") 
+  field(INPC, "$(SYS):SW-I-SSC-G1.VAL NPP")
+  field(INPD, "$(SYS):SW-II-SSC-G1.VAL NPP")  
+}
+record(calc, "$(SYS):SSCL-W1-FAIL") {
+  field(SCAN, "Passive")
+  field(CALC, "A=$(W1ON)?A:$(OFF)")
+  field(INPA, "$(SYS):SSC-W1-STS.VAL NPP")
+  field(INPB, "$(SYS):WATCHMAN-SSC-1-ACT.VAL NPP") 
+}
+record(calc, "$(SYS):SSCL-W4-FAIL") {
+  field(SCAN, "Passive")
+  field(CALC, "!B?$(VCOK):A=$(W4ON)?A:$(OFF)")
+  field(INPA, "$(SYS):SSC-W4-STS.VAL NPP")
+  field(INPB, "$(SYS):WATCHMAN-SSC-4-ACT.VAL NPP") 
+}
+##########################################################################################
+record(calc, "$(SYS):SSCL-VNC") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(VCOK):A")
+  field(INPA, "$(SYS):SSC-W1-STS.VAL PP")  
+}
+#############################################################################################
+# VCOK: Hold watchman 1 and press 2
+# B1NP: DO NOTHING
+# W1ON:Watchman 1 was released too soon
+# B1ON:Watchman 1 was released - PROCESS B5
+record(calcout, "$(SYS):SSC-W1-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES") 
+  field(FLNK, "$(SYS):SSCW1-PROC-STG")
+  field(CALC, "!A?!B?!C?$(VCOK):$(B2OFF):!D?!C?$(B1NP):$(W1ON):$(B1ON):$(FAIL)") 
+  field(INPA, "$(SYS):SSCL-FAIL-COND.VAL PP") 
+  field(INPB, "$(SYS):WS-BUT-SSC-1.VAL NPP")
+  field(INPC, "$(SYS):WATCHMAN-SSC-1-ACT.VAL")
+  field(INPD, "$(SYS):WATCHMAN-SSC-4-ACT.VAL")
+  #field(INPE, "$(SYS):SSC-W2-STS PP") # 33
+  #field(INPF, "$(SYS):SSC-W5-STS PP") # 33
+  field(OUT,  "$(SYS):SSCW1-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero")
+}
+# IF B1 IS RELEASED AND W4 SET PROCESS B5
+record(calc, "$(SYS):SSCW1-SEL-STG") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "A=$(B2OFF)?$(S0):A=$(B1ON)?$(S1):$(B1NP)")
+  field(INPA, "$(SYS):SSC-W1-STS NPP")
+}
+
+record(fanout, "$(SYS):SSCW1-PROC-STG") {
+  field(SCAN, "Passive")
+  field(SELM, "Specified")
+  field(SELL, "$(SYS):SSCW1-SEL-STG PP")
+  field(LNK1, "$(SYS):SSC-W2-STS")
+  field(LNK2, "$(SYS):SSC-W5-STS")
+}
+
+record(seq, "$(SYS):SSCW1-WRT-OUTS") { # MAY BE HANDLED BY SEQ
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DOL4, "0")
+  field(DOL5, "1")
+  field(LNK1, "$(SYS):CS4-SSC.VAL PP")
+  field(LNK2, "$(SYS):CL4-SSC.VAL PP")
+  field(LNK3, "$(SYS):LED-WS-SSC-1.VAL PP")
+  field(LNK4, "$(SYS):SSCL-COUNTER.VAL PP")
+  field(LNK5, "$(SYS):WATCHMAN-SSC-1-ACT.VAL PP")
+  field(SCAN, "Passive")
+  field(SELM, "All")
+}
+
+# VCOK: Hold watchman 1 and release 2
+# B2OFF: Hold watchman 1 and press 2
+record(calcout, "$(SYS):SSC-W2-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?$(VCOK):$(B2ON):!B?$(B2OFF):C")
+  field(INPA, "$(SYS):WS-BUT-SSC-2.VAL NPP")
+  field(INPB, "$(SYS):WATCHMAN-SSC-2-ACT.VAL") 
+  field(INPC, "$(SYS):SSC-W3-STS.VAL PP") 
+  field(OUT,  "$(SYS):SSCW2-WRT-OUTS.PROC PP")  
+  field(OOPT, "When Zero")
+}
+
+record(seq, "$(SYS):SSCW2-WRT-OUTS") {
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(LNK1, "$(SYS):LED-WS-SSC-2.VAL PP")
+  field(LNK2, "$(SYS):WATCHMAN-SSC-2-ACT.VAL PP")
+  field(SCAN, "Passive")
+  field(SELM, "All")
+}
+
+record(calcout, "$(SYS):SSC-W3-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "A&&!B?!C?$(VCOK):$(B3ON):!C?$(B3OFF):D")
+  field(INPA, "$(SYS):SSC-W2-RLSD.VAL PP")
+  field(INPB, "$(SYS):WS-BUT-SSC-3.VAL NPP")
+  field(INPC, "$(SYS):WATCHMAN-SSC-3-ACT.VAL") 
+  field(INPD, "$(SYS):SSC-W4-STS.VAL PP") 
+  field(OUT,  "$(SYS):SSCW3-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero")
+}
+
+record(seq, "$(SYS):SSCW3-WRT-OUTS") {
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(LNK1, "$(SYS):LED-WS-SSC-3.VAL PP")
+  field(LNK2, "$(SYS):WATCHMAN-SSC-3-ACT.VAL PP")
+  field(SCAN, "Passive")
+  field(SELM, "All")
+}
+# VCOK: GO AND WAIT FOR B1 TO RELEASED
+record(calcout, "$(SYS):SSC-W4-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "A&&!B?$(VCOK):!C&&!D?$(B4OFF):C&&!D?$(W4ON):!E?$(B5ON):F")
+  field(INPA, "$(SYS):SSC-W3-RLSD.VAL PP")
+  field(INPB, "$(SYS):WS-BUT-SSC-4.VAL NPP")
+  field(INPC, "$(SYS):WATCHMAN-SSC-4-ACT.VAL") 
+  field(INPD, "$(SYS):WATCHMAN-SSC-5-ACT.VAL")
+  field(INPE, "$(SYS):WS-BUT-SSC-5.VAL")
+  field(INPF, "$(SYS):SSC-W6-STS PP")
+  field(OUT,  "$(SYS):SSCW4-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero")
+}
+
+record(seq, "$(SYS):SSCW4-WRT-OUTS") {
+  field(DOL1, "1")
+  field(DOL2, "0")
+  field(DOL3, "1")
+  field(LNK1, "$(SYS):LED-WS-SSC-4.VAL PP")
+  field(LNK2, "$(SYS):LED-WS-SSC-1.VAL PP") # RESET: RELEASED W1
+  field(LNK3, "$(SYS):WATCHMAN-SSC-4-ACT.VAL PP")
+  field(SCAN, "Passive")
+  field(SELM, "All")
+}
+#######################################################################
+# VCOK: Release watchman 4 & 5 -- GOTO RELEASED W5
+# B4ON: Watchman 4 must be released
+# B5OFF:Hold watchman 4 and press 5
+record(calcout, "$(SYS):SSC-W5-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?$(VCOK):!C?$(B5OFF):$(B4ON):A")   
+  field(INPA, "$(SYS):SSC-W4-STS PP")
+  field(INPB, "$(SYS):WS-BUT-SSC-5.VAL") 
+  field(INPC, "$(SYS):WATCHMAN-SSC-5-ACT.VAL") 
+  field(OUT,  "$(SYS):SSCW5-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero")
+}
+
+record(seq, "$(SYS):SSCW5-WRT-OUTS") { # MAY BE HANDLED BY SEQ
+  field(DOL1, "1")
+  field(DOL2, "0")
+  field(DOL3, "1")
+  field(DOL4, "0")
+  field(LNK1, "$(SYS):LED-WS-SSC-5.VAL PP")
+  field(LNK2, "$(SYS):LED-WS-SSC-4.VAL PP") # RESET: RELEASED W4
+  field(LNK3, "$(SYS):WATCHMAN-SSC-5-ACT.VAL PP")
+  field(LNK4, "$(SYS):SSCL-VC.VAL NPP") # RESET ANY PREVIOUS FAIL CONDITIONS
+  field(SCAN, "Passive")
+  field(SELM, "All")
+}
+record(calcout, "$(SYS):SSC-W6-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!C?A&&B&&!D?$(VCOK):$(B6OFF):$(G2OFF)") 
+  field(INPA, "$(SYS):SSC-W4-RLSD.VAL PP")
+  field(INPB, "$(SYS):SSC-W5-RLSD.VAL PP")
+  field(INPC, "$(SYS):SSC-G2-CLSD.VAL PP")
+  field(INPD, "$(SYS):WS-BUT-SSC-6.VAL")
+  field(OUT,  "$(SYS):SSCLW6-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero")
+}
+
+record(seq, "$(SYS):SSCLW6-WRT-OUTS") {
+  field(SELM, "All")
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DLY2, "0.02")
+  field(LNK1, "$(SYS):RST-SSCL.PROC PP")
+  field(LNK2, "$(SYS):SSCL-CLR.VAL PP")
+  field(LNK3, "$(SYS):LED-WS-SSC-6.VAL PP")
+  field(SCAN, "Passive")
+}
+#####################################################################
+# WATCHMAN 2 RELEASED	
+record(calc, "$(SYS):SSC-W2-RLSD") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "A&&B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-SSC-2.VAL")
+  field(INPB, "$(SYS):WATCHMAN-SSC-2-ACT.VAL")
+}
+
+#####################################################################
+# WATCHMAN 3 RELEASED	
+record(calc, "$(SYS):SSC-W3-RLSD") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "A&&B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-SSC-3.VAL")
+  field(INPB, "$(SYS):WATCHMAN-SSC-3-ACT.VAL")
+}
+
+#####################################################################
+# WATCHMAN 4 RELEASED	
+record(calc, "$(SYS):SSC-W4-RLSD") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "A&&B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-SSC-4.VAL")
+  field(INPB, "$(SYS):WATCHMAN-SSC-4-ACT.VAL")
+}
+#####################################################################
+# WATCHMAN 4 RELEASED	
+record(calc, "$(SYS):SSC-W4-RLSD") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "A&&B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-SSC-4.VAL")
+  field(INPB, "$(SYS):WATCHMAN-SSC-4-ACT.VAL")
+}
+
+#####################################################################
+# WATCHMAN 5 RELEASED	
+record(calc, "$(SYS):SSC-W5-RLSD") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "A&&B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-SSC-5.VAL")
+  field(INPB, "$(SYS):WATCHMAN-SSC-5-ACT.VAL")
+}
+#######################################################################
+#  RECOVER FROM PANIQUE 
+record(calc, "$(SYS):SSCL-PNK") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "(!A||!B||!C||!D||!E||!F)?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-SSC-1.VAL")
+  field(INPB, "$(SYS):WS-BUT-SSC-2.VAL")
+  field(INPC, "$(SYS):WS-BUT-SSC-3.VAL")
+  field(INPD, "$(SYS):WS-BUT-SSC-4.VAL")
+  field(INPE, "$(SYS):WS-BUT-SSC-5.VAL")
+  field(INPF, "$(SYS):WS-BUT-SSC-17.VAL")
+  field(INPG, "$(SYS):WATCHMAN-SSC-6-ACT.VAL")
+}
+
+#####################################################################
+# GATE G1 CLOSED	
+record(calc, "$(SYS):SSC-G1-CLSD") {
+  field(SCAN, "Passive")
+  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(INPA, "$(SYS):SW-I-SSC-G1.VAL")
+  field(INPB, "$(SYS):SW-II-SSC-G1.VAL")
+}
+
+#####################################################################
+# GATE G2 CLOSED	
+record(calc, "$(SYS):SSC-G2-CLSD") {
+  field(SCAN, "Passive")
+  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(INPA, "$(SYS):SW-I-SSC-G2.VAL")
+  field(INPB, "$(SYS):SW-II-SSC-G2.VAL")
+}
+
+#####################################################################
+# DOOR A001 CLOSED
+record(calc, "$(SYS):SSC-DA001-CLSD") {
+  field(SCAN, "Passive")
+  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(INPA, "$(SYS):SW-I-SSC-A001.VAL")
+  field(INPB, "$(SYS):SW-II-SSC-A001.VAL")
+}
+##################################################################
+# TIMER PROCEDURE
+record(calc, "$(SYS):SSCL-COUNTER") {
+  field(SCAN, "Passive")
+  field(CALC, "B?A+1:0")
+  field(INPA, "$(SYS):SSCL-COUNTER.VAL")
+  field(INPB, "$(SYS):WATCHMAN-SSC-1-ACT.VAL")
+}
+record(calc, "$(SYS):SSCL-TIMEOUT") {
+  field(SCAN, "1 second")
+  field(CALC, "A>=$(COUT)?$(ON):$(OFF)")
+  field(INPA, "$(SYS):SSCL-COUNTER.VAL PP")
+}
+########################### Outputs ##################################
+
+record(bo, "$(SYS):SSCL-CLR") {
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-SSC-1") {
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-SSC-2") {
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-SSC-3") {
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-SSC-4") {
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-SSC-5") {
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-SSC-6") {
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):CS4-SSC") {
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):CL4-SSC") {
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(stringout, "$(SYS):SSCL-CLR-STATS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(OMSL, "supervisory")
+  field(VAL, "")
+}
+
+record(stringout, "$(SYS):SSCL-INTLCK-STATS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(OMSL, "supervisory")
+  field(VAL, "")
+}
+################ INPUTS ###############################
+#FLAGS
+
+record(bo, "$(SYS):SSCL-FAILED") {
+  field(SCAN, "Passive")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):WATCHMAN-SSC-1-ACT") {
+  field(SCAN, "Passive")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):WATCHMAN-SSC-2-ACT") {
+  field(SCAN, "Passive")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):WATCHMAN-SSC-3-ACT") {
+  field(SCAN, "Passive")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):WATCHMAN-SSC-4-ACT") {
+  field(SCAN, "Passive")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):WATCHMAN-SSC-5-ACT") {
+  field(SCAN, "Passive")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):WATCHMAN-SSC-6-ACT") {
+  field(SCAN, "Passive")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+# WATCHMEM
+record(bi, "$(SYS):WS-BUT-SSC-1") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):WS-BUT-SSC-2") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):WS-BUT-SSC-3") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):WS-BUT-SSC-4") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):WS-BUT-SSC-5") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):WS-BUT-SSC-6") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+# DOORS
+record(bi, "$(SYS):SW-I-SSC-A001") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "1")
+}
+
+record(bi, "$(SYS):SW-II-SSC-A001") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "1")
+}
+# GATES
+record(bi, "$(SYS):SW-I-SSC-G1") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "1")
+}
+
+record(bi, "$(SYS):SW-II-SSC-G1") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "1")
+}
+
+record(bi, "$(SYS):SW-I-SSC-G2") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "1")
+}
+
+record(bi, "$(SYS):SW-II-SSC-G2") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "1")
+}
+
+## THIS RECORDS MUST BE SET FROM THE SEQ ##
+record(bi, "$(SYS):SSCL-INIT") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
