@@ -12,17 +12,17 @@
 /*******************************************************************/	
 #define	VCOK       	0
 #define FAIL		-1
-#define B26ON		69 
-#define B28bOFF		74
-#define B28bON		80 
-#define B28aOFF		73
-#define B28aON		79
-#define B27ON		78 
-#define B27OFF		72
-#define B29OFF		77  
-#define	DA12S1OFF	75
-#define	DA12S2OFF	76   
-#define	G10OFF		154          
+#define B26ON		70
+#define B28bOFF		75
+#define B28bON		81 
+#define B28aOFF		74
+#define B28aON		80
+#define B27ON		79 
+#define B27OFF		73
+#define B29OFF		78  
+#define	DA12S1OFF	76
+#define	DA12S2OFF	77   
+#define	G10OFF		155          
 
 
 /* Variable declarations */
@@ -995,7 +995,7 @@ static void initVault(SS_ID seqg_env)
 # line 271 "../expClearanceSNC.stt"
 	not_cleared(EXP_CLR_STATS);
 # line 272 "../expClearanceSNC.stt"
-	report_error(EXP_INTLCK_STATS, 54);
+	report_error(EXP_INTLCK_STATS, 0);
 # line 273 "../expClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 3/*EXP_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 274 "../expClearanceSNC.stt"
@@ -1042,7 +1042,7 @@ static void EXP_status(SS_ID seqg_env)
 # line 295 "../expClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*EXP_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 296 "../expClearanceSNC.stt"
-	report_error(EXP_INTLCK_STATS, 54);
+	report_error(EXP_INTLCK_STATS, 0);
 # line 297 "../expClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*EXP_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }

@@ -12,10 +12,10 @@
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define	B21OFF      110
-#define	B20ON      	107
-#define DA7S1OFF	108 
-#define DA7S2OFF	109
+#define	B21OFF      111
+#define	B20ON      	108
+#define DA7S1OFF	109 
+#define DA7S2OFF	110
 
 
 /* Variable declarations */
@@ -612,7 +612,7 @@ static void initVault(SS_ID seqg_env)
 # line 169 "../ev2ClearanceSNC.stt"
 	not_cleared(EV2_CLR_STATS);
 # line 170 "../ev2ClearanceSNC.stt"
-	report_error(EV2_INTLCK_STATS, 54);
+	report_error(EV2_INTLCK_STATS, 0);
 # line 171 "../ev2ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 3/*EV2_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 172 "../ev2ClearanceSNC.stt"
@@ -659,7 +659,7 @@ static void EV2_status(SS_ID seqg_env)
 # line 193 "../ev2ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*EV2_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 194 "../ev2ClearanceSNC.stt"
-	report_error(EV2_INTLCK_STATS, 54);
+	report_error(EV2_INTLCK_STATS, 0);
 # line 195 "../ev2ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*EV2_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }

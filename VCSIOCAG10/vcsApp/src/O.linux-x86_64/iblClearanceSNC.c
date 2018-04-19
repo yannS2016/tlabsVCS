@@ -11,12 +11,12 @@
 	
 #define	VCOK       	0
 #define FAIL		-1 	
-#define	DA13S1OFF	65	
-#define	DA13S2OFF	66	
-#define B9ON        58
-#define B8OFF       64
-#define B8ON  		63
-#define B7OFF		67  
+#define	DA13S1OFF	66	
+#define	DA13S2OFF	67	
+#define B9ON        59
+#define B8OFF       65
+#define B8ON  		64
+#define B7OFF		68  
 
 
 /* Variable declarations */
@@ -727,7 +727,7 @@ static void initVault(SS_ID seqg_env)
 # line 206 "../iblClearanceSNC.stt"
 	not_cleared(IBL_CLR_STATS);
 # line 207 "../iblClearanceSNC.stt"
-	report_error(IBL_INTLCK_STATS, 54);
+	report_error(IBL_INTLCK_STATS, 0);
 # line 208 "../iblClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 3/*IBL_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 209 "../iblClearanceSNC.stt"
@@ -774,7 +774,7 @@ static void IBL_status(SS_ID seqg_env)
 # line 230 "../iblClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*IBL_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 231 "../iblClearanceSNC.stt"
-	report_error(IBL_INTLCK_STATS, 54);
+	report_error(IBL_INTLCK_STATS, 0);
 # line 232 "../iblClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*IBL_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }

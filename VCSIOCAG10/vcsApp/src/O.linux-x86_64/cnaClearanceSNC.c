@@ -12,11 +12,11 @@
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define	B38ON		124					
-#define	B39OFF		125      		 	
-#define	DA12AON		123       			
-#define	DA12AS1OFF	126        		   	 
-#define	DA12AS2OFF	127 
+#define	B38ON		125					
+#define	B39OFF		126      		 	
+#define	DA12AON		124       			
+#define	DA12AS1OFF	127        		   	 
+#define	DA12AS2OFF	128 
 
 
 /* Variable declarations */
@@ -613,7 +613,7 @@ static void initVault(SS_ID seqg_env)
 # line 170 "../cnaClearanceSNC.stt"
 	not_cleared(cnA_CLR_STATS);
 # line 171 "../cnaClearanceSNC.stt"
-	report_error(cnA_INTLCK_STATS, 54);
+	report_error(cnA_INTLCK_STATS, 0);
 # line 172 "../cnaClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 3/*cnA_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 173 "../cnaClearanceSNC.stt"
@@ -660,7 +660,7 @@ static void cnA_status(SS_ID seqg_env)
 # line 195 "../cnaClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*cnA_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 196 "../cnaClearanceSNC.stt"
-	report_error(cnA_INTLCK_STATS, 54);
+	report_error(cnA_INTLCK_STATS, 0);
 # line 197 "../cnaClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*cnA_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }

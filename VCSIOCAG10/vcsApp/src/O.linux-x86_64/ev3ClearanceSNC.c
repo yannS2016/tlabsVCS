@@ -12,10 +12,10 @@
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define	B23OFF      115
-#define	B22ON      	112
-#define DA8S1OFF	113 
-#define DA8S2OFF	114
+#define	B23OFF      116
+#define	B22ON      	113
+#define DA8S1OFF	114 
+#define DA8S2OFF	115
 
 
 /* Variable declarations */
@@ -614,7 +614,7 @@ static void initVault(SS_ID seqg_env)
 # line 169 "../ev3ClearanceSNC.stt"
 	not_cleared(EV3_CLR_STATS);
 # line 170 "../ev3ClearanceSNC.stt"
-	report_error(EV3_INTLCK_STATS, 54);
+	report_error(EV3_INTLCK_STATS, 0);
 # line 171 "../ev3ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 3/*EV3_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 172 "../ev3ClearanceSNC.stt"
@@ -631,7 +631,7 @@ static void resetStatus(SS_ID seqg_env)
 # line 178 "../ev3ClearanceSNC.stt"
 	not_cleared(EV3_CLR_STATS);
 # line 179 "../ev3ClearanceSNC.stt"
-	report_error(EV3_INTLCK_STATS, 54);
+	report_error(EV3_INTLCK_STATS, 0);
 # line 180 "../ev3ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*EV3_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 181 "../ev3ClearanceSNC.stt"
@@ -676,7 +676,7 @@ static void EV3_status(SS_ID seqg_env)
 # line 201 "../ev3ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*EV3_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 202 "../ev3ClearanceSNC.stt"
-	report_error(EV3_INTLCK_STATS, 54);
+	report_error(EV3_INTLCK_STATS, 0);
 # line 203 "../ev3ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*EV3_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }

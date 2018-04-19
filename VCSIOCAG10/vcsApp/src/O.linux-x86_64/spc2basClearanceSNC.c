@@ -12,14 +12,14 @@
 /**********************************************************/
 	
 #define	VCOK       	0
-#define TOUT		5
+#define TOUT		6
 #define FAIL		-1 
-#define B44ON		158
-#define B45OFF		160 
-#define DA007ON		156
-#define G6ON    	155      
-#define G6OFF 		159
-#define SPC2LPNK	157
+#define B44ON		159
+#define B45OFF		161 
+#define DA007ON		157
+#define G6ON    	156      
+#define G6OFF 		160
+#define SPC2LPNK	158
 
 
 /* Variable declarations */
@@ -598,7 +598,7 @@ static void initVault(SS_ID seqg_env)
 # line 169 "../spc2basClearanceSNC.stt"
 	not_cleared(SPC2L_CLR_STATS);
 # line 170 "../spc2basClearanceSNC.stt"
-	report_error(SPC2L_INTLCK_STATS, 54);
+	report_error(SPC2L_INTLCK_STATS, 0);
 # line 171 "../spc2basClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 3/*SPC2L_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 172 "../spc2basClearanceSNC.stt"
@@ -645,7 +645,7 @@ static void SPC2L_status(SS_ID seqg_env)
 # line 193 "../spc2basClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*SPC2L_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 194 "../spc2basClearanceSNC.stt"
-	report_error(SPC2L_INTLCK_STATS, 54);
+	report_error(SPC2L_INTLCK_STATS, 0);
 # line 195 "../spc2basClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*SPC2L_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }

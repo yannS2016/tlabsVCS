@@ -12,10 +12,10 @@
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define	B19OFF      105
-#define	B18ON      	102
-#define DA6S1OFF	103 
-#define DA6S2OFF	104
+#define	B19OFF      106
+#define	B18ON      	103
+#define DA6S1OFF	104 
+#define DA6S2OFF	105
 
 
 
@@ -616,7 +616,7 @@ static void initVault(SS_ID seqg_env)
 # line 173 "../ev1ClearanceSNC.stt"
 	not_cleared(EV1_CLR_STATS);
 # line 174 "../ev1ClearanceSNC.stt"
-	report_error(EV1_INTLCK_STATS, 54);
+	report_error(EV1_INTLCK_STATS, 0);
 # line 175 "../ev1ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 3/*EV1_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 176 "../ev1ClearanceSNC.stt"
@@ -663,7 +663,7 @@ static void EV1_status(SS_ID seqg_env)
 # line 198 "../ev1ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*EV1_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 199 "../ev1ClearanceSNC.stt"
-	report_error(EV1_INTLCK_STATS, 54);
+	report_error(EV1_INTLCK_STATS, 0);
 # line 200 "../ev1ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*EV1_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
@@ -683,19 +683,19 @@ static void EV1_clear_underway(SS_ID seqg_env)
 
 
 inline void cleared(string vault_status) {   
-    strcpy(vault_status, mes_array[0]); // Area cleared  
+    strcpy(vault_status, mes_array[1]); // Area cleared  
 }
 ////////////////////////////////////////////////
 inline void not_cleared(string vault_status) {  
-   strcpy(vault_status, mes_array[1]); // Area not cleared    
+   strcpy(vault_status, mes_array[2]); // Area not cleared    
 }
 ///////////////////////////////////////////////
 inline void clear_underway(string vault_status) { 
-   strcpy(vault_status, mes_array[2]);  // Area clearance underway    
+   strcpy(vault_status, mes_array[3]);  // Area clearance underway    
 }
 //////////////////////////////////////////////
 inline void clear_failed(string vault_status) { 
-   strcpy(vault_status, mes_array[4]); // Area clearance fail   
+   strcpy(vault_status, mes_array[5]); // Area clearance fail   
 }
 ////////////////////////////////////////////////
 inline void report_error(string vault_interlock, short intlock)

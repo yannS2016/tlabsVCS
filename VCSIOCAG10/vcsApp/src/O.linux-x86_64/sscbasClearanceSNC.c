@@ -12,60 +12,61 @@
 /*******************************************************************/	
 #define	VCOK       	0
 #define FAIL		-1
-#define	G2OFF       32
-#define B1ON        37
-#define W1ON        20
-#define B2OFF       21
-#define B2ON  		35
-#define B3OFF		26  
-#define B3ON 		36 
-#define B4OFF		27  
-#define B4ON 		31 
-#define W4ON		29  
-#define B5OFF		28  
-#define B5ON 		33
-#define B6OFF		34
+#define	G2OFF       33
+#define B1ON        38
+#define W1ON        21
+#define B2OFF       22
+#define B2ON  		36
+#define B3OFF		27  
+#define B3ON 		37 
+#define B4OFF		28  
+#define B4ON 		32 
+#define W4ON		30  
+#define B4_5ON      31
+#define B5OFF		29  
+#define B5ON 		34
+#define B6OFF		35
 
 
 /* Variable declarations */
-# line 24 "../sscbasClearanceSNC.stt"
-static	short SSCL_INIT;
 # line 25 "../sscbasClearanceSNC.stt"
-static	short SSCL_VC;
+static	short SSCL_INIT;
 # line 26 "../sscbasClearanceSNC.stt"
-static	short SSC_W1_STS;
+static	short SSCL_VC;
 # line 27 "../sscbasClearanceSNC.stt"
-static	short SSC_W2_STS;
+static	short SSC_W1_STS;
 # line 28 "../sscbasClearanceSNC.stt"
-static	short SSC_W3_STS;
+static	short SSC_W2_STS;
 # line 29 "../sscbasClearanceSNC.stt"
-static	short SSC_W4_STS;
+static	short SSC_W3_STS;
 # line 30 "../sscbasClearanceSNC.stt"
-static	short SSC_W5_STS;
+static	short SSC_W4_STS;
 # line 31 "../sscbasClearanceSNC.stt"
-static	short SSC_W6_STS;
+static	short SSC_W5_STS;
 # line 32 "../sscbasClearanceSNC.stt"
-static	short SSCL_FAIL_COND;
+static	short SSC_W6_STS;
 # line 33 "../sscbasClearanceSNC.stt"
-static	short SSCL_OLD_FAIL_COND;
+static	short SSCL_FAIL_COND;
 # line 34 "../sscbasClearanceSNC.stt"
-static	string SSCL_CLR_STATS;
+static	short SSCL_OLD_FAIL_COND;
 # line 35 "../sscbasClearanceSNC.stt"
-static	string SSCL_INTLCK_STATS;
+static	string SSCL_CLR_STATS;
 # line 36 "../sscbasClearanceSNC.stt"
+static	string SSCL_INTLCK_STATS;
+# line 37 "../sscbasClearanceSNC.stt"
 static	short ssclUpdate;
 
 
 /* Function declarations */
-# line 294 "../sscbasClearanceSNC.stt"
+# line 295 "../sscbasClearanceSNC.stt"
 static void initVault(SS_ID seqg_env);
-# line 303 "../sscbasClearanceSNC.stt"
+# line 304 "../sscbasClearanceSNC.stt"
 static void SSCL_update_failed(SS_ID seqg_env, short report);
-# line 312 "../sscbasClearanceSNC.stt"
+# line 313 "../sscbasClearanceSNC.stt"
 static void SSCL_update_report(SS_ID seqg_env, short intlck);
-# line 317 "../sscbasClearanceSNC.stt"
+# line 318 "../sscbasClearanceSNC.stt"
 static void SSCL_status(SS_ID seqg_env);
-# line 325 "../sscbasClearanceSNC.stt"
+# line 326 "../sscbasClearanceSNC.stt"
 static void SSCL_clear_underway(SS_ID seqg_env);
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
@@ -74,7 +75,7 @@ static void SSCL_clear_underway(SS_ID seqg_env);
 static void seqg_init(PROG_ID seqg_env)
 {
 	{
-# line 36 "../sscbasClearanceSNC.stt"
+# line 37 "../sscbasClearanceSNC.stt"
 	static short seqg_initvar_ssclUpdate = FALSE;
 	memcpy(&ssclUpdate, &seqg_initvar_ssclUpdate, sizeof(seqg_initvar_ssclUpdate));
 	}
@@ -85,7 +86,7 @@ static void seqg_init(PROG_ID seqg_env)
 /* Event function for state "init" in state set "SSCL_clearance_status" */
 static seqBool seqg_event_SSCL_clearance_status_0_init(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 63 "../sscbasClearanceSNC.stt"
+# line 64 "../sscbasClearanceSNC.stt"
 	if (seq_delay(seqg_env, 1.5))
 	{
 		*seqg_pnst = 3;
@@ -102,9 +103,9 @@ static void seqg_action_SSCL_clearance_status_0_init(SS_ID seqg_env, int seqg_tr
 	{
 	case 0:
 		{
-# line 64 "../sscbasClearanceSNC.stt"
-			initVault(seqg_env);
 # line 65 "../sscbasClearanceSNC.stt"
+			initVault(seqg_env);
+# line 66 "../sscbasClearanceSNC.stt"
 			printf("%sSSC LOW INITIALISATION COMPLETED%s\n", OK, DEF);
 		}
 		return;
@@ -116,14 +117,14 @@ static void seqg_action_SSCL_clearance_status_0_init(SS_ID seqg_env, int seqg_tr
 /* Entry function for state "vault_cleared" in state set "SSCL_clearance_status" */
 static void seqg_entry_SSCL_clearance_status_0_vault_cleared(SS_ID seqg_env)
 {
-# line 73 "../sscbasClearanceSNC.stt"
+# line 74 "../sscbasClearanceSNC.stt"
 	printf("%sSSC LOW IN CLEARED STATE%s\n", CLR, DEF);
 }
 
 /* Event function for state "vault_cleared" in state set "SSCL_clearance_status" */
 static seqBool seqg_event_SSCL_clearance_status_0_vault_cleared(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 75 "../sscbasClearanceSNC.stt"
+# line 76 "../sscbasClearanceSNC.stt"
 	if (SSCL_VC != VCOK)
 	{
 		*seqg_pnst = 15;
@@ -150,14 +151,14 @@ static void seqg_action_SSCL_clearance_status_0_vault_cleared(SS_ID seqg_env, in
 /* Event function for state "recover_faillure" in state set "SSCL_clearance_status" */
 static seqBool seqg_event_SSCL_clearance_status_0_recover_faillure(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 82 "../sscbasClearanceSNC.stt"
+# line 83 "../sscbasClearanceSNC.stt"
 	if (!SSCL_FAIL_COND)
 	{
 		*seqg_pnst = 3;
 		*seqg_ptrn = 0;
 		return TRUE;
 	}
-# line 89 "../sscbasClearanceSNC.stt"
+# line 90 "../sscbasClearanceSNC.stt"
 	if (SSCL_FAIL_COND != SSCL_OLD_FAIL_COND)
 	{
 		*seqg_pnst = 14;
@@ -174,12 +175,12 @@ static void seqg_action_SSCL_clearance_status_0_recover_faillure(SS_ID seqg_env,
 	{
 	case 0:
 		{
-# line 83 "../sscbasClearanceSNC.stt"
+# line 84 "../sscbasClearanceSNC.stt"
 			if (!ssclUpdate)
 			{
-# line 84 "../sscbasClearanceSNC.stt"
-				printf("%sRECOVERING FROM FAILLURE: ENTERING W1 STATE%s\n", OK, DEF);
 # line 85 "../sscbasClearanceSNC.stt"
+				printf("%sRECOVERING FROM FAILLURE: ENTERING W1 STATE%s\n", OK, DEF);
+# line 86 "../sscbasClearanceSNC.stt"
 				ssclUpdate = TRUE;
 			}
 		}
@@ -196,14 +197,14 @@ static void seqg_action_SSCL_clearance_status_0_recover_faillure(SS_ID seqg_env,
 /* Event function for state "watchman_1_pressed" in state set "SSCL_clearance_status" */
 static seqBool seqg_event_SSCL_clearance_status_0_watchman_1_pressed(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 97 "../sscbasClearanceSNC.stt"
+# line 98 "../sscbasClearanceSNC.stt"
 	if (SSCL_FAIL_COND != VCOK)
 	{
 		*seqg_pnst = 14;
 		*seqg_ptrn = 0;
 		return TRUE;
 	}
-# line 101 "../sscbasClearanceSNC.stt"
+# line 102 "../sscbasClearanceSNC.stt"
 	if (!SSC_W1_STS)
 	{
 		*seqg_pnst = 4;
@@ -220,15 +221,15 @@ static void seqg_action_SSCL_clearance_status_0_watchman_1_pressed(SS_ID seqg_en
 	{
 	case 0:
 		{
-# line 98 "../sscbasClearanceSNC.stt"
+# line 99 "../sscbasClearanceSNC.stt"
 			SSCL_OLD_FAIL_COND = SSCL_FAIL_COND;
 		}
 		return;
 	case 1:
 		{
-# line 102 "../sscbasClearanceSNC.stt"
-			SSCL_update_report(seqg_env, B2OFF);
 # line 103 "../sscbasClearanceSNC.stt"
+			SSCL_update_report(seqg_env, B2OFF);
+# line 104 "../sscbasClearanceSNC.stt"
 			SSCL_clear_underway(seqg_env);
 		}
 		return;
@@ -240,14 +241,14 @@ static void seqg_action_SSCL_clearance_status_0_watchman_1_pressed(SS_ID seqg_en
 /* Event function for state "watchman_2_pressed" in state set "SSCL_clearance_status" */
 static seqBool seqg_event_SSCL_clearance_status_0_watchman_2_pressed(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 109 "../sscbasClearanceSNC.stt"
+# line 110 "../sscbasClearanceSNC.stt"
 	if (SSC_W1_STS == FAIL)
 	{
 		*seqg_pnst = 14;
 		*seqg_ptrn = 0;
 		return TRUE;
 	}
-# line 114 "../sscbasClearanceSNC.stt"
+# line 115 "../sscbasClearanceSNC.stt"
 	if (SSC_W2_STS == B2ON)
 	{
 		*seqg_pnst = 5;
@@ -268,7 +269,7 @@ static void seqg_action_SSCL_clearance_status_0_watchman_2_pressed(SS_ID seqg_en
 		return;
 	case 1:
 		{
-# line 115 "../sscbasClearanceSNC.stt"
+# line 116 "../sscbasClearanceSNC.stt"
 			SSCL_update_report(seqg_env, B2ON);
 		}
 		return;
@@ -280,14 +281,14 @@ static void seqg_action_SSCL_clearance_status_0_watchman_2_pressed(SS_ID seqg_en
 /* Event function for state "watchman_2_released" in state set "SSCL_clearance_status" */
 static seqBool seqg_event_SSCL_clearance_status_0_watchman_2_released(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 121 "../sscbasClearanceSNC.stt"
+# line 122 "../sscbasClearanceSNC.stt"
 	if (SSC_W1_STS == FAIL)
 	{
 		*seqg_pnst = 14;
 		*seqg_ptrn = 0;
 		return TRUE;
 	}
-# line 125 "../sscbasClearanceSNC.stt"
+# line 126 "../sscbasClearanceSNC.stt"
 	if (SSC_W2_STS == B3OFF)
 	{
 		*seqg_pnst = 6;
@@ -308,7 +309,7 @@ static void seqg_action_SSCL_clearance_status_0_watchman_2_released(SS_ID seqg_e
 		return;
 	case 1:
 		{
-# line 126 "../sscbasClearanceSNC.stt"
+# line 127 "../sscbasClearanceSNC.stt"
 			SSCL_update_report(seqg_env, B3OFF);
 		}
 		return;
@@ -320,14 +321,14 @@ static void seqg_action_SSCL_clearance_status_0_watchman_2_released(SS_ID seqg_e
 /* Event function for state "watchman_3_pressed" in state set "SSCL_clearance_status" */
 static seqBool seqg_event_SSCL_clearance_status_0_watchman_3_pressed(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 132 "../sscbasClearanceSNC.stt"
+# line 133 "../sscbasClearanceSNC.stt"
 	if (SSC_W1_STS == FAIL)
 	{
 		*seqg_pnst = 14;
 		*seqg_ptrn = 0;
 		return TRUE;
 	}
-# line 137 "../sscbasClearanceSNC.stt"
+# line 138 "../sscbasClearanceSNC.stt"
 	if (SSC_W3_STS == B3ON)
 	{
 		*seqg_pnst = 7;
@@ -348,7 +349,7 @@ static void seqg_action_SSCL_clearance_status_0_watchman_3_pressed(SS_ID seqg_en
 		return;
 	case 1:
 		{
-# line 138 "../sscbasClearanceSNC.stt"
+# line 139 "../sscbasClearanceSNC.stt"
 			SSCL_update_report(seqg_env, B3ON);
 		}
 		return;
@@ -360,14 +361,14 @@ static void seqg_action_SSCL_clearance_status_0_watchman_3_pressed(SS_ID seqg_en
 /* Event function for state "watchman_3_released" in state set "SSCL_clearance_status" */
 static seqBool seqg_event_SSCL_clearance_status_0_watchman_3_released(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 144 "../sscbasClearanceSNC.stt"
+# line 145 "../sscbasClearanceSNC.stt"
 	if (SSC_W1_STS == FAIL)
 	{
 		*seqg_pnst = 14;
 		*seqg_ptrn = 0;
 		return TRUE;
 	}
-# line 149 "../sscbasClearanceSNC.stt"
+# line 150 "../sscbasClearanceSNC.stt"
 	if (SSC_W3_STS == B4OFF)
 	{
 		*seqg_pnst = 8;
@@ -388,7 +389,7 @@ static void seqg_action_SSCL_clearance_status_0_watchman_3_released(SS_ID seqg_e
 		return;
 	case 1:
 		{
-# line 150 "../sscbasClearanceSNC.stt"
+# line 151 "../sscbasClearanceSNC.stt"
 			SSCL_update_report(seqg_env, B4OFF);
 		}
 		return;
@@ -400,14 +401,14 @@ static void seqg_action_SSCL_clearance_status_0_watchman_3_released(SS_ID seqg_e
 /* Event function for state "watchman_4_pressed" in state set "SSCL_clearance_status" */
 static seqBool seqg_event_SSCL_clearance_status_0_watchman_4_pressed(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 156 "../sscbasClearanceSNC.stt"
+# line 157 "../sscbasClearanceSNC.stt"
 	if (SSC_W1_STS == FAIL)
 	{
 		*seqg_pnst = 14;
 		*seqg_ptrn = 0;
 		return TRUE;
 	}
-# line 161 "../sscbasClearanceSNC.stt"
+# line 162 "../sscbasClearanceSNC.stt"
 	if (!SSC_W4_STS)
 	{
 		*seqg_pnst = 9;
@@ -428,7 +429,7 @@ static void seqg_action_SSCL_clearance_status_0_watchman_4_pressed(SS_ID seqg_en
 		return;
 	case 1:
 		{
-# line 163 "../sscbasClearanceSNC.stt"
+# line 164 "../sscbasClearanceSNC.stt"
 			SSCL_update_report(seqg_env, B1ON);
 		}
 		return;
@@ -440,14 +441,14 @@ static void seqg_action_SSCL_clearance_status_0_watchman_4_pressed(SS_ID seqg_en
 /* Event function for state "watchman_1_released" in state set "SSCL_clearance_status" */
 static seqBool seqg_event_SSCL_clearance_status_0_watchman_1_released(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 169 "../sscbasClearanceSNC.stt"
+# line 170 "../sscbasClearanceSNC.stt"
 	if (SSC_W1_STS == FAIL)
 	{
 		*seqg_pnst = 14;
 		*seqg_ptrn = 0;
 		return TRUE;
 	}
-# line 173 "../sscbasClearanceSNC.stt"
+# line 174 "../sscbasClearanceSNC.stt"
 	if (SSC_W1_STS == B1ON)
 	{
 		*seqg_pnst = 10;
@@ -468,7 +469,7 @@ static void seqg_action_SSCL_clearance_status_0_watchman_1_released(SS_ID seqg_e
 		return;
 	case 1:
 		{
-# line 175 "../sscbasClearanceSNC.stt"
+# line 176 "../sscbasClearanceSNC.stt"
 			SSCL_update_report(seqg_env, B5OFF);
 		}
 		return;
@@ -480,14 +481,14 @@ static void seqg_action_SSCL_clearance_status_0_watchman_1_released(SS_ID seqg_e
 /* Event function for state "watchman_5_pressed" in state set "SSCL_clearance_status" */
 static seqBool seqg_event_SSCL_clearance_status_0_watchman_5_pressed(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 181 "../sscbasClearanceSNC.stt"
+# line 182 "../sscbasClearanceSNC.stt"
 	if (SSC_W1_STS == FAIL)
 	{
 		*seqg_pnst = 14;
 		*seqg_ptrn = 0;
 		return TRUE;
 	}
-# line 186 "../sscbasClearanceSNC.stt"
+# line 187 "../sscbasClearanceSNC.stt"
 	if (!SSC_W5_STS)
 	{
 		*seqg_pnst = 12;
@@ -508,8 +509,8 @@ static void seqg_action_SSCL_clearance_status_0_watchman_5_pressed(SS_ID seqg_en
 		return;
 	case 1:
 		{
-# line 188 "../sscbasClearanceSNC.stt"
-			SSCL_update_report(seqg_env, 30);
+# line 189 "../sscbasClearanceSNC.stt"
+			SSCL_update_report(seqg_env, B4_5ON);
 		}
 		return;
 	}
@@ -520,14 +521,14 @@ static void seqg_action_SSCL_clearance_status_0_watchman_5_pressed(SS_ID seqg_en
 /* Event function for state "watchman_5_released" in state set "SSCL_clearance_status" */
 static seqBool seqg_event_SSCL_clearance_status_0_watchman_5_released(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 194 "../sscbasClearanceSNC.stt"
+# line 195 "../sscbasClearanceSNC.stt"
 	if (SSC_W1_STS == FAIL)
 	{
 		*seqg_pnst = 14;
 		*seqg_ptrn = 0;
 		return TRUE;
 	}
-# line 198 "../sscbasClearanceSNC.stt"
+# line 199 "../sscbasClearanceSNC.stt"
 	if (SSC_W5_STS != B5ON)
 	{
 		*seqg_pnst = 12;
@@ -558,28 +559,28 @@ static void seqg_action_SSCL_clearance_status_0_watchman_5_released(SS_ID seqg_e
 /* Event function for state "watchman_4_released" in state set "SSCL_clearance_status" */
 static seqBool seqg_event_SSCL_clearance_status_0_watchman_4_released(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 206 "../sscbasClearanceSNC.stt"
+# line 207 "../sscbasClearanceSNC.stt"
 	if (SSC_W1_STS == FAIL)
 	{
 		*seqg_pnst = 14;
 		*seqg_ptrn = 0;
 		return TRUE;
 	}
-# line 211 "../sscbasClearanceSNC.stt"
+# line 212 "../sscbasClearanceSNC.stt"
 	if (!SSC_W5_STS)
 	{
 		*seqg_pnst = 12;
 		*seqg_ptrn = 1;
 		return TRUE;
 	}
-# line 215 "../sscbasClearanceSNC.stt"
+# line 216 "../sscbasClearanceSNC.stt"
 	if (SSC_W5_STS == B5ON)
 	{
 		*seqg_pnst = 11;
 		*seqg_ptrn = 2;
 		return TRUE;
 	}
-# line 220 "../sscbasClearanceSNC.stt"
+# line 221 "../sscbasClearanceSNC.stt"
 	if (SSC_W5_STS == B4ON)
 	{
 		*seqg_pnst = 12;
@@ -610,13 +611,13 @@ static void seqg_action_SSCL_clearance_status_0_watchman_4_released(SS_ID seqg_e
 		return;
 	case 2:
 		{
-# line 216 "../sscbasClearanceSNC.stt"
+# line 217 "../sscbasClearanceSNC.stt"
 			SSCL_update_report(seqg_env, B5ON);
 		}
 		return;
 	case 3:
 		{
-# line 221 "../sscbasClearanceSNC.stt"
+# line 222 "../sscbasClearanceSNC.stt"
 			SSCL_update_report(seqg_env, B4ON);
 		}
 		return;
@@ -632,28 +633,28 @@ static void seqg_action_SSCL_clearance_status_0_watchman_4_released(SS_ID seqg_e
 /* Event function for state "watchman_6_pressed" in state set "SSCL_clearance_status" */
 static seqBool seqg_event_SSCL_clearance_status_0_watchman_6_pressed(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 232 "../sscbasClearanceSNC.stt"
+# line 233 "../sscbasClearanceSNC.stt"
 	if (SSC_W1_STS == FAIL)
 	{
 		*seqg_pnst = 14;
 		*seqg_ptrn = 0;
 		return TRUE;
 	}
-# line 237 "../sscbasClearanceSNC.stt"
+# line 238 "../sscbasClearanceSNC.stt"
 	if (SSC_W6_STS == G2OFF)
 	{
 		*seqg_pnst = 13;
 		*seqg_ptrn = 1;
 		return TRUE;
 	}
-# line 243 "../sscbasClearanceSNC.stt"
+# line 244 "../sscbasClearanceSNC.stt"
 	if (SSC_W6_STS == B6OFF)
 	{
 		*seqg_pnst = 13;
 		*seqg_ptrn = 2;
 		return TRUE;
 	}
-# line 248 "../sscbasClearanceSNC.stt"
+# line 249 "../sscbasClearanceSNC.stt"
 	if (!SSC_W6_STS)
 	{
 		*seqg_pnst = 1;
@@ -674,19 +675,19 @@ static void seqg_action_SSCL_clearance_status_0_watchman_6_pressed(SS_ID seqg_en
 		return;
 	case 1:
 		{
-# line 239 "../sscbasClearanceSNC.stt"
+# line 240 "../sscbasClearanceSNC.stt"
 			SSCL_update_report(seqg_env, G2OFF);
 		}
 		return;
 	case 2:
 		{
-# line 244 "../sscbasClearanceSNC.stt"
+# line 245 "../sscbasClearanceSNC.stt"
 			SSCL_update_report(seqg_env, B6OFF);
 		}
 		return;
 	case 3:
 		{
-# line 250 "../sscbasClearanceSNC.stt"
+# line 251 "../sscbasClearanceSNC.stt"
 			SSCL_status(seqg_env);
 		}
 		return;
@@ -698,16 +699,16 @@ static void seqg_action_SSCL_clearance_status_0_watchman_6_pressed(SS_ID seqg_en
 /* Entry function for state "clearance_faillures" in state set "SSCL_clearance_status" */
 static void seqg_entry_SSCL_clearance_status_0_clearance_faillures(SS_ID seqg_env)
 {
-# line 259 "../sscbasClearanceSNC.stt"
-	printf("SSC LOW CLEARANCE FAILURE CONDITION: ");
 # line 260 "../sscbasClearanceSNC.stt"
+	printf("SSC LOW CLEARANCE FAILURE CONDITION: ");
+# line 261 "../sscbasClearanceSNC.stt"
 	ssclUpdate = FALSE;
 }
 
 /* Exit function for state "clearance_faillures" in state set "SSCL_clearance_status" */
 static void seqg_exit_SSCL_clearance_status_0_clearance_faillures(SS_ID seqg_env)
 {
-# line 269 "../sscbasClearanceSNC.stt"
+# line 270 "../sscbasClearanceSNC.stt"
 	SSCL_OLD_FAIL_COND = SSCL_FAIL_COND;
 }
 
@@ -730,7 +731,7 @@ static void seqg_action_SSCL_clearance_status_0_clearance_faillures(SS_ID seqg_e
 	{
 	case 0:
 		{
-# line 265 "../sscbasClearanceSNC.stt"
+# line 266 "../sscbasClearanceSNC.stt"
 			SSCL_update_failed(seqg_env, SSCL_FAIL_COND);
 		}
 		return;
@@ -742,16 +743,16 @@ static void seqg_action_SSCL_clearance_status_0_clearance_faillures(SS_ID seqg_e
 /* Entry function for state "vc_faillures" in state set "SSCL_clearance_status" */
 static void seqg_entry_SSCL_clearance_status_0_vc_faillures(SS_ID seqg_env)
 {
-# line 279 "../sscbasClearanceSNC.stt"
-	printf("SSC LOW CLEAR FAILURE CONDITION: ");
 # line 280 "../sscbasClearanceSNC.stt"
+	printf("SSC LOW CLEAR FAILURE CONDITION: ");
+# line 281 "../sscbasClearanceSNC.stt"
 	ssclUpdate = FALSE;
 }
 
 /* Exit function for state "vc_faillures" in state set "SSCL_clearance_status" */
 static void seqg_exit_SSCL_clearance_status_0_vc_faillures(SS_ID seqg_env)
 {
-# line 289 "../sscbasClearanceSNC.stt"
+# line 290 "../sscbasClearanceSNC.stt"
 	SSCL_OLD_FAIL_COND = SSCL_FAIL_COND;
 }
 
@@ -774,7 +775,7 @@ static void seqg_action_SSCL_clearance_status_0_vc_faillures(SS_ID seqg_env, int
 	{
 	case 0:
 		{
-# line 285 "../sscbasClearanceSNC.stt"
+# line 286 "../sscbasClearanceSNC.stt"
 			SSCL_update_failed(seqg_env, SSCL_VC);
 		}
 		return;
@@ -1027,74 +1028,74 @@ seqProgram sscbasClearanceSNC = {
 };
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 294 "../sscbasClearanceSNC.stt"
+# line 295 "../sscbasClearanceSNC.stt"
 static void initVault(SS_ID seqg_env)
 {
-# line 295 "../sscbasClearanceSNC.stt"
-	SSCL_INIT = TRUE;
 # line 296 "../sscbasClearanceSNC.stt"
-	not_cleared(SSCL_CLR_STATS);
+	SSCL_INIT = TRUE;
 # line 297 "../sscbasClearanceSNC.stt"
-	report_error(SSCL_INTLCK_STATS, 54);
+	not_cleared(SSCL_CLR_STATS);
 # line 298 "../sscbasClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 3/*SSCL_INIT*/, SYNC, DEFAULT_TIMEOUT);
+	report_error(SSCL_INTLCK_STATS, 0);
 # line 299 "../sscbasClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 0/*SSCL_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
+	seq_pvPutTmo(seqg_env, 3/*SSCL_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 300 "../sscbasClearanceSNC.stt"
+	seq_pvPutTmo(seqg_env, 0/*SSCL_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
+# line 301 "../sscbasClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*SSCL_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 303 "../sscbasClearanceSNC.stt"
+# line 304 "../sscbasClearanceSNC.stt"
 static void SSCL_update_failed(SS_ID seqg_env, short report)
 {
-# line 305 "../sscbasClearanceSNC.stt"
-	clear_failed(SSCL_CLR_STATS);
 # line 306 "../sscbasClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 0/*SSCL_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
+	clear_failed(SSCL_CLR_STATS);
 # line 307 "../sscbasClearanceSNC.stt"
-	report_error(SSCL_INTLCK_STATS, report);
+	seq_pvPutTmo(seqg_env, 0/*SSCL_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 308 "../sscbasClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 1/*SSCL_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
+	report_error(SSCL_INTLCK_STATS, report);
 # line 309 "../sscbasClearanceSNC.stt"
+	seq_pvPutTmo(seqg_env, 1/*SSCL_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
+# line 310 "../sscbasClearanceSNC.stt"
 	printf("%s%s%s\n", ERROR, SSCL_INTLCK_STATS, DEF);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 312 "../sscbasClearanceSNC.stt"
+# line 313 "../sscbasClearanceSNC.stt"
 static void SSCL_update_report(SS_ID seqg_env, short intlck)
 {
-# line 313 "../sscbasClearanceSNC.stt"
-	report_error(SSCL_INTLCK_STATS, intlck);
 # line 314 "../sscbasClearanceSNC.stt"
+	report_error(SSCL_INTLCK_STATS, intlck);
+# line 315 "../sscbasClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*SSCL_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 317 "../sscbasClearanceSNC.stt"
+# line 318 "../sscbasClearanceSNC.stt"
 static void SSCL_status(SS_ID seqg_env)
 {
-# line 319 "../sscbasClearanceSNC.stt"
-	cleared(SSCL_CLR_STATS);
 # line 320 "../sscbasClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 0/*SSCL_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
+	cleared(SSCL_CLR_STATS);
 # line 321 "../sscbasClearanceSNC.stt"
-	report_error(SSCL_INTLCK_STATS, 54);
+	seq_pvPutTmo(seqg_env, 0/*SSCL_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 322 "../sscbasClearanceSNC.stt"
+	report_error(SSCL_INTLCK_STATS, 0);
+# line 323 "../sscbasClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*SSCL_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 325 "../sscbasClearanceSNC.stt"
+# line 326 "../sscbasClearanceSNC.stt"
 static void SSCL_clear_underway(SS_ID seqg_env)
 {
-# line 327 "../sscbasClearanceSNC.stt"
-	clear_underway(SSCL_CLR_STATS);
 # line 328 "../sscbasClearanceSNC.stt"
+	clear_underway(SSCL_CLR_STATS);
+# line 329 "../sscbasClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*SSCL_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var

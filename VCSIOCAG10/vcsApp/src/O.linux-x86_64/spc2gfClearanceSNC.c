@@ -11,19 +11,19 @@
 	#include "vcs_var_mes.h" // define this here so C functions/variables are seen
 /**********************************************************/	
 #define	VCOK       	0
-#define TOUT		5
+#define TOUT		6
 #define FAIL		-1 
-#define SPC2GFPNK   19 
-#define B46ON       165
-#define B47OFF      168
-#define B47ON  		169
-#define B48OFF		166  
-#define	RA3ON	    147
-#define	A007ON     	162
-#define	DA3ON	    163	
-#define	DA3OFF		167	
-#define	DA3aON		170	
-#define	G6aON       164
+#define SPC2GFPNK   20 
+#define B46ON       166
+#define B47OFF      169
+#define B47ON  		170
+#define B48OFF		167  
+#define	RA3ON	    148
+#define	A007ON     	163
+#define	DA3ON	    164	
+#define	DA3OFF		168	
+#define	DA3aON		171	
+#define	G6aON       165
 
 
 
@@ -720,7 +720,7 @@ static void initVault(SS_ID seqg_env)
 # line 207 "../spc2gfClearanceSNC.stt"
 	not_cleared(SPC2GF_CLR_STATS);
 # line 208 "../spc2gfClearanceSNC.stt"
-	report_error(SPC2GF_INTLCK_STATS, 54);
+	report_error(SPC2GF_INTLCK_STATS, 0);
 # line 209 "../spc2gfClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 3/*SPC2GF_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 210 "../spc2gfClearanceSNC.stt"
@@ -767,7 +767,7 @@ static void SPC2GF_status(SS_ID seqg_env)
 # line 231 "../spc2gfClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*SPC2GF_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 232 "../spc2gfClearanceSNC.stt"
-	report_error(SPC2GF_INTLCK_STATS, 54);
+	report_error(SPC2GF_INTLCK_STATS, 0);
 # line 233 "../spc2gfClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*SPC2GF_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }

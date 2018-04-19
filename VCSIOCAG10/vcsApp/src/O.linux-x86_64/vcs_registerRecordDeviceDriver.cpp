@@ -292,7 +292,7 @@ static struct iocshVarDef vardefs[] = {
 
 int vcs_registerRecordDeviceDriver(DBBASE *pbase)
 {
-    const char *bldTop = "/epics/VCSIOCAG10";
+    const char *bldTop = "/tlabsVCS/VCSIOCAG10";
     const char *envTop = getenv("TOP");
 
     if (envTop && strcmp(envTop, bldTop)) {
