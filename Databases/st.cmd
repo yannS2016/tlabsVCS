@@ -1,4 +1,4 @@
-#!../../bin/linux-x86_64/vcs
+#!../../bin/linux-x86/vcs
 
 ## You may have to change vcs to something else
 ## everywhere it appears in this file
