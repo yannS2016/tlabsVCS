@@ -1,0 +1,154 @@
+
+file "db/management_templates/MASTER.template" {
+
+	pattern {	DEVICE			PORT		SCAN 		}
+			{	VCS:MASTER   	MASTER0  	"I/O Intr" 	}
+}
+
+file "db/management_templates/EK1100.template" {
+
+	pattern {	DEVICE  		PORT 		SCAN 		}
+			{	VCS:COUPLER  	ERIO.0   	"I/O Intr"	}
+}
+################################################################
+### Load DI module templates for VCS inputs on card 1 ##
+
+file "db/inputs_templates/card 2/EBUS-DIM14.template" {
+
+	pattern {	SYS			DEVICE		PORT        SCAN		}
+			{	VCS			DIM14		ERIO.14   	"I/O Intr" 	}
+}
+
+file "db/inputs_templates/card 2/EBUS-DIM15.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			DIM15		ERIO.15   	"I/O Intr" 	}
+}
+file "db/inputs_templates/card 2/EBUS-DIM16.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			DIM16		ERIO.16   	"I/O Intr" 	}
+}
+
+file "db/inputs_templates/card 2/EBUS-DIM17.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			DIM17		ERIO.17   	"I/O Intr" 	}
+}
+
+file "db/inputs_templates/card 2/EBUS-DIM18.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			DIM18		ERIO.18   	"I/O Intr" 	}
+}
+
+file "db/inputs_templates/card 1/EBUS-DIM19.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			DIM19		ERIO.19   	"I/O Intr" 	}
+}
+
+file "db/inputs_templates/card 1/EBUS-DIM20.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			DIM20		ERIO.20   	"I/O Intr" 	}
+}
+file "db/inputs_templates/card 1/EBUS-DIM21.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			DIM21		ERIO.21   	"I/O Intr" 	}
+}
+file "db/inputs_templates/card 1/EBUS-DIM22.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			DIM22		ERIO.22   	"I/O Intr" 	}
+}
+file "db/inputs_templates/card 1/EBUS-DIM23.template" {
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			DIM23		ERIO.23   	"I/O Intr" 	}
+}
+
+################################################################
+### Load relay modules Template for SIS interface ###
+### card 1 ###
+
+file "db/output_modules_templates/card 1/SIS/EBUS-ROM1.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			ROM1		ERIO.1   	"Passive" 	}
+}
+
+file "db/output_modules_templates/card 1/SIS/EBUS-ROM2.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			ROM2		ERIO.2   	"Passive" 	}
+}
+
+file "db/output_modules_templates/card 1/SIS/EBUS-ROM3.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			ROM3		ERIO.3   	"Passive" 	}
+}
+
+file "db/output_modules_templates/card 1/SIS/EBUS-ROM4.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			ROM4		ERIO.4   	"Passive" 	}
+}
+
+file "db/output_modules_templates/card 1/SIS/EBUS-ROM5.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			ROM5		ERIO.5   	"Passive" 	}
+}
+################################################################
+### Load DO module template for VCS outputs(Light and Sirens) ##
+
+### card 4 ###
+
+file "db/EBUS-DOM6.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			DOM6		ERIO.6   	"Passive" 	}
+}
+
+file "db/EBUS-DOM7.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			DOM7		ERIO.7   	"Passive" 	}
+}
+### card 3 ##
+file "db/output_modules_templates/card 3/EBUS-DOM8.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			DOM8		ERIO.8   	"Passive" 	}
+}
+
+file "db/output_modules_templates/card 3/EBUS-DOM9.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			DOM9		ERIO.9   	"Passive" 	}
+}
+
+### card 2 ###
+file "db/output_modules_templates/card 2/EBUS-DOM10.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			DOM10		ERIO.10   	"Passive" 	}
+}
+
+file "db/output_modules_templates/card 2/EBUS-DOM11.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			DOM11		ERIO.11  	"Passive" 	}
+}
+
+### card 1 ###
+file "db/output_modules_templates/card 1/DO/EBUS-DOM12.template" {
+
+	pattern {	SYS			DEVICE		PORT 		SCAN		}
+			{	VCS			DOM12		ERIO.12   	"Passive" 	}
+}
+
+
+

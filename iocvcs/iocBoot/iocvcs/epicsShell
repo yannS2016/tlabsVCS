@@ -1,0 +1,43 @@
+#!../../bin/linux-x86_64/vcs
+## You may have to change vcs to something else
+## everywhere it appears in this file
+< envPaths
+epicsEnvSet("ARCH","linux-x86")
+epicsEnvSet("IOC","iocvcs")
+epicsEnvSet("TOP","/epics/testIOC")
+epicsEnvSet("EPICS_BASE","/epics/bases/base-3.14.12.5")
+epicsEnvSet("SNCSEQ","/epics/support/seq-2-1-3")
+cd "/epics/testIOC"
+## Register all support components
+dbLoadDatabase "dbd/vcs.dbd"
+vcs_registerRecordDeviceDriver pdbbase
+## Load record instances
+#dbLoadTemplate "db/vcs.substitutions"
+dbLoadRecords "db/vcs_exp.template", "SYS=VCS"
+dbLoadRecords "db/vcs_ev1.template", "SYS=VCS"
+## Set this to see messages from mySub
+#var mySubDebug 1
+## Run this to trace the stages of iocInit
+#traceIocInit
+cd "/epics/testIOC/iocBoot/iocvcs"
+iocInit
+############################################################################
+## EPICS R3.14.12.5 $Date: Tue 2015-03-24 09:57:35 -0500$
+## EPICS Base built Aug 12 2017
+############################################################################
+## Start any sequence programs
+seq ev1ClearanceSNC, "SYS=VCS"
+Sequencer release 2.2.1, compiled Fri Jul 28 11:40:15 2017
+Spawning sequencer program "ev1ClearanceSNC", thread 0x271e6c0: "ev1ClearanceSNC"
+#seq  sncExample ,"SYS=VCS"
+seq expClearanceSNC, "SYS=VCS" 
+Sequencer release 2.2.1, compiled Fri Jul 28 11:40:15 2017
+Spawning sequencer program "expClearanceSNC", thread 0x2720f80: "expClearanceSNC"
+ev1ClearanceSNC[0]: all channels connected & received 1st monitor
+expClearanceSNC[0]: all channels connected & received 1st monitor
+epics> [33;1m
+EV1 INITIALISATION COMPLETED[0m
+[33;1m
+EXP INITIALISATION COMPLETED[0m
+[33;1mEV1 WATCHMAN 18 ACTIVATED: CLEARANCE UNDERWAY[0m
+exit

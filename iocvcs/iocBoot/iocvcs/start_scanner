@@ -1,0 +1,2 @@
+#../../../../bin/linux-x86_64/scanner -m 0 -q ../../etc/scanner-arms.xml "/tmp/scan1"
+/epics/ethercat-4-3/bin/linux-x86_64/scanner -m 0 -q /epics/ethercat-4-3/iocs/iocvcs/etc/scanner-vcs.xml "/tmp/scan1"

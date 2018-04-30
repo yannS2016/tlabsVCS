@@ -1,0 +1,1 @@
+/home/vcs/VCS/snc_devs/databases/st.cmd
