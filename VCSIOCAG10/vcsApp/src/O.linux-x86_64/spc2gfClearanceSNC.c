@@ -51,15 +51,15 @@ static	short spc2GFUpdate;
 
 
 /* Function declarations */
-# line 204 "../spc2gfClearanceSNC.stt"
+# line 205 "../spc2gfClearanceSNC.stt"
 static void initVault(SS_ID seqg_env);
-# line 214 "../spc2gfClearanceSNC.stt"
+# line 215 "../spc2gfClearanceSNC.stt"
 static void SPC2GF_update_failed(SS_ID seqg_env, short report);
-# line 223 "../spc2gfClearanceSNC.stt"
+# line 224 "../spc2gfClearanceSNC.stt"
 static void SPC2GF_update_report(SS_ID seqg_env, short intlck);
-# line 228 "../spc2gfClearanceSNC.stt"
+# line 229 "../spc2gfClearanceSNC.stt"
 static void SPC2GF_status(SS_ID seqg_env);
-# line 236 "../spc2gfClearanceSNC.stt"
+# line 237 "../spc2gfClearanceSNC.stt"
 static void SPC2GF_clear_underway(SS_ID seqg_env);
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
@@ -118,9 +118,9 @@ static void seqg_entry_SPC2GF_clearance_status_0_vault_cleared(SS_ID seqg_env)
 static seqBool seqg_event_SPC2GF_clearance_status_0_vault_cleared(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
 # line 67 "../spc2gfClearanceSNC.stt"
-	if (SPC2GF_VC != VCOK)
+	if (SPC2GF_FAIL_COND != VCOK)
 	{
-		*seqg_pnst = 10;
+		*seqg_pnst = 9;
 		*seqg_ptrn = 0;
 		return TRUE;
 	}
@@ -483,50 +483,6 @@ static void seqg_action_SPC2GF_clearance_status_0_clearance_faillures(SS_ID seqg
 	}
 }
 
-/****** Code for state "vc_faillures" in state set "SPC2GF_clearance_status" ******/
-
-/* Entry function for state "vc_faillures" in state set "SPC2GF_clearance_status" */
-static void seqg_entry_SPC2GF_clearance_status_0_vc_faillures(SS_ID seqg_env)
-{
-# line 189 "../spc2gfClearanceSNC.stt"
-	printf("SPC2 GF CLEAR FAILURE CONDITION: ");
-# line 190 "../spc2gfClearanceSNC.stt"
-	spc2GFUpdate = FALSE;
-}
-
-/* Exit function for state "vc_faillures" in state set "SPC2GF_clearance_status" */
-static void seqg_exit_SPC2GF_clearance_status_0_vc_faillures(SS_ID seqg_env)
-{
-# line 199 "../spc2gfClearanceSNC.stt"
-	SPC2GF_OLD_FAIL_COND = SPC2GF_FAIL_COND;
-}
-
-/* Event function for state "vc_faillures" in state set "SPC2GF_clearance_status" */
-static seqBool seqg_event_SPC2GF_clearance_status_0_vc_faillures(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
-{
-	if (TRUE)
-	{
-		*seqg_pnst = 2;
-		*seqg_ptrn = 0;
-		return TRUE;
-	}
-	return FALSE;
-}
-
-/* Action function for state "vc_faillures" in state set "SPC2GF_clearance_status" */
-static void seqg_action_SPC2GF_clearance_status_0_vc_faillures(SS_ID seqg_env, int seqg_trn, int *seqg_pnst)
-{
-	switch(seqg_trn)
-	{
-	case 0:
-		{
-# line 194 "../spc2gfClearanceSNC.stt"
-			SPC2GF_update_failed(seqg_env, SPC2GF_VC);
-		}
-		return;
-	}
-}
-
 #undef seqg_var
 
 /************************ Tables ************************/
@@ -549,7 +505,7 @@ static const seqMask seqg_mask_SPC2GF_clearance_status_0_init[] = {
 	0x00000000,
 };
 static const seqMask seqg_mask_SPC2GF_clearance_status_0_vault_cleared[] = {
-	0x00000008,
+	0x00000100,
 };
 static const seqMask seqg_mask_SPC2GF_clearance_status_0_recover_faillure[] = {
 	0x00000100,
@@ -573,9 +529,6 @@ static const seqMask seqg_mask_SPC2GF_clearance_status_0_door_A3_closed[] = {
 	0x000000a0,
 };
 static const seqMask seqg_mask_SPC2GF_clearance_status_0_clearance_faillures[] = {
-	0x00000000,
-};
-static const seqMask seqg_mask_SPC2GF_clearance_status_0_vc_faillures[] = {
 	0x00000000,
 };
 
@@ -671,15 +624,6 @@ static seqState seqg_states_SPC2GF_clearance_status[] = {
 	/* event mask array */  seqg_mask_SPC2GF_clearance_status_0_clearance_faillures,
 	/* state options */     (0 | OPT_DOENTRYFROMSELF | OPT_DOEXITTOSELF)
 	},
-	{
-	/* state name */        "vc_faillures",
-	/* action function */   seqg_action_SPC2GF_clearance_status_0_vc_faillures,
-	/* event function */    seqg_event_SPC2GF_clearance_status_0_vc_faillures,
-	/* entry function */    seqg_entry_SPC2GF_clearance_status_0_vc_faillures,
-	/* exit function */     seqg_exit_SPC2GF_clearance_status_0_vc_faillures,
-	/* event mask array */  seqg_mask_SPC2GF_clearance_status_0_vc_faillures,
-	/* state options */     (0 | OPT_DOENTRYFROMSELF | OPT_DOEXITTOSELF)
-	},
 };
 
 /* State set table */
@@ -687,7 +631,7 @@ static seqSS seqg_statesets[] = {
 	{
 	/* state set name */    "SPC2GF_clearance_status",
 	/* states */            seqg_states_SPC2GF_clearance_status,
-	/* number of states */  11
+	/* number of states */  10
 	},
 };
 
@@ -710,76 +654,76 @@ seqProgram spc2gfClearanceSNC = {
 };
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 204 "../spc2gfClearanceSNC.stt"
+# line 205 "../spc2gfClearanceSNC.stt"
 static void initVault(SS_ID seqg_env)
 {
-# line 205 "../spc2gfClearanceSNC.stt"
-	SPC2GF_INIT = TRUE;
 # line 206 "../spc2gfClearanceSNC.stt"
-	SPC2GF_OLD_FAIL_COND = SPC2GF_FAIL_COND;
+	SPC2GF_INIT = TRUE;
 # line 207 "../spc2gfClearanceSNC.stt"
-	not_cleared(SPC2GF_CLR_STATS);
+	SPC2GF_OLD_FAIL_COND = SPC2GF_FAIL_COND;
 # line 208 "../spc2gfClearanceSNC.stt"
-	report_error(SPC2GF_INTLCK_STATS, 0);
+	not_cleared(SPC2GF_CLR_STATS);
 # line 209 "../spc2gfClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 3/*SPC2GF_INIT*/, SYNC, DEFAULT_TIMEOUT);
+	report_error(SPC2GF_INTLCK_STATS, 0);
 # line 210 "../spc2gfClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 0/*SPC2GF_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
+	seq_pvPutTmo(seqg_env, 3/*SPC2GF_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 211 "../spc2gfClearanceSNC.stt"
+	seq_pvPutTmo(seqg_env, 0/*SPC2GF_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
+# line 212 "../spc2gfClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*SPC2GF_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 214 "../spc2gfClearanceSNC.stt"
+# line 215 "../spc2gfClearanceSNC.stt"
 static void SPC2GF_update_failed(SS_ID seqg_env, short report)
 {
-# line 216 "../spc2gfClearanceSNC.stt"
-	clear_failed(SPC2GF_CLR_STATS);
 # line 217 "../spc2gfClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 0/*SPC2GF_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
+	clear_failed(SPC2GF_CLR_STATS);
 # line 218 "../spc2gfClearanceSNC.stt"
-	report_error(SPC2GF_INTLCK_STATS, report);
+	seq_pvPutTmo(seqg_env, 0/*SPC2GF_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 219 "../spc2gfClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 1/*SPC2GF_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
+	report_error(SPC2GF_INTLCK_STATS, report);
 # line 220 "../spc2gfClearanceSNC.stt"
+	seq_pvPutTmo(seqg_env, 1/*SPC2GF_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
+# line 221 "../spc2gfClearanceSNC.stt"
 	printf("%s%s%s\n", ERROR, SPC2GF_INTLCK_STATS, DEF);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 223 "../spc2gfClearanceSNC.stt"
+# line 224 "../spc2gfClearanceSNC.stt"
 static void SPC2GF_update_report(SS_ID seqg_env, short intlck)
 {
-# line 224 "../spc2gfClearanceSNC.stt"
-	report_error(SPC2GF_INTLCK_STATS, intlck);
 # line 225 "../spc2gfClearanceSNC.stt"
+	report_error(SPC2GF_INTLCK_STATS, intlck);
+# line 226 "../spc2gfClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*SPC2GF_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 228 "../spc2gfClearanceSNC.stt"
+# line 229 "../spc2gfClearanceSNC.stt"
 static void SPC2GF_status(SS_ID seqg_env)
 {
-# line 230 "../spc2gfClearanceSNC.stt"
-	cleared(SPC2GF_CLR_STATS);
 # line 231 "../spc2gfClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 0/*SPC2GF_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
+	cleared(SPC2GF_CLR_STATS);
 # line 232 "../spc2gfClearanceSNC.stt"
-	report_error(SPC2GF_INTLCK_STATS, 0);
+	seq_pvPutTmo(seqg_env, 0/*SPC2GF_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 233 "../spc2gfClearanceSNC.stt"
+	report_error(SPC2GF_INTLCK_STATS, 0);
+# line 234 "../spc2gfClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*SPC2GF_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 236 "../spc2gfClearanceSNC.stt"
+# line 237 "../spc2gfClearanceSNC.stt"
 static void SPC2GF_clear_underway(SS_ID seqg_env)
 {
-# line 238 "../spc2gfClearanceSNC.stt"
-	clear_underway(SPC2GF_CLR_STATS);
 # line 239 "../spc2gfClearanceSNC.stt"
+	clear_underway(SPC2GF_CLR_STATS);
+# line 240 "../spc2gfClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*SPC2GF_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var

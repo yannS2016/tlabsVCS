@@ -8,7 +8,7 @@
    <Identity id="0">
     <Title>QEGui SPC2</Title>
    </Identity>
-   <Geometry X="2387" Width="694" Y="335" Height="704"/>
+   <Geometry Width="694" Y="335" Height="704" X="2387"/>
    <State Flags="0"/>
    <Gui Name="/home/eitvcs/tlabsVCS/epicsQtDisplays/SPC2.ui" ID="QEGui_window_0_form_0" CurrentGui="1">
     <Title>QEGui SPC2</Title>
@@ -17,6 +17,30 @@
    <Gui Name="/home/eitvcs/tlabsVCS/epicsQtDisplays/SPC2-LOW.ui" ID="QEGui_window_0_form_1">
     <Title>QEGui SPC2-LOW</Title>
     <Presentation>Tab</Presentation>
+   </Gui>
+  </Component>
+  <Component Name="QEGui_window_0_form_0_QEForm"/>
+  <Component Name="QEGui_window_0_form_1_QEForm"/>
+ </Config>
+ <Config Name="AutoSave">
+  <Component Name="QEGui">
+   <MainWindows>1</MainWindows>
+   <UserLevel>USERLEVEL_USER</UserLevel>
+  </Component>
+  <Component Name="QEGuiMainWindow_0">
+   <Identity id="0">
+    <Title>QEGui SPC2-LOW</Title>
+   </Identity>
+   <Geometry Y="62" Width="648" Height="490" X="75"/>
+   <State Flags="0"/>
+   <Gui Name="/tlabsVCS/epicsQtDisplays/SPC2-LOW.ui" ID="QEGui_window_0_form_0" CurrentGui="1">
+    <Title>QEGui SPC2-LOW</Title>
+    <Presentation>Central</Presentation>
+   </Gui>
+   <Gui Name="/tlabsVCS/epicsQtDisplays/SPC2.ui" ID="QEGui_window_0_form_1">
+    <Title>QEGui SPC2</Title>
+    <Presentation>Dock</Presentation>
+    <Docking Hidden="0" Floating="1" Y="221" Width="694" Features="7" Height="657" Area="1" AllowedAreas="15" X="2489"/>
    </Gui>
   </Component>
   <Component Name="QEGui_window_0_form_0_QEForm"/>
