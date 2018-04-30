@@ -6,10 +6,10 @@ program bsvClearanceSNC
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define	B37OFF      131
-#define	B36ON      	130
-#define DA15S1OFF	132 
-#define DA15S2OFF	133
+#define	B37OFF      132
+#define	B36ON      	131
+#define DA15S1OFF	133 
+#define DA15S2OFF	134
 }%
 /* Declare seq variables*/
 short BSV_INIT; 
@@ -167,7 +167,7 @@ void initVault(){
 	BSV_INIT = TRUE;
 	BSV_OLD_FAIL_COND = BSV_FAIL_COND;
 	not_cleared(BSV_CLR_STATS);
-	report_error(BSV_INTLCK_STATS, 54);
+	report_error(BSV_INTLCK_STATS, 0);
 	pvPut(BSV_INIT, SYNC);
 	pvPut(BSV_CLR_STATS, SYNC);
 	pvPut(BSV_INTLCK_STATS, SYNC);
@@ -192,7 +192,7 @@ void BSV_status()
 {
 	cleared(BSV_CLR_STATS);
 	pvPut(BSV_CLR_STATS, SYNC); 		
-	report_error(BSV_INTLCK_STATS, 54);
+	report_error(BSV_INTLCK_STATS, 0);
 	pvPut(BSV_INTLCK_STATS, SYNC);
 }
 ///////////////////////////////////////////////////////////

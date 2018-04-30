@@ -70,6 +70,7 @@ record(seq, "$(SYS):RST-SPC1GF") { # HANDLE BY SEQ
   field(SELM, "All")
 }
 #CLEARANCE UNDERWAY FAIL CONDITIONS
+# having this record return VCOK(0) cause problem in the sequencer which index CLEARED
 record(calcout, "$(SYS):SPC1GF-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")

@@ -5,17 +5,17 @@ program vliClearanceSNC
 #include "vcs_var_mes.h" // define this here so C functions are seen
 /*******************************************************************/
 #define	VCOK       	0
-#define TOUT		5
+#define TOUT		6
 #define FAIL		-1
-#define VLIPNK      138
-#define	G4ON		82
-#define	G4S1ON		83
-#define	G4S2ON		84
-#define	B33OFF      100
-#define	B32ON       97
-#define	DA004ON     96
-#define DA004S1OFF	98 
-#define DA004S2OFF	99
+#define VLIPNK      139
+#define	G4ON		83
+#define	G4S1ON		84
+#define	G4S2ON		85
+#define	B33OFF      101
+#define	B32ON       98
+#define	DA004ON     97
+#define DA004S1OFF	99 
+#define DA004S2OFF	100
 }%
 /* Declare seq variables*/
 short VLI_INIT; 
@@ -67,7 +67,7 @@ ss VLI_clearance_status {
 		
 		when (!VLI_FAIL_COND) {
 			if(!vliUpdate) {
-				printf("%sRECOVERING FROM FAILLURE - ENTERING W32 STATE: %d%s\n",OK,VLI_W32_STS,DEF);
+				//printf("%sRECOVERING FROM FAILLURE - ENTERING W32 STATE: %d%s\n",OK,VLI_W32_STS,DEF);
 				vliUpdate = TRUE;
 			}
 		} state  watchman_32_pressed
@@ -173,7 +173,7 @@ void initVault(){
 	VLI_INIT = TRUE;
 	VLI_OLD_FAIL_COND = VLI_FAIL_COND;
 	not_cleared(VLI_CLR_STATS);
-	report_error(VLI_INTLCK_STATS, 54);
+	report_error(VLI_INTLCK_STATS, 0);
 	pvPut(VLI_INIT, SYNC);
 	pvPut(VLI_CLR_STATS, SYNC);
 	pvPut(VLI_INTLCK_STATS, SYNC);
@@ -182,7 +182,7 @@ void initVault(){
 void resetStatus()
 {
 	not_cleared(VLI_CLR_STATS);
-	report_error(VLI_INTLCK_STATS, 54);
+	report_error(VLI_INTLCK_STATS, 0);
 	pvPut(VLI_CLR_STATS, SYNC);
 	pvPut(VLI_INTLCK_STATS, SYNC);
 }
@@ -205,7 +205,7 @@ void VLI_status()
 {
 	cleared(VLI_CLR_STATS);
 	pvPut(VLI_CLR_STATS, SYNC); 		
-	report_error(VLI_INTLCK_STATS, 54);
+	report_error(VLI_INTLCK_STATS, 0);
 	pvPut(VLI_INTLCK_STATS, SYNC);
 }
 ///////////////////////////////////////////////////////////

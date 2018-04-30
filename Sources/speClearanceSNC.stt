@@ -6,10 +6,10 @@ program speClearanceSNC
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define	B25OFF      119
-#define	B24ON      	118
-#define DA9S1OFF	121 
-#define DA9S2OFF	120
+#define	B25OFF      120
+#define	B24ON      	119
+#define DA9S1OFF	122 
+#define DA9S2OFF	121
 }%
 /* Declare seq variables*/
 short SPE_INIT; 
@@ -167,7 +167,7 @@ void initVault(){
 	SPE_INIT = TRUE;
 	SPE_OLD_FAIL_COND = SPE_FAIL_COND;
 	not_cleared(SPE_CLR_STATS);
-	report_error(SPE_INTLCK_STATS, 54);
+	report_error(SPE_INTLCK_STATS, 0);
 	pvPut(SPE_INIT, SYNC);
 	pvPut(SPE_CLR_STATS, SYNC);
 	pvPut(SPE_INTLCK_STATS, SYNC);
@@ -176,7 +176,7 @@ void initVault(){
 void resetStatus()
 {
 	not_cleared(SPE_CLR_STATS);
-	report_error(SPE_INTLCK_STATS, 54);
+	report_error(SPE_INTLCK_STATS, 0);
 	pvPut(SPE_CLR_STATS, SYNC);
 	pvPut(SPE_INTLCK_STATS, SYNC);
 }
@@ -199,7 +199,7 @@ void SPE_status()
 {
 	cleared(SPE_CLR_STATS);
 	pvPut(SPE_CLR_STATS, SYNC); 		
-	report_error(SPE_INTLCK_STATS, 54);
+	report_error(SPE_INTLCK_STATS, 0);
 	pvPut(SPE_INTLCK_STATS, SYNC);
 }
 ///////////////////////////////////////////////////////////

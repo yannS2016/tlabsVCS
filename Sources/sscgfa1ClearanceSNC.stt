@@ -6,10 +6,10 @@ program sscgfa1ClearanceSNC
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define SSCPNK      19
-#define B11ON 		146	  
-#define B12OFF		47   	  
-#define G3OFF		46	
+#define SSCPNK      20
+#define B11ON 		147	  
+#define B12OFF		48   	  
+#define G3OFF		47	
 
 }%
 /* Declare seq variables*/
@@ -135,6 +135,7 @@ ss SSCA1_clearance_status {
 
 		when () {
 			SSCA1_update_failed(SSCA1_FAIL_COND);
+			printf("PROBLEM: %d\n",SSCA1_FAIL_COND);
 		} state recover_faillure
 		
 		exit {
@@ -165,7 +166,7 @@ void initVault(){
 	SSCA1_INIT = TRUE;
 	SSCA1_OLD_FAIL_COND = SSCA1_FAIL_COND;
 	not_cleared(SSCA1_CLR_STATS);
-	report_error(SSCA1_INTLCK_STATS, 54);
+	report_error(SSCA1_INTLCK_STATS, 0);
 	pvPut(SSCA1_INIT, SYNC);
 	pvPut(SSCA1_CLR_STATS, SYNC);
 	pvPut(SSCA1_INTLCK_STATS, SYNC);
@@ -189,7 +190,7 @@ void SSCA1_status()
 {
 	cleared(SSCA1_CLR_STATS);
 	pvPut(SSCA1_CLR_STATS, SYNC); 		
-	report_error(SSCA1_INTLCK_STATS, 54);
+	report_error(SSCA1_INTLCK_STATS, 0);
 	pvPut(SSCA1_INTLCK_STATS, SYNC);
 }
 ///////////////////////////////////////////////////////////

@@ -6,10 +6,10 @@ program a13aClearanceSNC
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define	G5AS1OFF	144
-#define	G5AS2OFF	143
-#define	B9bOFF      142
-#define	B9aON       141
+#define	G5AS1OFF	145
+#define	G5AS2OFF	144
+#define	B9bOFF      143
+#define	B9aON       142
 }%
 /* Declare seq variables*/
 short A13A_INIT; 
@@ -167,7 +167,7 @@ void initVault(){
 	A13A_INIT = TRUE;
 	A13A_OLD_FAIL_COND = A13A_FAIL_COND;
 	not_cleared(A13A_CLR_STATS);
-	report_error(A13A_INTLCK_STATS, 54);
+	report_error(A13A_INTLCK_STATS, 0);
 	pvPut(A13A_INIT, SYNC);
 	pvPut(A13A_CLR_STATS, SYNC);
 	pvPut(A13A_INTLCK_STATS, SYNC);
@@ -191,7 +191,7 @@ void A13A_status()
 {
 	cleared(A13A_CLR_STATS);
 	pvPut(A13A_CLR_STATS, SYNC); 		
-	report_error(A13A_INTLCK_STATS, 54);
+	report_error(A13A_INTLCK_STATS, 0);
 	pvPut(A13A_INTLCK_STATS, SYNC);
 }
 ///////////////////////////////////////////////////////////

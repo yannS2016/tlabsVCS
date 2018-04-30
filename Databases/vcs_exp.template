@@ -46,9 +46,9 @@ record(calcout, "$(SYS):EXP-VC") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(FLNK, "$(SYS):EXP-FAIL-COND")
-  field(CALC, "!A?!B?!C?!D?E?$(EXPPNK):$(VCOK):$(G10ON):$(G9ON):$(DA12ON):$(RA12ON)")
+  field(CALC, "!A?B?!C?!D?E?$(EXPPNK):$(VCOK):$(G10ON):$(G9ON):$(DA12ON):$(RA12ON)")
   field(INPA, "$(SYS):SW-RF-A12.VAL NPP")
-  field(INPB, "$(SYS):EXP-DA12-CLSD.VAL.VAL PP")  
+  field(INPB, "$(SYS):EXP-DA12-CLSD.VAL PP")  
   field(INPC, "$(SYS):SW-G9-EXP-A12.VAL NPP")
   field(INPD, "$(SYS):SW-G10-EXP-A12.VAL NPP")
   field(INPE, "$(SYS):EXP-PNK.VAL PP")
@@ -237,6 +237,7 @@ record(calcout, "$(SYS):EXP-W29-STS") {
   field(DESC, "Vault clearance stage 3")
   field(SCAN, "Passive")
   field(PINI, "YES")
+  field(FLNK, "$(SYS):EXP-DA12-CLSD PP") # 
   field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B29OFF):$(DA12S2OFF):$(DA12S1OFF):$(FAIL)")
   field(INPA, "$(SYS):EXP-FAIL-COND PP") # THIS MUST BE CALLED IN PP   	 	  
   field(INPB, "$(SYS):SW-I-EXP-A12 NPP")
@@ -319,7 +320,7 @@ record(calc, "$(SYS):EXP-PNK") {
 #####################################################################
 # DOOR A12 CLOSED
 record(calc, "$(SYS):EXP-DA12-CLSD") {
-  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(CALC, "!A&&!B?$(ON):$(OFF)")
   field(INPA, "$(SYS):SW-I-EXP-A12.VAL")
   field(INPB, "$(SYS):SW-II-EXP-A12.VAL")
 }

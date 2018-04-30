@@ -26,7 +26,7 @@ record(calcout, "$(SYS):A13A-VC") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(FLNK, "$(SYS):A13A-FAIL-COND")
-  field(CALC, "!A?B?$(A13APNK):$(VCOK):$(G5AON)")
+  field(CALC, "A?B?$(A13APNK):$(VCOK):$(G5AON)")
   field(INPA, "$(SYS):A13A-G5A-CLSD.VAL PP")  
   field(INPB, "$(SYS):A13A-PNK.VAL PP")
   field(OUT,  "$(SYS):RST-A13A.PROC PP")  
@@ -102,6 +102,7 @@ record(seq, "$(SYS):SSCW9a-WRT-OUTS") { # HANDLE BY SEQ
 record(calcout, "$(SYS):A13A-W9b-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
+  field(FLNK, "$(SYS):A13A-G5A-CLSD") # this is used for css purpose
   field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B9bOFF):$(G5AS2OFF):$(G5AS1OFF):$(FAIL)")
   field(INPA, "$(SYS):A13A-FAIL-COND PP")
   field(INPB, "$(SYS):SW-I-A13A-G5A.VAL")
@@ -140,7 +141,7 @@ record(calc, "$(SYS):A13A-WATCH-9a-RLSD") {
 }
 #################### GATE G5A CLOSED ##################################
 record(calc, "$(SYS):A13A-G5A-CLSD") {
-  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(CALC, "!A&&!B?$(ON):$(OFF)")
   field(INPA, "$(SYS):SW-I-A13A-G5A.VAL")
   field(INPB, "$(SYS):SW-II-A13A-G5A.VAL")
 }

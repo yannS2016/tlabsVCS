@@ -6,19 +6,20 @@ program sscbasClearanceSNC
 /*******************************************************************/	
 #define	VCOK       	0
 #define FAIL		-1
-#define	G2OFF       32
-#define B1ON        37
-#define W1ON        20
-#define B2OFF       21
-#define B2ON  		35
-#define B3OFF		26  
-#define B3ON 		36 
-#define B4OFF		27  
-#define B4ON 		31 
-#define W4ON		29  
-#define B5OFF		28  
-#define B5ON 		33
-#define B6OFF		34
+#define	G2OFF       33
+#define B1ON        38
+#define W1ON        21
+#define B2OFF       22
+#define B2ON  		36
+#define B3OFF		27  
+#define B3ON 		37 
+#define B4OFF		28  
+#define B4ON 		32 
+#define W4ON		30  
+#define B4_5ON      31
+#define B5OFF		29  
+#define B5ON 		34
+#define B6OFF		35
 }%
 /* Declare seq variables*/
 short SSCL_INIT; 
@@ -185,7 +186,7 @@ ss SSCL_clearance_status {
 
 		when (!SSC_W5_STS) {
 			
-			SSCL_update_report(30);
+			SSCL_update_report(B4_5ON);
 		} state watchman_4_released	
 	}
 ////////////////////////////////////////////////////////////////
@@ -294,7 +295,7 @@ ss SSCL_clearance_status {
 void initVault(){
 	SSCL_INIT = TRUE;
 	not_cleared(SSCL_CLR_STATS);
-	report_error(SSCL_INTLCK_STATS, 54);
+	report_error(SSCL_INTLCK_STATS, 0);
 	pvPut(SSCL_INIT, SYNC);
 	pvPut(SSCL_CLR_STATS, SYNC);
 	pvPut(SSCL_INTLCK_STATS, SYNC);
@@ -318,7 +319,7 @@ void SSCL_status()
 {  
 	cleared(SSCL_CLR_STATS);
 	pvPut(SSCL_CLR_STATS, SYNC); 		
-	report_error(SSCL_INTLCK_STATS, 54);
+	report_error(SSCL_INTLCK_STATS, 0);
 	pvPut(SSCL_INTLCK_STATS, SYNC);
 }
 ///////////////////////////////////////////////////////////

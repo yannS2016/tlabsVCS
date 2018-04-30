@@ -6,13 +6,13 @@ program sscgfa2ClearanceSNC
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define B13ON 		49	      
-#define B14OFF		50          
-#define B14ON		52 		
-#define B15OFF		55 
-#define DA1ON 		40	        
-#define DA1S1OFF	53	             
-#define DA1S2OFF	53	
+#define B13ON 		50	      
+#define B14OFF		51          
+#define B14ON		53 		
+#define B15OFF		56 
+#define DA1ON 		41	        
+#define DA1S1OFF	54	             
+#define DA1S2OFF	54	
 
 }%
 /* Declare seq variables*/
@@ -199,7 +199,7 @@ void initVault(){
 	SSCA2_INIT = TRUE;
 	SSCA2_OLD_FAIL_COND = SSCA2_FAIL_COND;
 	not_cleared(SSCA2_CLR_STATS);
-	report_error(SSCA2_INTLCK_STATS, 54);
+	report_error(SSCA2_INTLCK_STATS, 0);
 	pvPut(SSCA2_INIT, SYNC);
 	pvPut(SSCA2_CLR_STATS, SYNC);
 	pvPut(SSCA2_INTLCK_STATS, SYNC);
@@ -223,7 +223,7 @@ void SSCA2_status()
 {
 	cleared(SSCA2_CLR_STATS);
 	pvPut(SSCA2_CLR_STATS, SYNC); 		
-	report_error(SSCA2_INTLCK_STATS, 54);
+	report_error(SSCA2_INTLCK_STATS, 0);
 	pvPut(SSCA2_INTLCK_STATS, SYNC);
 }
 ///////////////////////////////////////////////////////////

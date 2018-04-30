@@ -6,14 +6,14 @@ program spc2basClearanceSNC
 /**********************************************************/
 	
 #define	VCOK       	0
-#define TOUT		5
+#define TOUT		6
 #define FAIL		-1 
-#define B44ON		158
-#define B45OFF		160 
-#define DA007ON		156
-#define G6ON    	155      
-#define G6OFF 		159
-#define SPC2LPNK	157
+#define B44ON		159
+#define B45OFF		161 
+#define DA007ON		157
+#define G6ON    	156      
+#define G6OFF 		160
+#define SPC2LPNK	158
 }%
 /* Declare seq variables*/
 short SPC2L_INIT; 
@@ -167,7 +167,7 @@ void initVault(){
 	SPC2L_INIT = TRUE;
 	SPC2L_OLD_FAIL_COND = SPC2L_FAIL_COND;
 	not_cleared(SPC2L_CLR_STATS);
-	report_error(SPC2L_INTLCK_STATS, 54);
+	report_error(SPC2L_INTLCK_STATS, 0);
 	pvPut(SPC2L_INIT, SYNC);
 	pvPut(SPC2L_CLR_STATS, SYNC);
 	pvPut(SPC2L_INTLCK_STATS, SYNC);
@@ -191,7 +191,7 @@ void SPC2L_status()
 {
 	cleared(SPC2L_CLR_STATS);
 	pvPut(SPC2L_CLR_STATS, SYNC); 		
-	report_error(SPC2L_INTLCK_STATS, 54);
+	report_error(SPC2L_INTLCK_STATS, 0);
 	pvPut(SPC2L_INTLCK_STATS, SYNC);
 }
 ///////////////////////////////////////////////////////////

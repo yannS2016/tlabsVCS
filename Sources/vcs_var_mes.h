@@ -13,106 +13,107 @@
 #define DEF 		"\033[0m"    	// white background
 
 static const char* mes_array[188] = {     
-		"    CLEARED   ", 						// 0
-        "    NOT CLEARED   ",					// 1
-        "CLEAR UNDERWAY", 						// 2
-        "     ERROR    ", 						// 3
-        " CLEAR FAILED ", 						// 4
-        "TIME OUT ERROR: RELEASE ALL WATCHMEN", // 5
-        "Gate A001A switch 1 is open",			// 6
-        "Gate A001A switch 2 is open",			// 7
-        "Waiting on G5 switch 1 to close",		// 8
-        "Waiting on G5 switch 2 to close",		// 9
-        "Watchman 17 must be activated",		// 10
-        "Watchman 16 must be released",			// 11
-        "Gate G5 was opened",					// 12
-        "Gate A001A was opened",				// 13
-        "Panic button 16 was activated",		// 14
-        "SSC cable labyrinth NOT cleared",		// 15
-        "Door A001 was opened",					// 16
-        "Gate G1 was opened",					// 17
-        "Gate G2 was opened",					// 18
-        "A Panic button was activated",			// 19
-        "Watchman 1 was released too soon",		// 20
-        "Hold watchman 1 and press 2",			// 21
-        "Door A001 switch 1 is open",			// 22
-        "Door A001 switch 2 is open",			// 23
-        "Gate G1 switch 1 is open",				// 24
-        "Gate G1 switch 2 is open",				// 25
-        "Hold watchman 1 and press 3",			// 26
-        "Hold watchman 1, press and hold 4",	// 27
-        "Hold watchman 4 and press 5",			// 28
-        "Watchman 4 was released too soon",		// 29
-        "Release watchman 4 & 5",				// 30
-        "Watchman 4 must be released",			// 31
-        "Gate G2 must be closed",				// 32
-        "Watchman 5 must be released",			// 33
-        "Watchman 6 must be activated",			// 34
-        "Hold watchman 1 and release 2",		// 35
-        "Hold watchman 1 and release 3",		// 36
-        "Hold watchman 4 and release 1",		// 37
-        "SSC basement is not cleared",			// 38
-        "Gate A1A was opened",					// 39
-        "Door A1 was opened",					// 40
-        "Gate G3 was opened",					// 41
-        "Gate A1A switch 1 is open",			// 42
-        "Gate A1A switch 2 is open",			// 43
-        "Gate A1A switch 3 is open",			// 44
-        "Gate A1A switch 4 is open",			// 45
-        "Gate G3 must be closed",				// 46
-        "Watchman 12 must be activated",		// 47
-        "SSC Area 1 is not cleared",			// 48
-        "Release watchman 13",					// 49
-        "Watchman 14 must be activated", 		// 50
-        "Release watchman 14",					// 51
-        "Watchman 14 must be released",			// 52
-        "Door A1 must be closed",				// 53
-        "",										// 54
-        "Watchman 15 must be activated",		// 55
-        "Door A1A was opened",					// 56
-        "Door A13 was opened",					// 57
-        "Watchman 9 must be released",			// 58
-        "Gate A1A switch 1 is open",			// 59
-        "Gate A1A switch 2 is open",			// 60
-        "Gate A1A switch 3 is open",			// 61
-        "Gate A1A switch 4 is open",			// 62
-        "Watchman 8 must be released",			// 63
-        "Watchman 8 must be activated",			// 64
-        "Waiting on A13 switch 1 to close",		// 65
-        "Waiting on A13 switch 2 to close",		// 66
-        "Watchman 7 must be activated",			// 67
-        "Door A12 was opened",					// 68
-        "Release watchman 26",					// 69
-        "Hold watchman 27 and release 26",		// 70
-        "Hold watchman 27 and press 28a",		// 71
-        "Watchman 27 must be activated",		// 72
-        "Watchman 28a must be activated",		// 73
-        "Watchman 28b must be activated",		// 74
-        "Waiting on A12 switch 1 to close",		// 75
-        "Waiting on A12 switch 2 to close",		// 76
-        "Watchman 29 must be activated", 		// 77
-        "Release Watchman 27",					// 78
-        "Release watchman 28a",					// 79
-        "Release watchman 28b",					// 80
-        "Door A004A was opened",				// 81
-        "Gate G4 was opened",		        	// 82
-        "Gate G4 switch 1 is open",				// 83
-        "Gate G4 switch 2 is open",				// 84
-        "Watchman 34a must be released",		// 85
-        "Watchman 34b must be released",		// 86
-        "Watchman 34b must be activated",		// 87
-        "Door A004A switch 1 is open",			// 88
-        "Door A004A switch 2 is open",			// 89
-        "Watchman 35 must be activated",		// 90
-        "Door A14 was opened",					// 91
-        "Watchman 30 must be released",			// 92
-        "Door A14 switch 1 is open",			// 93
-        "Door A14 switch 2 is open",			// 94
-        "Watchman 31 must be activated",		// 95
-        "Door A004 was opened",					// 96
-        "Watchman 32 must be released",			// 97
-        "Door A004 switch 1 is open",			// 98
-        "Door A004 switch 2 is open",			// 99
+		"",										// 0it is a requirement that this array first element be an empty string
+		"    CLEARED   ", 						// 1
+        "    NOT CLEARED   ",					// 2
+        "CLEAR UNDERWAY", 						// 3
+        "     ERROR    ", 						// 4
+        " CLEAR FAILED ", 						// 5
+        "TIME OUT ERROR: RELEASE ALL WATCHMEN", // 6
+        "Gate A001A switch 1 is open",			// 7
+        "Gate A001A switch 2 is open",			// 8
+        "Waiting on G5 switch 1 to close",		// 9
+        "Waiting on G5 switch 2 to close",		// 10
+        "Watchman 17 must be activated",		// 11
+        "Watchman 16 must be released",			// 12
+        "Gate G5 was opened",					// 13
+        "Gate A001A was opened",				// 14
+        "Panic button 16 was activated",		// 15
+        "SSC cable labyrinth NOT cleared",		// 16
+        "Door A001 was opened",					// 17
+        "Gate G1 was opened",					// 18
+        "Gate G2 was opened",					// 19
+        "A Panic button was activated",			// 20
+        "Watchman 1 was released too soon",		// 21
+        "Hold watchman 1 and press 2",			// 22
+        "Door A001 switch 1 is open",			// 23
+        "Door A001 switch 2 is open",			// 24
+        "Gate G1 switch 1 is open",				// 25
+        "Gate G1 switch 2 is open",				// 26
+        "Hold watchman 1 and press 3",			// 27
+        "Hold watchman 1, press and hold 4",	// 28
+        "Hold watchman 4 and press 5",			// 29
+        "Watchman 4 was released too soon",		// 30
+        "Release watchman 4 & 5",				// 31
+        "Watchman 4 must be released",			// 32
+        "Gate G2 must be closed",				// 33
+        "Watchman 5 must be released",			// 34
+        "Watchman 6 must be activated",			// 35
+        "Hold watchman 1 and release 2",		// 36
+        "Hold watchman 1 and release 3",		// 37
+        "Hold watchman 4 and release 1",		// 38
+        "SSC basement is not cleared",			// 39
+        "Gate A1A was opened",					// 40
+        "Door A1 was opened",					// 41
+        "Gate G3 was opened",					// 42
+        "Gate A1A switch 1 is open",			// 43
+        "Gate A1A switch 2 is open",			// 44
+        "Gate A1A switch 3 is open",			// 45
+        "Gate A1A switch 4 is open",			// 46
+        "Gate G3 must be closed",				// 47
+        "Watchman 12 must be activated",		// 48
+        "SSC Area 1 is not cleared",			// 49
+        "Release watchman 13",					// 50
+        "Watchman 14 must be activated", 		// 51
+        "Release watchman 14",					// 52
+        "Watchman 14 must be released",			// 53
+        "Door A1 must be closed",				// 54
+        "",										// 55
+        "Watchman 15 must be activated",		// 56
+        "Door A1A was opened",					// 57
+        "Door A13 was opened",					// 58
+        "Watchman 9 must be released",			// 59
+        "Gate A1A switch 1 is open",			// 60
+        "Gate A1A switch 2 is open",			// 61
+        "Gate A1A switch 3 is open",			// 62
+        "Gate A1A switch 4 is open",			// 63
+        "Watchman 8 must be released",			// 64
+        "Watchman 8 must be activated",			// 65
+        "Waiting on A13 switch 1 to close",		// 66
+        "Waiting on A13 switch 2 to close",		// 67
+        "Watchman 7 must be activated",			// 68
+        "Door A12 was opened",					// 69
+        "Release watchman 26",					// 70
+        "Hold watchman 27 and release 26",		// 71
+        "Hold watchman 27 and press 28a",		// 72
+        "Watchman 27 must be activated",		// 73
+        "Watchman 28a must be activated",		// 74
+        "Watchman 28b must be activated",		// 75
+        "Waiting on A12 switch 1 to close",		// 76
+        "Waiting on A12 switch 2 to close",		// 77
+        "Watchman 29 must be activated", 		// 78
+        "Release Watchman 27",					// 79
+        "Release watchman 28a",					// 80
+        "Release watchman 28b",					// 81
+        "Door A004A was opened",				// 82
+        "Gate G4 was opened",		        	// 83
+        "Gate G4 switch 1 is open",				// 84
+        "Gate G4 switch 2 is open",				// 85
+        "Watchman 34a must be released",		// 86
+        "Watchman 34b must be released",		// 87
+        "Watchman 34b must be activated",		// 88
+        "Door A004A switch 1 is open",			// 89
+        "Door A004A switch 2 is open",			// 90
+        "Watchman 35 must be activated",		// 91
+        "Door A14 was opened",					// 92
+        "Watchman 30 must be released",			// 93
+        "Door A14 switch 1 is open",			// 94
+        "Door A14 switch 2 is open",			// 95
+        "Watchman 31 must be activated",		// 96
+        "Door A004 was opened",					// 97
+        "Watchman 32 must be released",			// 98
+        "Door A004 switch 1 is open",			// 99
+        "Door A004 switch 2 is open",			// 100
         "Watchman 33 must be activated",		// 100
         "Door A6 was opened",					// 101
         "Watchman 18 must be released",			// 102
@@ -160,7 +161,7 @@ static const char* mes_array[188] = {
         "Gate 5A switch 1 is still open" ,		// 144
         "Area A13A is not cleared",				// 145
         "Watchman 11 must be released",			// 146
-        "The roof is open",						// 147
+        "The roof is open",						// 148
         "Experimental vault 2 roof is open",	// 148
         "The roof or Gate G8 is open",			// 149
         "A12, A9 or A15 is not cleared",		// 150
@@ -201,6 +202,7 @@ static const char* mes_array[188] = {
         "SPC1 upper vault not cleared",			// 185
         "Input Cable Reconnected",				// 186
         "Waiting for Vault Clearance",		    // 187
+        "Power faillure on vcs crate",
 };	
 
 

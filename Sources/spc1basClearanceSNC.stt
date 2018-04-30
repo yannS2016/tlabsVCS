@@ -7,15 +7,15 @@ program spc1basClearanceSNC
 #define FAIL		-1 	
 #define	VCOK       	0
 #define TOUT		5
-#define SPC1LPNK	19
-#define RA2ON		147
-#define B42ON		179
-#define B43OFF		182
-#define DA001ON		173
-#define DA005AON	174
-#define DA005ON		175
-#define DA005OFF	181
-#define A005ON		185
+#define SPC1LPNK	20
+#define RA2ON		148
+#define B42ON		180
+#define B43OFF		183
+#define DA001ON		174
+#define DA005AON	175
+#define DA005ON		176
+#define DA005OFF	182
+#define A005ON		186
 }%
 /* Declare seq variables*/
 short SPC1L_VC;   
@@ -108,6 +108,7 @@ ss SPC1L_clearance_status {
 		
 		when (SPC1_W43_STS != DA005OFF) {
 			SPC1L_update_report(B43OFF);
+			printf("Watchman 43 must be activated\n");
 		} state watchman_43_pressed
 	}
 
@@ -163,7 +164,7 @@ ss SPC1L_clearance_status {
 void initVault(){
 	SPC1L_INIT = TRUE;
 	not_cleared(SPC1L_CLR_STATS);
-	report_error(SPC1L_INTLCK_STATS, 54);
+	report_error(SPC1L_INTLCK_STATS, 0);
 	pvPut(SPC1L_CLR_STATS, SYNC);
 	pvPut(SPC1L_INTLCK_STATS, SYNC);
 	pvPut(SPC1L_INIT, SYNC);
@@ -187,7 +188,7 @@ void SPC1L_status()
 {  
 	cleared(SPC1L_CLR_STATS);
 	pvPut(SPC1L_CLR_STATS, SYNC); 		
-	report_error(SPC1L_INTLCK_STATS, 54);
+	report_error(SPC1L_INTLCK_STATS, 0);
 	pvPut(SPC1L_INTLCK_STATS, SYNC);
 }
 ///////////////////////////////////////////////////////////

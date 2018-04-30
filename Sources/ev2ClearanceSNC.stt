@@ -6,10 +6,10 @@ program ev2ClearanceSNC
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define	B21OFF      110
-#define	B20ON      	107
-#define DA7S1OFF	108 
-#define DA7S2OFF	109
+#define	B21OFF      111
+#define	B20ON      	108
+#define DA7S1OFF	109 
+#define DA7S2OFF	110
 }%
 /* Declare seq variables*/
 short EV2_INIT; 
@@ -167,7 +167,7 @@ void initVault(){
 	EV2_INIT = TRUE;
 	EV2_OLD_FAIL_COND = EV2_FAIL_COND;
 	not_cleared(EV2_CLR_STATS);
-	report_error(EV2_INTLCK_STATS, 54);
+	report_error(EV2_INTLCK_STATS, 0);
 	pvPut(EV2_INIT, SYNC);
 	pvPut(EV2_CLR_STATS, SYNC);
 	pvPut(EV2_INTLCK_STATS, SYNC);
@@ -191,7 +191,7 @@ void EV2_status()
 {
 	cleared(EV2_CLR_STATS);
 	pvPut(EV2_CLR_STATS, SYNC); 		
-	report_error(EV2_INTLCK_STATS, 54);
+	report_error(EV2_INTLCK_STATS, 0);
 	pvPut(EV2_INTLCK_STATS, SYNC);
 }
 ///////////////////////////////////////////////////////////

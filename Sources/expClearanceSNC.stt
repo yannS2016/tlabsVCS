@@ -6,17 +6,17 @@ program expClearanceSNC
 /*******************************************************************/	
 #define	VCOK       	0
 #define FAIL		-1
-#define B26ON		69 
-#define B28bOFF		74
-#define B28bON		80 
-#define B28aOFF		73
-#define B28aON		79
-#define B27ON		78 
-#define B27OFF		72
-#define B29OFF		77  
-#define	DA12S1OFF	75
-#define	DA12S2OFF	76   
-#define	G10OFF		154          
+#define B26ON		70
+#define B28bOFF		75
+#define B28bON		81 
+#define B28aOFF		74
+#define B28aON		80
+#define B27ON		79 
+#define B27OFF		73
+#define B29OFF		78  
+#define	DA12S1OFF	76
+#define	DA12S2OFF	77   
+#define	G10OFF		155          
 }%
 /* Declare seq variables*/
 short EXP_INIT; 
@@ -269,7 +269,7 @@ void initVault(){
 	EXP_UPDATE = FALSE;
 	EXP_OLD_FAIL_COND = EXP_FAIL_COND; 
 	not_cleared(EXP_CLR_STATS);
-	report_error(EXP_INTLCK_STATS, 54);
+	report_error(EXP_INTLCK_STATS, 0);
 	pvPut(EXP_INIT, SYNC);
 	pvPut(EXP_CLR_STATS, SYNC);
 	pvPut(EXP_INTLCK_STATS, SYNC);
@@ -293,7 +293,7 @@ void EXP_status()
 {  
 	cleared(EXP_CLR_STATS);
 	pvPut(EXP_CLR_STATS, SYNC); 		
-	report_error(EXP_INTLCK_STATS, 54);
+	report_error(EXP_INTLCK_STATS, 0);
 	pvPut(EXP_INTLCK_STATS, SYNC);
 }
 ///////////////////////////////////////////////////////////

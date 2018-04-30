@@ -6,11 +6,11 @@ program cnaClearanceSNC
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define	B38ON		124					
-#define	B39OFF		125      		 	
-#define	DA12AON		123       			
-#define	DA12AS1OFF	126        		   	 
-#define	DA12AS2OFF	127 
+#define	B38ON		125					
+#define	B39OFF		126      		 	
+#define	DA12AON		124       			
+#define	DA12AS1OFF	127        		   	 
+#define	DA12AS2OFF	128 
 }%
 /* Declare seq variables*/
 short cnA_INIT; 
@@ -168,7 +168,7 @@ void initVault(){
 	cnA_INIT = TRUE;
 	cnA_OLD_FAIL_COND = cnA_FAIL_COND;
 	not_cleared(cnA_CLR_STATS);
-	report_error(cnA_INTLCK_STATS, 54);
+	report_error(cnA_INTLCK_STATS, 0);
 	pvPut(cnA_INIT, SYNC);
 	pvPut(cnA_CLR_STATS, SYNC);
 	pvPut(cnA_INTLCK_STATS, SYNC);
@@ -193,7 +193,7 @@ void cnA_status()
 {
 	cleared(cnA_CLR_STATS);
 	pvPut(cnA_CLR_STATS, SYNC); 		
-	report_error(cnA_INTLCK_STATS, 54);
+	report_error(cnA_INTLCK_STATS, 0);
 	pvPut(cnA_INTLCK_STATS, SYNC);
 }
 ///////////////////////////////////////////////////////////

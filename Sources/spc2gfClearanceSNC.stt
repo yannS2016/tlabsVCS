@@ -5,19 +5,19 @@ program spc2gfClearanceSNC
 	#include "vcs_var_mes.h" // define this here so C functions/variables are seen
 /**********************************************************/	
 #define	VCOK       	0
-#define TOUT		5
+#define TOUT		6
 #define FAIL		-1 
-#define SPC2GFPNK   19 
-#define B46ON       165
-#define B47OFF      168
-#define B47ON  		169
-#define B48OFF		166  
-#define	RA3ON	    147
-#define	A007ON     	162
-#define	DA3ON	    163	
-#define	DA3OFF		167	
-#define	DA3aON		170	
-#define	G6aON       164
+#define SPC2GFPNK   20 
+#define B46ON       166
+#define B47OFF      169
+#define B47ON  		170
+#define B48OFF		167  
+#define	RA3ON	    148
+#define	A007ON     	163
+#define	DA3ON	    164	
+#define	DA3OFF		168	
+#define	DA3aON		171	
+#define	G6aON       165
 
 }%
 /* Declare seq variables*/
@@ -205,7 +205,7 @@ void initVault(){
 	SPC2GF_INIT = TRUE;
 	SPC2GF_OLD_FAIL_COND = SPC2GF_FAIL_COND;
 	not_cleared(SPC2GF_CLR_STATS);
-	report_error(SPC2GF_INTLCK_STATS, 54);
+	report_error(SPC2GF_INTLCK_STATS, 0);
 	pvPut(SPC2GF_INIT, SYNC);
 	pvPut(SPC2GF_CLR_STATS, SYNC);
 	pvPut(SPC2GF_INTLCK_STATS, SYNC);
@@ -229,7 +229,7 @@ void SPC2GF_status()
 {  
 	cleared(SPC2GF_CLR_STATS);
 	pvPut(SPC2GF_CLR_STATS, SYNC); 		
-	report_error(SPC2GF_INTLCK_STATS, 54);
+	report_error(SPC2GF_INTLCK_STATS, 0);
 	pvPut(SPC2GF_INTLCK_STATS, SYNC);
 }
 ///////////////////////////////////////////////////////////

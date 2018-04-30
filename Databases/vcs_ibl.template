@@ -32,6 +32,7 @@ record(calc, "$(SYS):IBL-VNC") {
 record(calcout, "$(SYS):IBL-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")
+  field(FLNK, "$(SYS):SSC-GA1A-CLSD") ## track status of A1A
   field(CALC, "!E?$(VCOK):!A?B?!C?!D?$(VCOK):D:$(TOUT):$(A13AON):$(RA13ON)")
   field(INPA, "$(SYS):SW-RF-A13.VAL NPP") 
   field(INPB, "$(SYS):A13A-CLR.VAL NPP")
@@ -59,7 +60,7 @@ record(calcout, "$(SYS):IBL-VC") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(FLNK, "$(SYS):IBL-FAIL-COND")
-  field(CALC, "!A?B?!C?!D?E?$(IBLPNK):$(VCOK):$(DA13ON):$(GA1AON):$(A13AON):$(RA13ON)")
+  field(CALC, "!A?B?C?D?E?$(IBLPNK):$(VCOK):$(DA13ON):$(GA1AON):$(A13AON):$(RA13ON)")
   field(INPA, "$(SYS):SW-RF-A13.VAL NPP") 
   field(INPB, "$(SYS):A13A-CLR.VAL NPP")
   field(INPC, "$(SYS):SSC-GA1A-CLSD PP")
@@ -161,6 +162,7 @@ record(calcout, "$(SYS):IBL-W7-STS") {
   field(DESC, "Vault clearance stage 3")
   field(SCAN, "Passive")
   field(PINI, "YES")
+  field(FLNK, "$(SYS):IBL-DA13-CLSD") ## track status of A1A
   field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B7OFF):$(DA13S2OFF):$(DA13S1OFF):$(FAIL)")		  
   field(INPA, "$(SYS):IBL-FAIL-COND PP")
   field(INPB, "$(SYS):SW-I-IBL-A13.VAL")
@@ -203,7 +205,7 @@ record(calc, "$(SYS):IBL-WATCH-8-RLSD") {
 #####################################################################
 # GATE A1A CLOSED
 record(calc, "$(SYS):SSC-GA1A-CLSD") {
-  field(CALC, "!A&&!B&&!C&&!D?$(OFF):$(ON)")
+  field(CALC, "!A&&!B&&!C&&!D?$(ON):$(OFF)")
   field(INPA, "$(SYS):SW-I-SSC-A1A.VAL")
   field(INPB, "$(SYS):SW-II-SSC-A1A.VAL")
   field(INPC, "$(SYS):SW-III-SSC-A1A.VAL")
@@ -223,7 +225,7 @@ record(calc, "$(SYS):IBL-PNK") {
 #####################################################################
 # DOOR A13 CLOSED
 record(calc, "$(SYS):IBL-DA13-CLSD") {
-  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(CALC, "!A&&!B?$(ON):$(OFF)")
   field(INPA, "$(SYS):SW-I-IBL-A13.VAL")
   field(INPB, "$(SYS):SW-II-IBL-A13.VAL")
 }

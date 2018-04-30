@@ -6,9 +6,9 @@ program spc1gfClearanceSNC
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1 
-#define B40ON		176
-#define B41OFF		178
-#define G7OFF 		183
+#define B40ON		177
+#define B41OFF		179
+#define G7OFF 		184
 }%
 /* Declare seq variables*/
 short SPC1GF_INIT; 
@@ -130,7 +130,10 @@ ss SPC1GF_clearance_status {
 		}
 
 		when () {
+		
+			//SPC1GF_update_failed(SPC1GF_FAIL_COND = 0?54:SPC1GF_FAIL_COND);
 			SPC1GF_update_failed(SPC1GF_FAIL_COND);
+			printf("\nINTERLOCK VALUE: %d\n",SPC1GF_FAIL_COND);
 			
 		} state recover_faillure
 	
@@ -163,7 +166,7 @@ void initVault(){
 	SPC1GF_INIT = TRUE;
 	SPC1GF_OLD_FAIL_COND = SPC1GF_FAIL_COND;
 	not_cleared(SPC1GF_CLR_STATS);
-	report_error(SPC1GF_INTLCK_STATS, 54);
+	report_error(SPC1GF_INTLCK_STATS,0);
 	pvPut(SPC1GF_INIT, SYNC);
 	pvPut(SPC1GF_CLR_STATS, SYNC);
 	pvPut(SPC1GF_INTLCK_STATS, SYNC);
@@ -187,7 +190,7 @@ void SPC1GF_status()
 {
 	cleared(SPC1GF_CLR_STATS);
 	pvPut(SPC1GF_CLR_STATS, SYNC); 		
-	report_error(SPC1GF_INTLCK_STATS, 54);
+	report_error(SPC1GF_INTLCK_STATS, 0);
 	pvPut(SPC1GF_INTLCK_STATS, SYNC);
 }
 ///////////////////////////////////////////////////////////

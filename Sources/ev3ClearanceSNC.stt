@@ -6,10 +6,10 @@ program ev3ClearanceSNC
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define	B23OFF      115
-#define	B22ON      	112
-#define DA8S1OFF	113 
-#define DA8S2OFF	114
+#define	B23OFF      116
+#define	B22ON      	113
+#define DA8S1OFF	114 
+#define DA8S2OFF	115
 }%
 /* Declare seq variables*/
 short EV3_INIT; 
@@ -167,7 +167,7 @@ void initVault(){
 	EV3_INIT = TRUE;
 	EV3_OLD_FAIL_COND = EV3_FAIL_COND;
 	not_cleared(EV3_CLR_STATS);
-	report_error(EV3_INTLCK_STATS, 54);
+	report_error(EV3_INTLCK_STATS, 0);
 	pvPut(EV3_INIT, SYNC);
 	pvPut(EV3_CLR_STATS, SYNC);
 	pvPut(EV3_INTLCK_STATS, SYNC);
@@ -176,7 +176,7 @@ void initVault(){
 void resetStatus()
 {
 	not_cleared(EV3_CLR_STATS);
-	report_error(EV3_INTLCK_STATS, 54);
+	report_error(EV3_INTLCK_STATS, 0);
 	pvPut(EV3_CLR_STATS, SYNC);
 	pvPut(EV3_INTLCK_STATS, SYNC);
 }
@@ -199,7 +199,7 @@ void EV3_status()
 {
 	cleared(EV3_CLR_STATS);
 	pvPut(EV3_CLR_STATS, SYNC); 		
-	report_error(EV3_INTLCK_STATS, 54);
+	report_error(EV3_INTLCK_STATS, 0);
 	pvPut(EV3_INTLCK_STATS, SYNC);
 }
 ///////////////////////////////////////////////////////////
