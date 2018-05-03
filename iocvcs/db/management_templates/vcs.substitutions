@@ -1,1 +1,158 @@
-/home/vcs/VCS/snc_devs/databases/vcs.substitutions
+###############################################################################################################################
+#                        						Vault clearance substitution file                         #
+###############################################################################################################################
+# FAIL:			Outputed to indicate that vault was not initialised: initiailzation is done from the sequencer code
+# VCOK:			Outputed to indicate that a clearance stage was completed successfully
+# S1:  			Clearance is underway and is in stage 1	/maybe used to index a fanout record
+# S2:  			Clearance is underway and is in stage 2	/Maybe used to index a fanout record
+# S0:  			Vault in clear stage					/Maybe used to index a fanout record
+# PNK: 			Clearance can  not be started: panique condition is active: it is only reset when the panique button is released
+
+# $(VID)PNK:		Outputed in S0 to indicate a panic condition has occured for vault with ID $(VID) i.e: EV1
+#				When more than one button define panique condition $(VID)PNK is always: "A Panic button was activated" 
+
+# $(BID)ON: 	Button with ID $(BID) must be released 		i.e: B16ON
+# $(BID)OFF: 	Button with ID $(BID) must be activated 	i.e: B16OFF
+
+# $(RID)ON:		outputed to indicated that roof with ID $(RID) is open : This always indicate a clearance fail condition
+#				except fo EV1 which span 2 roofs(A6 and A7) this message for all other vaults is: "A roof was Opened"
+				
+# $(DID)ON:		Outputed in S1 or S2 to indicate "vault clearance failed" because door with ID $(DID)(i.e: A6) is open
+# $(DID)OFF:	Outputed in S1 or S2 to indicate "vault clearance is blocked" because door with ID $(DID)(i.e: A6) is to be closed
+# $(DID)S1ON:	Outputed in S1 or S2 to indicate that switch 1 on  door with ID $(DID)(i.e: A6) is open
+# $(DID)S2ON:	Outputed in S1 or S2 to indicate that switch 2 on  door with ID $(DID)(i.e: A6) is open
+
+# $(GID)ON:		Outputed in S1 or S2 to indicate "vault clearance failed" because gate with ID $(GID)(i.e: G5) is open
+# $(GID)OFF:	Outputed in S1 or S2 to indicate "vault clearance is blocked" because gate with ID $(GID)(i.e: G5) is to be closed
+
+# $(GID)S1ON:	Outputed in S1 or S2 to indicate that switch 1 on  gate with ID $(GID)(i.e: G2) is open
+# $(GID)S2ON:	Outputed in S1 or S2 to indicate that switch 2 on  gate with ID $(GID)(i.e: G2) is open
+# TOUT: 		Outputed in S1 or S2 to indicate that a timeout fail condition occured
+# $(VID)TOUT:	Time out value for that particular vault: Generally 2 mins(120 second)
+# $(VID)ON:     Clearance signal fromm a dependancy vault: i.e: A13AON ; a13a is a dependancy vault for IBL vault
+
+##################################################################################################################################################################################################################################
+file "db/vcs_spc1_gf.template" {
+pattern 
+{  SYS  	S0  	S1  	PNK  	NI   TOUT  	FAIL  	VCOK	B40NP  		B40ON		B41OFF		RA2ON		DA2ON		G7ON    	G7OFF 		SPC1PNK	  	ON   	OFF   	SPC1TOUT   	SCAN    }
+{  VCS  	1   	2   	3	  	4	 6	    -1	   	0	  	1   		177	   		179      	148     	173    		185     	184     	20        	1    	0     	120       ".02 second"}    
+}
+
+file "db/vcs_spc1_bas.template" {
+pattern 
+{  SYS  	S0  	S1  	PNK  	NI   	TOUT  	FAIL  	VCOK  	A005ON   	B42NP   	B42ON	  	B43OFF		RA2ON	  DA001ON	  DA005AON	  DA005ON    DA005OFF   SPC1PNK	 ON	 	OFF   	SPC1TOUT   SCAN}
+{  VCS  	1   	2  		3	 	4	  	6     	-1	   	0	 	186      	1   	 	180	  		183       	148       174         175         176        182        20       1   	0     	120       ".05 second"}    
+}
+################################################################################################################################################################################################################################
+file "db/vcs_ssc_cable.template" {
+pattern 
+{	SYS	 	S0 	 S1   PNK	 NI    TOUT    FAIL    VCOK  	B16NP  	    B16ON		B17OFF		DA001AON	DA001AS2ON	 	DA001AS1ON		G5ON  	G5S1OFF  G5S2OFF  	CABPNK   ON  OFF   SSCTOUT   SCAN }
+{   VCS  	1    2    3	     4	   6	   -1	   0		1     	    12	   		11     		15		  	8			 	7				13	  	9		 10		  	15       1   0     120     	".1 second"}    
+}
+
+file "db/vcs_ssc_bas.template" {
+pattern 
+{ SYS S0 S1 PNK NI TOUT FAIL  VCOK A001AON  DA001ON  DA001S1ON  DA001S2ON  G1ON  G1S1ON  G1S2ON  G2ON  G2OFF  B1NP  B1ON  W1ON  B2OFF  B2ON  B3OFF  B3ON  B4OFF  B4ON  W4ON  B5OFF  B5ON  B6OFF  SSCPNK  ON  OFF COUT  SCAN }
+{ VCS 1  2  3   4  6    -1    0	   16       17       23	        24         18	 25      26	     19	   33	  6	    38	  21	22     36    27     37    28     32    30    29     34    35     20      1   0   120 ".02 second"} 
+}
+##################################################################################################################################################################################################################################
+file "db/vcs_ssc_gfa1.template" {
+pattern 
+{ SYS  	S0  	S1  	PNK  	NI   	TOUT  	FAIL  	VCOK   	A001ON    	RA1ON   	B11NP  		B11ON    	B12OFF    	GA1AON	  	G3OFF  		G3ON    	SSCPNK   	ON  	OFF   	SSCTOUT    	SCAN }
+{ VCS  	1   	2   	3    	4    	6	   -1	 	0	    39        	148     	1      		147	  		48       	57		  	47   	   	42			20       	1   	0     	120        ".05 second"}    
+}
+
+
+
+file "db/vcs_ssc_gfa2.template" {
+pattern 
+{ SYS  	S0  	S1  	PNK  	NI   	TOUT  	FAIL  	VCOK   		A1ON    	B13NP   	B13ON    	B14OFF   	B14ON     B15OFF	DA1ON    	DA1S1OFF    	DA1S2OFF     SSCPNK   ON  	OFF   SSCTOUT    SCAN }
+{ VCS  	1   	2   	3    	4    	6	   -1	 	0	    	49       	1       	50	     	51       	53 		  56		41	     	54	         	54	       	 20       1   	0     120        ".1 second"}    
+}
+###################################################################################################################################################################################################################################
+file "db/vcs_a13a.template" {
+pattern 
+{	SYS	 	S0  	S1  	PNK		NI   	TOUT	FAIL	VCOK	B9aNP		B9aON		B9bOFF		G5AON		G5AS1OFF	G5AS2OFF	A13APNK		ON		OFF   	A13ATOUT   	SCAN    }
+{   VCS  	1   	2   	3	 	4	   	5	 	-1	  	0		1    		142		 	143      	141	  		145        	144      	140     	1   	0     	120       	".1 second"}    
+}
+
+file "db/vcs_ibl.template" {
+pattern 
+{ SYS  S0  S1  PNK  NI   TOUT  FAIL  VCOK   A13AON   RA13ON   B9NP   B9ON   B8OFF   B8ON   B7OFF    DA13ON   DA13S1OFF   DA13S2OFF   GA1AON   GA1AS1ON   GA1AS2ON   GA1AS3ON   GA1AS4ON   IBLPNK   ON  OFF   IBLTOUT    SCAN }
+{ VCS  1   2   3    4    6	   -1	 0	    146      148      1      59	    65      64	   68	    58	     66		     67		     57	      60		 61	        62         63         20       1   0     120  ".05 second"}    
+}
+####################################################################################################################
+file "db/vcs_exp.template" {
+pattern 
+{ SYS  S0 S1  PNK  NI  TOUT  FAIL  VCOK   RA12ON   B26NP   B26ON   B28bOFF   B28bON   B28aOFF   B28aON  B27OFF  B27ON   B29OFF   DA12ON   DA12S1OFF  DA12S2OFF   G9ON   G9OFF  G10ON  G10OFF   EXPPNK  ON  OFF  EXPTOUT   SCAN }
+{ VCS  1  2   3    4   6     -1    0	  148      1       70	   75        81	      74	    80	    73	    79	    78	     69	      76	     77          152    154    153    155      20      1   0    120 ".05 second" } 
+}
+######################################################################################################################################################################################################################
+file "db/vcs_ev1.template" {
+pattern 
+{	SYS	 	S0  	S1  	PNK  	NI    	TOUT   	FAIL  	VCOK	 B18NP    	B18ON		B19OFF	 	RA6ON	 	RA7ON	 	DA6ON	 	DA6S1OFF   	DA6S2OFF	EV1PNK  	ON		OFF    	EV1TOUT   	SCAN }
+{   VCS  	1   	2   	3	  	4	  	6	   	-1	 	0		 188       	103			106     	148     	149     	102     	104       	105       	135      	1     	0     	120     	".1 second"}    
+}
+######################################################################################################################################################################################################################
+file "db/vcs_ev2.template" {
+pattern 
+{	SYS	 	S0  	S1   	PNK  	NI     	TOUT	 FAIL  		VCOK		B20NP		B20ON		B21OFF		RA7ON		DA7ON		DA7S1OFF   	DA7S2OFF    EV2PNK		ON	OFF   	EV2TOUT    SCAN    }
+{   VCS  	1   	2    	3	   	4	  	6		 -1	  		0			1       	108			111      	149     	107      	109       	110        	136      	1   0     	120        ".1 second"}    
+}
+######################################################################################################################################################################################################################
+file "db/vcs_ev3.template" {
+pattern 
+{	SYS	  	S0  	S1  	PNK   	NI   	TOUT	FAIL  	VCOK	B22NP		B22ON		B23OFF		RA8ON		DA8ON	 	DA8S1OFF   	DA8S2OFF  	EV3PNK   	ON		OFF   	EV3TOUT   	SCAN    }
+{   VCS   	1   	2   	3	 	4	  	6	  	-1	    0		1      		113	  		116       	148    	    112      	114       	115       	137      	1   	0     	120       ".1 second"}    
+}
+
+
+######################################################################################################################################################################################################################
+file "db/vcs_bsv.template" {
+pattern 
+{	SYS	  	S0  	S1  	PNK  	NI    	TOUT	FAIL   	VCOK	B36NP		B36ON		B37OFF		RA15ON		DA15ON	 	DA15S1OFF 	DA15S2OFF 	BSVPNK		ON		OFF   	BSVTOUT    SCAN    }
+{   VCS   	1   	2   	3	  	4	 	6	    -1	   	0		1    		131			132     	148     	130     	134      	133        	129      	1   	0    	120       ".1 second"}    
+}
+######################################################################################################################################################################################################################
+file "db/vcs_spe.template" {
+pattern 
+{	SYS		S0 		S1  	PNK   	NI		TOUT	FAIL	VCOK	B24NP   	B24ON		B25OFF	 	RA9ON	 	DA9ON		DA9S1OFF   	DA9S2OFF   SPEPNK		ON		OFF  	 SPETOUT   	SCAN    }
+{   VCS  	1   	2   	3	 	4	   	6	  	-1	 	0		188    		119			120      	148     	118       	122        	121       	117    	 	1       0    	 120       ".1 second"}    
+}
+
+######################################################################################################################################################################################################################
+file "db/vcs_cnA.template" {
+pattern 
+{	SYS		S0 		S1  	PNK   	NI		TOUT	FAIL	VCOK	cnAON		B38NP   	B38ON		B39OFF	 	DA12AON		DA12AS1OFF   	 DA12AS2OFF   cnAPNK		ON		OFF  	 cnATOUT   	SCAN    }
+{   VCS  	1   	2   	3	 	4	   	6	  	-1	 	0		151			1    		125			126      	124       	127        		 128          129    	 	1       0    	 120       ".1 second"}    
+}
+########################################################################################################################################################################################################################
+file "db/vcs_spc2_bas.template" {
+pattern 
+{  SYS	 S0  S1  PNK  NI   TOUT   FAIL   VCOK  	B44NP   B44ON	B45OFF    DA007ON    G6ON    G6OFF    SPC2LPNK	 ON	 OFF   SPC2TOUT   SCAN}
+{  VCS   1   2   3	  4	   6      -1	 0	 	1   	159	  	161       157    	 156     160 	  158     	 1   0     120        ".02 second" }    
+}
+
+file "db/vcs_spc2_gf.template" {
+pattern 
+{  SYS	 	S0  	S1  	PNK   	NI  	TOUT  	FAIL  	VCOK   	A007ON    	B46NP    B46ON	   B47OFF		B47ON 		B48OFF	 	RA3ON	  	DA3aON   	G6aON	DA3ON    DA3OFF   SPC2PNK  ON  OFF   SPC2TOUT   SCAN}
+{  VCS   	1   	2   	3	   	4   	6     	-1	   	0	  	163      	1   	 166	   169	    	170	    	167		 	148      	171      	165     164      168      20       1   0     120  ".001 second"}    
+}
+######################################################################################################################################################################################################################
+file "db/vcs_hli.template" {
+pattern 
+{	SYS	 	S0  	S1  	PNK  	NI		TOUT	FAIL	VCOK	B30NP   	B30ON		B31OFF		RA14ON		DA14ON	 	DA14S1OFF 		DA14S2OFF    HLIPNK		ON		OFF   	HLITOUT   	SCAN  }
+{   VCS  	1   	2   	3	 	4	   	6	  	-1	 	0		188    		93			96      	148    		92       	94      		95         	 138      	1   	0     	120       ".2 second"}    
+}
+######################################################################################################################################################################################################################
+file "db/vcs_vli.template" {
+pattern 
+{  SYS	 	S0  	S1  	PNK		NI 		TOUT 	FAIL  	VCOK  	B32NP    B32ON    B33OFF    G4ON    G4S1ON    G4S2ON    DA004ON  	DA004S1OFF 	 DA004S2OFF    VLIPNK     ON    OFF   VLITOUT   SCAN}
+{  VCS  	1   	2   	3		4		6	 	-1	    0	  	1   	 98	   	  101     	83	  	84        85     	97       	99		  	 100		   139		  1     0     120      ".1 second"}    
+}
+######################################################################################################################################################################################################################
+file "db/vcs_trl.template" {
+pattern 
+{ SYS  	S0  	S1  	PNK  	NI   TOUT   FAIL   VCOK  	B34aNP    B34aON	B34bOFF		B34bON  	B35OFF  	DA004AON  	DA004AS2OFF  	DA004AS1OFF  	G4ON  	G4S1ON    G4S2ON  	TRLPNK  ON   OFF  TRLTOUT 	SCAN}
+{ VCS  	1   	2   	3    	4    6	   -1	   0	 	1         86	  	88       	87	  		91	  		82			90		     	89		      	83		84	   	  85	    20      1    0    120  ".1 second"}    
+}

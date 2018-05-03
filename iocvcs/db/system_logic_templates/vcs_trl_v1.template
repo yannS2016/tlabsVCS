@@ -1,0 +1,363 @@
+############ SELECT THE NEXT PROCESSING BRANCH ##################
+record(calc, "$(SYS):TRL-SEL-STAGE") {
+  field(DESC, "Select processing branch")
+  field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
+  field(CALC, "A?!B?C?$(S0):D?$(S2):$(S1):$(PNK):$(INITFAIL)")
+  field(INPA, "$(SYS):TRL-INIT")
+##IF BUTTON 34a or  34b  IS STILL PRESSED PNK IS ACTIVE##
+  field(INPB, "$(SYS):TRL-PNK") 
+  field(INPC, "$(SYS):TRL-SNC-CLR")
+## THIS FLAG ENSURE WE ONLY RESPOND TO A SINGLE EVENT ON BUT 34a and 34b##
+  field(INPD, "$(SYS):WATCHMAN-TRL-34a-ACT.VAL")
+  field(FLNK, "$(SYS):TRL-PROC-STAGE")
+}
+#   field(CALC, "A?!B?C?$(S0):!D?$(S1):(D && !E)?$(S2):$(S3):$(PNK):$(INITFAIL)")
+## THIS RECORDS PROPAGATE PROCESSING ##
+record(fanout, "$(SYS):TRL-PROC-STAGE") {
+  field(SCAN, "Passive")
+  field(SELM, "Specified")
+  field(SELL, "$(SYS):TRL-SEL-STAGE")
+  field(LNK1, "$(SYS):TRL-VC")
+  field(LNK2, "$(SYS):TRL-VNCS1 PP")
+  field(LNK3, "$(SYS):TRL-VNCS3 PP")
+  field(LNK5, "$(SYS):TRL-PNK")
+}
+##################################################################################
+# monitor status of inputs which may cause clearance faillure
+# SIGNAL TO SYS: TRL-VC?TRL-SNC-CLR && (HARDWARE STATUS RECORDS):FALSE
+record(calcout, "$(SYS):TRL-VC") { 
+  field(DESC, "TRL Vault clear stage")
+  field(SCAN, "Passive")
+  field(CALC, "!A?!B?C?$(TRLPNK):$(VCOK):$(G4ON):$(DA004AON)")
+# IN LIVE APP USE A FLNK FROM  SW-I-TRL-A004A OR SW-I-TRL-A004A (SCAN=Intr) TO PROCESS THIS RECORD
+# AND ACCES IT HERE WITH NPP OR ACCES IT WITH PP BUT USE NPP ON ITS INPUTS
+  field(INPA, "$(SYS):TRL-DA004A-CLSD.VAL PP")  
+  field(INPB, "$(SYS):TRL-G4-CLSD.VAL PP")
+  field(INPC, "$(SYS):TRL-PNK.VAL PP")
+  field(OUT,  "$(SYS):RST-TRL.PROC PP")  
+  field(OOPT, "When Non-zero")
+  field(PINI, "YES")
+  field(VAL, "1") 
+}
+####################### RESET VAULT #################
+record(seq, "$(SYS):RST-TRL") { # MAY BE HANDLE BY SEQ
+  field(SCAN, "Passive")
+  field(DOL1, "0")
+  field(DOL2, "0")
+  field(DOL3, "0")
+  field(DOL4, "0")
+  field(DOL5, "0")
+  field(DOL6, "0")
+  field(DOL7, "0")
+  field(DOL8, "0")
+  field(LNK1, "$(SYS):TRL-SNC-CLR.VAL PP")
+  field(LNK2, "$(SYS):LED-WS-TRL-34a.VAL PP")
+  field(LNK3, "$(SYS):LED-WS-TRL-34b.VAL PP")
+  field(LNK4, "$(SYS):LED-WS-TRL-35.VAL PP")
+  field(LNK5, "$(SYS):TRL-COUNTER.VAL PP")
+  field(LNK6, "$(SYS):WATCHMAN-TRL-34a-ACT.VAL")
+  field(LNK7, "$(SYS):WATCHMAN-TRL-34b-ACT.VAL")
+  field(LNK8, "$(SYS):WATCHMAN-TRL-35-ACT.VAL")
+  field(SELM, "All")
+}
+
+#################### RECOVER FROM PANIQUE ################
+
+record(calc, "$(SYS):TRL-PNK") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A||!B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-TRL-34a.VAL")
+  field(INPB, "$(SYS):WS-BUT-TRL-34b.VAL")
+  field(VAL, "0")
+}
+
+# formula to monitor status of inputs and set output in stage 1
+record(calcout, "$(SYS):TRL-VNCS1") {
+  field(DESC, "Vault clearance stage 1")
+  field(SCAN, "Passive")
+  field(CALC, "!A?$(VCOK):$(B34aON)")
+  field(INPA, "$(SYS):WS-BUT-TRL-34a.VAL")
+  field(OUT,  "$(SYS):TRLS1-WRT-OUTS.PROC PP")  
+  field(OOPT, "When Zero") 
+  field(PINI, "YES")
+  field(VAL, "1")  
+}
+
+####################### STAGE 1 OUTPUTS STATUS  #################
+
+record(seq, "$(SYS):TRLS1-WRT-OUTS") { # MAY BE HANDLED BY SEQ
+  field(DOL1, "1")
+  field(DOL2, "0")
+  field(DOL3, "1")
+  field(LNK1, "$(SYS):LED-WS-TRL-34a.VAL PP")
+  field(LNK2, "$(SYS):TRL-COUNTER.VAL PP")
+  field(LNK3, "$(SYS):WATCHMAN-TRL-34a-ACT.VAL PP")
+  field(SCAN, "Passive")
+  field(SELM, "All")
+}
+
+############################## STAGE 2 LOGIC RECORDS ######################################
+
+record(calcout, "$(SYS):TRL-VNCS2") {
+  field(DESC, "Vault clearance stage 2")
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+#  field(FLNK, "$(SYS):TRLS2-OUT-STS")
+# CONTINUE CLEARANCE STAGE 2 SUB 1
+  field(CALC, "A?!B?!C?!D?(!E||F)?$(VCOK):$(B34bON):$(G4S2ON):$(G4S1ON):$(TOUT):$(B34aOFF)")	  
+  field(INPA, "$(SYS):TRL-WATCH-34a-RLSD.VAL PP")
+  field(INPB, "$(SYS):TRL-TIMEOUT.VAL")
+  field(INPC, "$(SYS):SW-I-VLI-G4.VAL")
+  field(INPD, "$(SYS):SW-II-VLI-G4.VAL")
+  field(INPE, "$(SYS):WS-BUT-TRL-34b.VAL")
+  field(INPF, "$(SYS):WATCHMAN-TRL-34b-ACT.VAL")	  
+  field(OUT,  "$(SYS):TRLS2-WRT-OUTS.PROC PP")  
+  field(OOPT, "When Zero") 
+  field(VAL, "1")
+}
+
+# THIS RECORDS IS PROCESSED ONLY WHEN TRL-VNCS2 RETURN 0
+# THAT IS TRL INTERLOCKS ARE CORRECT IN STAGE 2 SUB 1
+
+record(seq, "$(SYS):TRLS2-WRT-OUTS") {
+  field(SELM, "All")
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(LNK1, "$(SYS):WATCHMAN-TRL-34b-ACT.VAL PP")
+  field(LNK2, "$(SYS):LED-WS-TRL-34b.VAL PP")
+  field(SCAN, "Passive")
+}
+
+
+########################################################################################
+# STAGE 3 IS INNER TO STAGE 2 
+# WE CAN ACCESS STAGE 2 FAIL CONDITION THIS WAY BY RETURN ITS ORELATED PV TRL-VNCS2 VALUE
+# WHEN NOT 0. THUS B IS EITHER TOUT OR G4S1ON OR G4S2ON
+record(calcout, "$(SYS):TRL-VNCS3") {
+  field(DESC, "Vault clearance stage 3")
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(FLNK, "$(SYS):TRLS3-OUT-STS")
+  field(CALC, "!A?B?!C?!D?(!E&&!F)?$(VCOK):$(B35ON):$(DA004AS2ON):$(DA004AS1ON):$(B34bOFF):A")	  
+  field(INPA, "$(SYS):TRL-VNCS2.VAL.VAL PP")
+  field(INPB, "$(SYS):TRL-WATCH-34b-RLSD.VAL PP") # THIS MUST BE CALLED IN PP MODE
+	 
+	  
+  field(INPC, "$(SYS):SW-I-TRL-A004A.VAL PP")
+  field(INPD, "$(SYS):SW-II-TRL-A004A.VAL PP")
+  field(INPE, "$(SYS):WS-BUT-TRL-35.VAL PP")
+  field(INPF, "$(SYS):WATCHMAN-TRL-35-ACT.VAL PP")
+  field(OUT,  "$(SYS):TRLS3-WRT-OUTS.PROC PP")  
+  field(OOPT, "When Zero") 
+  field(VAL, "1")
+}
+# IF PREVIOUS INTERLOCKS(GATE G4 OR TOUT) CHANGED THEIR STATE
+# RESET THE VAULT, OTHERWISE DOOR A004A NEEDS TO BE CLOSED
+# OR PRESS WATCHMAN 35
+# OR RELEASE WATCHMAN 34b
+record(calcout, "$(SYS):TRLS3-OUT-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "A=$(TOUT)||A=$(G4S1ON)||A=$(G4S2ON)?$(ON):$(OFF)")
+  field(INPA, "$(SYS):TRL-VNCS2.VAL PP")
+  field(OUT,  "$(SYS):RST-TRL.PROC PP")  
+  field(OOPT, "When Non-zero") 
+  field(VAL, "0")
+}
+################ RESET OUTPUTS IN CASE PREVIOUS INTERLOCK FAILED #############
+
+
+# THIS RECORDS IS PROCESSED ONLY WHEN TRL-VNCS2 RETRUN 0
+# THAT IS TRL INTERLOCKS ARE CORRECT IN STAGE 2 SUB 1	
+record(seq, "$(SYS):TRLS3-WRT-OUTS") {
+  field(SELM, "All")
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DOL4, "1")
+  field(DLY2, "0.02")
+  field(LNK1, "$(SYS):RST-TRL.PROC PP")
+  field(LNK2, "$(SYS):WATCHMAN-TRL-35-ACT.VAL PP")
+  field(LNK3, "$(SYS):TRL-SNC-CLR.VAL PP")
+  field(LNK4, "$(SYS):LED-WS-TRL-35.VAL PP")
+  field(SCAN, "Passive")
+}  
+
+#################### WATCHMAN 34a RELEASE ##############################
+record(calc, "$(SYS):TRL-WATCH-34a-RLSD") {
+  field(CALC, "A&&B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-TRL-34a.VAL")
+  field(INPB, "$(SYS):WATCHMAN-TRL-34a-ACT.VAL")
+}
+################## WATCHMAN 34b RELEASE #################################
+	
+record(calc, "$(SYS):TRL-WATCH-34b-RLSD") {
+  field(CALC, "A&&B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-TRL-34b.VAL")
+  field(INPB, "$(SYS):WATCHMAN-TRL-34b-ACT.VAL")
+}
+#################### DOOR A004A CLOSED ##################################
+record(calc, "$(SYS):TRL-DA004A-CLSD") {
+  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(INPA, "$(SYS):SW-I-TRL-A004A.VAL")
+  field(INPB, "$(SYS):SW-II-TRL-A004A.VAL")
+}
+#################### GATE G4 CLOSED ##################################
+record(calc, "$(SYS):TRL-G4-CLSD") {
+  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(INPA, "$(SYS):SW-I-TRL-G4.VAL")
+  field(INPB, "$(SYS):SW-II-TRL-G4.VAL")
+}
+########################## TIMER PROCEDURE #############################
+record(calc, "$(SYS):TRL-COUNTER") {
+  field(SCAN, "Passive")
+  field(CALC, "B?A+1:0")
+  field(INPA, "$(SYS):TRL-COUNTER.VAL")
+  field(INPB, "$(SYS):WATCHMAN-TRL-34a-ACT.VAL")
+}
+record(calc, "$(SYS):TRL-TIMEOUT") {
+  field(SCAN, "1 second")
+  field(CALC, "A>=$(TRLTOUT)?$(ON):$(OFF)")
+  field(INPA, "$(SYS):TRL-COUNTER.VAL PP")
+}
+########################### Outputs ##################################
+
+record(bo, "$(SYS):TRL-SNC-CLR") {
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-TRL-34a") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-TRL-34b") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-TRL-35") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(stringout, "$(SYS):TRL-CLR-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+
+record(stringout, "$(SYS):TRL-INTLCK-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+################ INPUTS ###############################
+########  INIT THIS RECORD TO FALSE ######
+record(bo, "$(SYS):WATCHMAN-TRL-34a-ACT") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "0")
+}
+
+record(bo, "$(SYS):WATCHMAN-TRL-34b-ACT") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "0")
+}
+
+record(bo, "$(SYS):WATCHMAN-TRL-35-ACT") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "0")
+}
+
+record(bi, "$(SYS):WS-BUT-TRL-34a") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):WS-BUT-TRL-34b") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):WS-BUT-TRL-35") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-I-TRL-A004A") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-II-TRL-A004A") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+### THIS GATE IS NAMED AFTER VAULT VLI
+record(bi, "$(SYS):SW-I-VLI-G4") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-II-VLI-G4") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+## THIS RECORDS MUST BE SET FROM THE SEQ ##
+record(bi, "$(SYS):TRL-INIT") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):WS-BUT-TRL-34b") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}

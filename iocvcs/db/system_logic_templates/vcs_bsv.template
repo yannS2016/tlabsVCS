@@ -1,1 +1,267 @@
-/home/vcs/VCS/snc_devs/databases/vcs_bsv.template
+############ SELECT THE NEXT PROCESSING BRANCH ##################
+record(calc, "$(SYS):BSV-SEL-STAGE") {
+  field(DESC, "Select processing branch")
+  field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
+  field(CALC, "A?!B?C?$(S0):$(S1):$(PNK):$(NI)")
+  field(INPA, "$(SYS):BSV-INIT NPP")
+##IF BUTTON 42 IS STILL PRESSED PNK IS ACTIVE##
+  field(INPB, "$(SYS):BSV-PNK") 
+  field(INPC, "$(SYS):BSV-CLR NPP")
+  field(FLNK, "$(SYS):BSV-PROC-STAGE")
+}
+## THIS RECORDS PROPAGATE PROCESSING ##
+record(fanout, "$(SYS):BSV-PROC-STAGE") {
+  field(SCAN, "Passive")
+  field(SELM, "Specified")
+  field(SELL, "$(SYS):BSV-SEL-STAGE")
+  field(LNK1, "$(SYS):BSV-VC PP")
+  field(LNK2, "$(SYS):BSV-VNC PP")
+  field(LNK3, "$(SYS):BSV-PNK PP")
+}
+##################################################################################
+# monitor status of inputs which may cause clearance faillure
+# SIGNAL TO SYS: BSV-VC?BSV-CLR && (HARDWARE STATUS RECORDS):FALSE
+record(calcout, "$(SYS):BSV-VC") { 
+  field(DESC, "BSV Vault clear stage")
+  field(SCAN, "Passive")
+  field(FLNK, "$(SYS):BSV-FAIL-COND")
+  field(CALC, "!A?!B?C?$(BSVPNK):$(VCOK):$(DA15ON):$(RA15ON)")
+  field(INPA, "$(SYS):SW-RF-A15.VAL")
+  field(INPB, "$(SYS):BSV-DA15-CLSD.VAL PP") # FOR TESTING 
+  field(INPC, "$(SYS):BSV-PNK.VAL PP")
+  field(OUT,  "$(SYS):RST-BSV.PROC PP")  
+  field(OOPT, "When Non-zero")
+  field(PINI, "YES")
+  field(VAL, "1") 
+}
+####################### RESET VAULT #################
+record(seq, "$(SYS):RST-BSV") { # HANDLE BY SEQ
+  field(SCAN, "Passive")
+  field(DOL1, "0")
+  field(DOL2, "0")
+  field(DOL3, "0")
+  field(DOL4, "0")
+  field(DOL5, "0")
+  field(DOL6, "0")
+  field(DOL7, "0")
+  field(LNK1, "$(SYS):CS13-BSV.VAL PP")
+  field(LNK2, "$(SYS):CL13-BSV.VAL PP")
+  field(LNK3, "$(SYS):BSV-CLR.VAL PP")
+  field(LNK4, "$(SYS):LED-WS-BSV-36.VAL PP")
+  field(LNK5, "$(SYS):LED-WS-BSV-37.VAL PP")
+  field(LNK6, "$(SYS):BSV-COUNTER.VAL PP")
+  field(LNK7, "$(SYS):WATCHMAN-BSV-36-ACT.VAL")
+  field(SELM, "All")
+}
+#CLEARANCE UNDERWAY FAIL CONDITIONS
+record(calcout, "$(SYS):BSV-FAIL-COND") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?$(VCOK):$(TOUT):$(RA15ON)")
+  field(INPA, "$(SYS):SW-RF-A15 NPP") 
+  field(INPB, "$(SYS):BSV-TIMEOUT NPP") 
+  field(OUT,  "$(SYS):RST-BSV PP")  
+  field(OOPT, "Transition To Non-zero") # STOP THIS RECORD TO KEEP RESETTING SHARED OUTPUT AFTER INIT 
+}
+#######################################################################################
+record(calc, "$(SYS):BSV-VNC") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(VCOK):A")
+  field(INPA, "$(SYS):BSV-W36-STS PP")  
+}
+########################################################################
+# formula to monitor status of inputs and set output in stage 1
+record(calcout, "$(SYS):BSV-W36-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?$(VCOK):$(B36ON):!C?$(B36NP):D:$(FAIL)")
+  field(INPA, "$(SYS):BSV-FAIL-COND PP")
+  field(INPB, "$(SYS):WS-BUT-BSV-36.VAL")
+  field(INPC, "$(SYS):WATCHMAN-BSV-36-ACT NPP")
+  field(INPD, "$(SYS):BSV-W37-STS PP")
+  field(OUT,  "$(SYS):BSVW36-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
+}
+####################### STAGE 1 OUTPUTS STATUS  #################
+record(seq, "$(SYS):BSVW36-WRT-OUTS") { # HANDLE BY SEQ
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DOL4, "0")
+  field(DOL5, "1")
+  field(DOL6, "0")
+  field(LNK1, "$(SYS):CS13-BSV.VAL PP")
+  field(LNK2, "$(SYS):CL13-BSV.VAL PP")
+  field(LNK3, "$(SYS):LED-WS-BSV-36.VAL PP")
+  field(LNK4, "$(SYS):BSV-COUNTER.VAL PP")
+  field(LNK5, "$(SYS):WATCHMAN-BSV-36-ACT.VAL PP")
+  field(LNK6, "$(SYS):BSV-VC.VAL NPP") # RESET ANY PREVIOUS FAIL CONDITIONS
+  field(SCAN, "Passive")
+  field(SELM, "All")
+}
+####################################################################################
+record(calcout, "$(SYS):BSV-W37-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B37OFF):$(DA15S2OFF):$(DA15S1OFF):$(FAIL)")
+  field(INPA, "$(SYS):BSV-FAIL-COND PP")
+  field(INPB, "$(SYS):SW-I-BSV-A15.VAL NPP")
+  field(INPC, "$(SYS):SW-II-BSV-A15.VAL NPP")
+  field(INPD, "$(SYS):BSV-WATCH-36-RLSD.VAL PP")
+  field(INPE, "$(SYS):WS-BUT-BSV-37 NPP")
+  field(OUT,  "$(SYS):BSVW37-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
+}
+####################### STAGE 2 OUTPUTS STATUS  #################
+# THIS RECORDS IS PROCESSED ONLY WHEN BSV-VNCS2 RETRUN 0
+# THAT IS BSV INTERLOCKS ARE CORRECT IN STAGE 2
+record(seq, "$(SYS):BSVW37-WRT-OUTS") {
+  field(SELM, "All")
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DLY2, "0.02")
+  field(LNK1, "$(SYS):RST-BSV.PROC PP")
+  field(LNK2, "$(SYS):BSV-CLR.VAL PP")
+  field(LNK3, "$(SYS):LED-WS-BSV-37.VAL PP")
+  field(SCAN, "Passive")
+}
+#################### RECOVER FROM PANIQUE ################
+record(calc, "$(SYS):BSV-PNK") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-BSV-36.VAL")
+  field(VAL, "0")
+}
+#################### WATCHMAN 36 RELEASE ##############################
+record(calc, "$(SYS):BSV-WATCH-36-RLSD") {
+  field(CALC, "A&&B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-BSV-36.VAL")
+  field(INPB, "$(SYS):WATCHMAN-BSV-36-ACT.VAL")
+}
+#################### DOOR A15 CLOSED ##################################
+record(calc, "$(SYS):BSV-DA15-CLSD") {
+  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(INPA, "$(SYS):SW-I-BSV-A15.VAL")
+  field(INPB, "$(SYS):SW-II-BSV-A15.VAL")
+}
+########################## TIMER PROCEDURE #############################
+record(calc, "$(SYS):BSV-COUNTER") {
+  field(SCAN, "Passive")
+  field(CALC, "B?A+1:0")
+  field(INPA, "$(SYS):BSV-COUNTER.VAL")
+  field(INPB, "$(SYS):WATCHMAN-BSV-36-ACT.VAL")
+}
+record(calc, "$(SYS):BSV-TIMEOUT") {
+  field(SCAN, "1 second")
+  field(CALC, "A>=$(BSVTOUT)?$(ON):$(OFF)")
+  field(INPA, "$(SYS):BSV-COUNTER.VAL PP")
+}
+########################### Outputs ##################################
+
+record(bo, "$(SYS):CS13-BSV") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):CL13-BSV") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):BSV-CLR") {
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-BSV-36") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-BSV-37") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(stringout, "$(SYS):BSV-CLR-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+
+record(stringout, "$(SYS):BSV-INTLCK-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+################ INPUTS ###############################
+########  INIT THIS RECORD TO FALSE ######
+record(bo, "$(SYS):WATCHMAN-BSV-36-ACT") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "0")
+}
+record(bi, "$(SYS):WS-BUT-BSV-36") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-RF-A15") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-I-BSV-A15") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-II-BSV-A15") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+## THIS RECORDS MUST BE SET FROM THE SEQ ##
+record(bi, "$(SYS):BSV-INIT") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):WS-BUT-BSV-37") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}

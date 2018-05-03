@@ -1,1 +1,268 @@
-/home/vcs/VCS/snc_devs/databases/vcs_ssc_cable.template
+############ SELECT THE NEXT PROCESSING BRANCH ##################
+record(calc, "$(SYS):SSCCAB-SEL-STAGE") {
+  field(DESC, "Select processing branch")
+  field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
+  field(CALC, "A?!B?C?$(S0):$(S1):$(PNK):$(NI)")
+  field(INPA, "$(SYS):SSCCAB-INIT NPP")
+##IF BUTTON 42 IS STILL PRESSED PNK IS ACTIVE##
+  field(INPB, "$(SYS):SSCCAB-PNK") 
+  field(INPC, "$(SYS):SSCCAB-CLR NPP")
+  field(FLNK, "$(SYS):SSCCAB-PROC-STAGE")
+}
+## THIS RECORDS PROPAGATE PROCESSING ##
+record(fanout, "$(SYS):SSCCAB-PROC-STAGE") {
+  field(SCAN, "Passive")
+  field(SELM, "Specified")
+  field(SELL, "$(SYS):SSCCAB-SEL-STAGE")
+  field(LNK1, "$(SYS):SSCCAB-VC PP")
+  field(LNK2, "$(SYS):SSCCAB-VNC PP")
+  field(LNK3, "$(SYS):SSCCAB-PNK PP")
+}
+##################################################################################
+# monitor status of inputs which may cause clearance faillure
+# SIGNAL TO SYS: SSCCAB-VC?SSCCAB-SNC-CLR && (HARDWARE STATUS RECORDS):FALSE
+record(calcout, "$(SYS):SSCCAB-VC") { 
+  field(DESC, "SSCCAB Vault clear stage")
+  field(SCAN, "Passive")
+  field(FLNK, "$(SYS):SSCCAB-FAIL-COND")
+  field(CALC, "A?!B?C?$(CABPNK):$(VCOK):$(G5ON):$(DA001AON)")
+# IN LIVE APP USE A FLNK FROM  SW-I-SSC-A001A OR SW-I-SSC-A001A (SCAN=Intr) TO PROCESS THIS RECORD
+# AND ACCES IT HERE WITH NPP OR ACCES IT WITH PP BUT USE NPP ON ITS INPUTS
+  field(INPA, "$(SYS):SSC-A001A-CLSD.VAL PP")  
+  field(INPB, "$(SYS):SSC-G5-CLSD.VAL PP")
+  field(INPC, "$(SYS):SSCCAB-PNK.VAL PP")
+  field(OUT,  "$(SYS):RST-SSCCAB.PROC PP")  
+  field(OOPT, "When Non-zero")
+  field(PINI, "YES")
+  field(VAL, "1") 
+}
+####################### RESET VAULT #################
+record(seq, "$(SYS):RST-SSCCAB") { # HANDLE BY SEQ
+  field(SCAN, "Passive")
+  field(DOL1, "0")
+  field(DOL2, "0")
+  field(DOL3, "0")
+  field(DOL4, "0")
+  field(DOL5, "0")
+  field(LNK1, "$(SYS):SSCCAB-CLR.VAL PP")
+  field(LNK2, "$(SYS):LED-WS-SSC-16.VAL PP")
+  field(LNK3, "$(SYS):LED-WS-SSC-17.VAL PP")
+  field(LNK4, "$(SYS):SSCCAB-COUNTER.VAL PP")
+  field(LNK5, "$(SYS):WATCHMAN-SSC-16-ACT.VAL")
+  field(SELM, "All")
+}
+#######################################################################################################
+#CLEARANCE UNDERWAY FAIL CONDITIONS
+record(calcout, "$(SYS):SSCCAB-FAIL-COND") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(FLNK, "$(SYS):SSC-A001A-CLSD PP")
+  field(CALC, "!A?!B?!C?$(VCOK):$(TOUT):$(DA001AS2ON):$(DA001AS1ON)") 
+  field(INPA, "$(SYS):SW-I-SSC-A001A.VAL NPP")
+  field(INPB, "$(SYS):SW-II-SSC-A001A.VAL NPP")
+  field(INPC, "$(SYS):SSCCAB-TIMEOUT NPP")
+  field(OUT,  "$(SYS):RST-SSCCAB.PROC PP")  
+  field(OOPT, "Transition To Non-zero") # STOP THIS RECORD TO KEEP RESETTING SHARED OUTPUT AFTER INIT 
+}
+#######################################################################################
+record(calc, "$(SYS):SSCCAB-VNC") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(VCOK):A")
+  field(INPA, "$(SYS):SSC-W16-STS PP")  
+}
+###############################################################
+# ONLY CHNAGE OUTS STATE WHEN B16 IS PRESSED WHILE ROOF
+# A007 AND DOOR A007 ARE CLOSED: THIS ENSURE WE DONT UNECCESSARLY WRITE TO OUTS
+
+record(calcout, "$(SYS):SSC-W16-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?$(VCOK):$(B16ON):!C?$(B16NP):D:$(FAIL)")
+  field(INPA, "$(SYS):SSCCAB-FAIL-COND PP")
+  field(INPB, "$(SYS):WS-BUT-SSC-16.VAL")
+  field(INPC, "$(SYS):WATCHMAN-SSC-16-ACT NPP")
+  field(INPD, "$(SYS):SSC-W17-STS PP")
+  field(OUT,  "$(SYS):SSCW16-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
+}
+####################### STAGE 1 OUTPUTS STATUS  #################
+
+record(seq, "$(SYS):SSCW16-WRT-OUTS") { # HANDLE BY SEQ
+  field(DOL1, "1")
+  field(DOL2, "0")
+  field(DOL3, "1")
+  field(DOL4, "0")
+  field(SCAN, "Passive")
+  field(LNK1, "$(SYS):LED-WS-SSC-16.VAL PP")
+  field(LNK2, "$(SYS):SSCCAB-COUNTER.VAL PP")
+  field(LNK3, "$(SYS):WATCHMAN-SSC-16-ACT.VAL PP")
+  field(LNK4, "$(SYS):SSCCAB-VC.VAL NPP") # RESET ANY PREVIOUS FAIL CONDITIONS
+  field(SELM, "All")
+}
+# monitor status of inputs and set output in stage 2
+####################################################################################################
+## IF WATCHMAN 16 RELEASE CONTINUE CLEARANCE
+## WE TEST THIS IN "SSC-WATCH-16-RLSD" RECORD
+record(calcout, "$(SYS):SSC-W17-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B17OFF):$(G5S2OFF):$(G5S1OFF):$(FAIL)")
+  field(INPA, "$(SYS):SSCCAB-FAIL-COND PP")
+  field(INPB, "$(SYS):SW-I-SSC-G5.VAL")
+  field(INPC, "$(SYS):SW-II-SSC-G5.VAL")
+  field(INPD, "$(SYS):SSC-WATCH-16-RLSD.VAL PP")
+  field(INPE, "$(SYS):WS-BUT-SSC-17 NPP")
+  field(OUT,  "$(SYS):SSCW17-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
+}
+####################### STAGE 2 OUTPUTS STATUS  ################# biancaf@phoenixcontact.co.za
+# THIS RECORDS IS PROCESSED ONLY WHEN SSC-W17-STS RETRUN 0
+record(seq, "$(SYS):SSCW17-WRT-OUTS") {
+  field(SELM, "All")
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DLY2, "0.02")
+  field(LNK1, "$(SYS):RST-SSCCAB.PROC PP")
+  field(LNK2, "$(SYS):SSCCAB-CLR.VAL PP")
+  field(LNK3, "$(SYS):LED-WS-SSC-17.VAL PP")
+  field(SCAN, "Passive")
+}
+#################### RECOVER FROM PANIQUE ################
+record(calc, "$(SYS):SSCCAB-PNK") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-SSC-16.VAL")
+  field(VAL, "0")
+}
+#################### WATCHMAN 16 RELEASE ##############################
+record(calc, "$(SYS):SSC-WATCH-16-RLSD") {
+  field(CALC, "A&&B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-SSC-16.VAL")
+  field(INPB, "$(SYS):WATCHMAN-SSC-16-ACT.VAL")
+}
+#################### DOOR A001A CLOSED ##################################
+record(calc, "$(SYS):SSC-A001A-CLSD") {
+  field(CALC, "!A&&!B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):SW-I-SSC-A001A.VAL")
+  field(INPB, "$(SYS):SW-II-SSC-A001A.VAL")
+}
+#################### GATE G5 CLOSED ##################################
+record(calc, "$(SYS):SSC-G5-CLSD") {
+  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(INPA, "$(SYS):SW-I-SSC-G5.VAL")
+  field(INPB, "$(SYS):SW-II-SSC-G5.VAL")
+}
+########################## TIMER PROCEDURE #############################
+record(calc, "$(SYS):SSCCAB-COUNTER") {
+  field(SCAN, "Passive")
+  field(CALC, "B?A+1:0")
+  field(INPA, "$(SYS):SSCCAB-COUNTER.VAL")
+  field(INPB, "$(SYS):WATCHMAN-SSC-16-ACT.VAL")
+}
+record(calc, "$(SYS):SSCCAB-TIMEOUT") {
+  field(SCAN, "1 second")
+  field(CALC, "A>=$(SSCTOUT)?$(ON):$(OFF)")
+  field(INPA, "$(SYS):SSCCAB-COUNTER.VAL PP")
+}
+########################### Outputs ##################################
+record(bo, "$(SYS):SSCCAB-CLR") {
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-SSC-16") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-SSC-17") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(stringout, "$(SYS):SSCCAB-CLR-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+
+record(stringout, "$(SYS):SSCCAB-INTLCK-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+################ INPUTS ###############################
+########  INIT THIS RECORD TO FALSE ######
+record(bo, "$(SYS):WATCHMAN-SSC-16-ACT") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "0")
+}
+record(bi, "$(SYS):WS-BUT-SSC-16") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+
+record(bi, "$(SYS):SW-I-SSC-A001A") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-II-SSC-A001A") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-I-SSC-G5") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+
+record(bi, "$(SYS):SW-II-SSC-G5") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+## THIS RECORDS MUST BE SET FROM THE SEQ ##
+record(bi, "$(SYS):SSCCAB-INIT") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):WS-BUT-SSC-17") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}

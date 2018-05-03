@@ -1,1 +1,295 @@
-/home/vcs/VCS/snc_devs/databases/vcs_vli.template
+############ SELECT THE NEXT PROCESSING BRANCH ##################
+record(calc, "$(SYS):VLI-SEL-STAGE") {
+  field(DESC, "Select processing branch")
+  field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
+  field(CALC, "A?!B?C?$(S0):$(S1):$(PNK):$(NI)")
+  field(INPA, "$(SYS):VLI-INIT")
+##IF BUTTON 9 or  8  IS STILL PRESSED PNK IS ACTIVE##
+  field(INPB, "$(SYS):VLI-PNK") 
+  field(INPC, "$(SYS):VLI-CLR")
+## THIS FLAG ENSURE WE ONLY RESPOND TO A SINGLE EVENT ON BUT 9 and 8##
+  field(FLNK, "$(SYS):VLI-PROC-STAGE")
+}
+## THIS RECORDS PROPAGATE PROCESSING ##
+record(fanout, "$(SYS):VLI-PROC-STAGE") {
+  field(SCAN, "Passive")
+  field(SELM, "Specified")
+  field(SELL, "$(SYS):VLI-SEL-STAGE")
+  field(LNK1, "$(SYS):VLI-VC")
+  field(LNK2, "$(SYS):VLI-VNC")
+  field(LNK3, "$(SYS):VLI-PNK")
+}
+#######################################################################################
+record(calc, "$(SYS):VLI-VNC") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(VCOK):A")
+  field(INPA, "$(SYS):VLI-W32-STS.VAL PP")  
+}
+
+###################################################################################
+#CLEARANCE UNDERWAY FAIL CONDITIONS
+record(calcout, "$(SYS):VLI-FAIL-COND") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?$(VCOK):$(G4S2ON):$(G4S1ON):$(TOUT)")
+  field(INPA, "$(SYS):VLI-TIMEOUT NPP") 
+  field(INPB, "$(SYS):SW-I-VLI-G4.VAL NPP")
+  field(INPC, "$(SYS):SW-II-VLI-G4.VAL NPP")
+  field(OUT,  "$(SYS):RST-VLI PP")  
+  field(OOPT, "Transition To Non-zero")  
+}
+##################################################################################
+# monitor status of inputs which may cause clearance faillure
+# SIGNAL TO SYS: VLI-VC?VLI-CLR && (HARDWARE STATUS RECORDS):FALSE
+record(calcout, "$(SYS):VLI-VC") { 
+  field(DESC, "VLI Vault clear stage")
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(FLNK, "$(SYS):VLI-FAIL-COND") # THIS RECORD MUST IMMEDIATELY READ A FAIL CONDITION
+  field(CALC, "!A?!B?C?$(VLIPNK):$(VCOK):$(G4ON):$(DA004ON)")
+  field(INPA, "$(SYS):VLI-DA004-CLSD PP") 
+  field(INPB, "$(SYS):VLI-G4-CLSD PP")
+  field(INPC, "$(SYS):VLI-PNK PP")
+  field(OUT,  "$(SYS):RST-VLI.PROC PP")  
+  field(OOPT, "When Non-zero")
+}
+####################### RESET VAULT #################
+record(seq, "$(SYS):RST-VLI") { # HANDLE BY SEQ
+  field(SCAN, "Passive")
+  field(DOL1, "0")
+  field(DOL2, "0")
+  field(DOL3, "0")
+  field(DOL4, "0")
+  field(DOL5, "0")
+  field(DOL6, "0")
+  field(DOL7, "0")
+  field(LNK1, "$(SYS):CS7-VLI.VAL PP")
+  field(LNK2, "$(SYS):CL7-VLI.VAL PP")
+  field(LNK3, "$(SYS):VLI-CLR.VAL PP")
+  field(LNK4, "$(SYS):LED-WS-VLI-32.VAL PP")
+  field(LNK5, "$(SYS):LED-WS-VLI-33.VAL PP")
+  field(LNK6, "$(SYS):VLI-COUNTER.VAL PP")
+  field(LNK7, "$(SYS):WATCHMAN-VLI-32-ACT.VAL")
+  field(SELM, "All")
+}
+########################################################################
+# formula to monitor status of inputs and set output in stage 1
+record(calcout, "$(SYS):VLI-W32-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?$(VCOK):$(B32ON):!B?$(B32NP):C")
+  field(INPA, "$(SYS):WS-BUT-VLI-32.VAL")
+  field(INPB, "$(SYS):WATCHMAN-VLI-32-ACT.VAL")
+  field(INPC, "$(SYS):VLI-W33-STS PP")	  
+  field(OUT,  "$(SYS):VLIW32-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero")
+}
+########################################################################
+record(seq, "$(SYS):VLIW32-WRT-OUTS") { # MAY BE HANDLED BY SEQ
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DOL4, "0")
+  field(DOL5, "1")
+  field(DOL6, "0")
+  field(LNK1, "$(SYS):CS7-VLI.VAL PP")
+  field(LNK2, "$(SYS):CL7-VLI.VAL PP")
+  field(LNK3, "$(SYS):LED-WS-VLI-32.VAL PP")
+  field(LNK4, "$(SYS):VLI-COUNTER.VAL PP")
+  field(LNK5, "$(SYS):WATCHMAN-VLI-32-ACT.VAL PP")
+
+  field(LNK6, "$(SYS):VLI-CLR.VAL PP")
+
+  field(LNK6, "$(SYS):VLI-VC.VAL NPP")
+
+  field(SCAN, "Passive")
+  field(SELM, "All")
+}
+##########################################################################
+record(calcout, "$(SYS):VLI-W33-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B33OFF):$(DA004S2OFF):$(DA004S1OFF):$(FAIL)")		  
+  field(INPA, "$(SYS):VLI-FAIL-COND PP")
+  field(INPB, "$(SYS):SW-I-VLI-A004.VAL")
+  field(INPC, "$(SYS):SW-II-VLI-A004.VAL")
+
+  field(INPD, "$(SYS):VLI-WATCH-34b-RLSD PP")	
+
+  field(INPD, "$(SYS):VLI-WATCH-32-RLSD PP")	
+
+  field(INPE, "$(SYS):WS-BUT-VLI-33")	  
+  field(OUT,  "$(SYS):VLIW33-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
+}
+# THIS RECORDS IS PROCESSED ONLY WHEN VLI-VNCS2 RETRUN 0
+# THAT IS VLI INTERLOCKS ARE CORRECT IN STAGE 2 SUB 1	
+record(seq, "$(SYS):VLIW33-WRT-OUTS") {
+  field(SELM, "All")
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DLY2, "0.02")
+  field(LNK1, "$(SYS):RST-VLI PP")
+  field(LNK2, "$(SYS):LED-WS-VLI-33.VAL PP")
+
+  field(LNK3, "$(SYS):WATCHMAN-VLI-33-ACT.VAL PP")
+
+  field(LNK3, "$(SYS):VLI-CLR.VAL PP")
+
+  field(SCAN, "Passive")
+}
+#################### RECOVER FROM PANIQUE ################
+record(calc, "$(SYS):VLI-PNK") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-VLI-32.VAL")
+  field(VAL, "0")
+}
+#################### WATCHMAN 32 RELEASE ##############################
+record(calc, "$(SYS):VLI-WATCH-32-RLSD") {
+  field(CALC, "A&&B?$(ON):$(OFF)")
+  field(INPA, "$(SYS):WS-BUT-VLI-32.VAL")
+  field(INPB, "$(SYS):WATCHMAN-VLI-32-ACT.VAL")
+}
+#################### DOOR A004 CLOSED ##################################
+record(calc, "$(SYS):VLI-DA004-CLSD") {
+  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(INPA, "$(SYS):SW-I-VLI-A004.VAL")
+  field(INPB, "$(SYS):SW-II-VLI-A004.VAL")
+}
+#################### GATE G4 CLOSED ##################################
+record(calc, "$(SYS):VLI-G4-CLSD") {
+  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(INPA, "$(SYS):SW-I-VLI-G4.VAL")
+  field(INPB, "$(SYS):SW-II-VLI-G4.VAL")
+}
+########################## TIMER PROCEDURE #############################
+record(calc, "$(SYS):VLI-COUNTER") {
+  field(SCAN, "Passive")
+  field(CALC, "B?A+1:0")
+  field(INPA, "$(SYS):VLI-COUNTER.VAL")
+  field(INPB, "$(SYS):WATCHMAN-VLI-32-ACT.VAL")
+}
+record(calc, "$(SYS):VLI-TIMEOUT") {
+  field(SCAN, "1 second")
+  field(CALC, "A>=$(VLITOUT)?$(ON):$(OFF)")
+  field(INPA, "$(SYS):VLI-COUNTER.VAL PP")
+}
+########################### Outputs ##################################
+
+record(bo, "$(SYS):CS7-VLI") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):CL7-VLI") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):VLI-CLR") {
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-VLI-32") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-VLI-33") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(stringout, "$(SYS):VLI-CLR-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+
+record(stringout, "$(SYS):VLI-INTLCK-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+################ INPUTS ###############################
+########  INIT THIS RECORD TO FALSE ######
+record(bo, "$(SYS):WATCHMAN-VLI-32-ACT") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "0")
+}
+record(bi, "$(SYS):WS-BUT-VLI-32") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-I-VLI-A004") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-II-VLI-A004") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-I-VLI-G4") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-II-VLI-G4") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+## THIS RECORDS MUST BE SET FROM THE SEQ ##
+record(bi, "$(SYS):VLI-INIT") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):WS-BUT-VLI-33") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
