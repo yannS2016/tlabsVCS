@@ -12,10 +12,10 @@
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define	B31OFF      95
-#define	B30ON      	92
-#define DA14S1OFF	93 
-#define DA14S2OFF	94
+#define	B31OFF      96
+#define	B30ON      	93
+#define DA14S1OFF	94 
+#define DA14S2OFF	95
 
 
 /* Variable declarations */
@@ -612,7 +612,7 @@ static void initVault(SS_ID seqg_env)
 # line 169 "../hliClearanceSNC.stt"
 	not_cleared(HLI_CLR_STATS);
 # line 170 "../hliClearanceSNC.stt"
-	report_error(HLI_INTLCK_STATS, 54);
+	report_error(HLI_INTLCK_STATS, 0);
 # line 171 "../hliClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 3/*HLI_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 172 "../hliClearanceSNC.stt"
@@ -659,7 +659,7 @@ static void HLI_status(SS_ID seqg_env)
 # line 193 "../hliClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*HLI_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 194 "../hliClearanceSNC.stt"
-	report_error(HLI_INTLCK_STATS, 54);
+	report_error(HLI_INTLCK_STATS, 0);
 # line 195 "../hliClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*HLI_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }

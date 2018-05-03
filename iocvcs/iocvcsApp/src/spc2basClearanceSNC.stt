@@ -1,1 +1,202 @@
-/tlabsVCS/Sources/./spc2basClearanceSNC.stt
+program spc2basClearanceSNC
+
+%{
+/**********************************************************/
+	#include "vcs_var_mes.h" // define this here so C functions/variables are seen
+/**********************************************************/
+	
+#define	VCOK       	0
+#define TOUT		6
+#define FAIL		-1 
+#define B44ON		159
+#define B45OFF		161 
+#define DA007ON		157
+#define G6ON    	156      
+#define G6OFF 		160
+#define SPC2LPNK	158
+}%
+/* Declare seq variables*/
+short SPC2L_INIT; 
+
+short SPC2L_VC;   
+short SPC2_W44_STS;
+short SPC2_W45_STS;
+short SPC2L_FAIL_COND;
+string SPC2L_CLR_STATS; 
+string SPC2L_INTLCK_STATS;
+// CONTROL FLAGS
+short SPC2LUpdate = FALSE;
+short SPC2L_OLD_FAIL_COND;
+
+/* Associate SNL variables with epics output pv's*/
+assign	SPC2L_CLR_STATS		to	"{SYS}:SPC2L-CLR-STATS"; 
+assign	SPC2L_INTLCK_STATS	to	"{SYS}:SPC2L-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	SPC2L_VC 			to 	"{SYS}:SPC2L-VC"; 
+assign 	SPC2L_INIT 			to 	"{SYS}:SPC2L-INIT";
+assign 	SPC2_W44_STS 		to 	"{SYS}:SPC2-W44-STS";   
+assign 	SPC2_W45_STS 		to 	"{SYS}:SPC2-W45-STS";
+assign	SPC2L_FAIL_COND		to	"{SYS}:SPC2L-FAIL-COND";
+
+monitor	SPC2L_VC;
+monitor SPC2_W44_STS;  
+monitor SPC2_W45_STS;
+monitor	SPC2L_FAIL_COND;
+
+ss SPC2L_clearance_status {
+    state init {
+		when (delay(8)) {
+			initVault();
+			printf("\n%sSPC2 BASEMENT VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_44_pressed	
+    }
+///////////////////////////////////////////////////////////////
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("%sSPC2 BASEMENT VAULT IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (SPC2L_VC != VCOK) {
+
+		} state vc_faillures
+	}
+//////////////////////////////////////////////////////////
+	state recover_faillure {
+		
+		when (!SPC2L_FAIL_COND) {
+			if(!SPC2LUpdate) {
+				printf("%sSPC2 LOW RECOVERING FROM FAILLURE - ENTERING W44 STATE%s\n",OK,DEF);
+				SPC2LUpdate = TRUE;
+			}
+		} state  watchman_44_pressed
+			
+		when (SPC2L_FAIL_COND != SPC2L_OLD_FAIL_COND) {
+		} state  clearance_faillures
+	}
+//////////////////////////////////////////////////////////
+
+	state watchman_44_pressed {
+
+		when (SPC2_W44_STS == FAIL) {
+			SPC2L_OLD_FAIL_COND = SPC2L_FAIL_COND;
+		} state  clearance_faillures
+			
+		when (SPC2_W44_STS == B44ON) {
+			SPC2L_clear_underway();
+			SPC2L_update_report(B44ON);
+		} state watchman_44_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_44_released {
+		
+		when (SPC2_W44_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+		when (SPC2_W44_STS != B44ON) {
+			SPC2L_update_report(G6OFF);
+		} state gate_G6_closed
+	}
+//////////////////////////////////////////////////////////
+	state gate_G6_closed {
+
+		when (SPC2_W44_STS == FAIL) {
+
+		} state   clearance_faillures
+		
+		
+		when (SPC2_W45_STS != G6OFF) {
+			SPC2L_update_report(B45OFF);
+		} state watchman_45_pressed
+	}
+
+///////////////////////////////////////////////////////////
+	state watchman_45_pressed {
+		
+		when (SPC2_W44_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+			
+		when (!SPC2_W45_STS) {
+
+			SPC2L_status();
+		} state vault_cleared
+	}
+///////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("SPC2 LOW CLEARANCE FAILURE CONDITION: ");
+			SPC2LUpdate = FALSE;
+		}
+		
+		when () {			
+			SPC2L_update_failed(SPC2L_FAIL_COND);
+		} state recover_faillure
+		
+		exit {
+		    SPC2L_OLD_FAIL_COND = SPC2L_FAIL_COND;	
+		}			
+	}
+////////////////////////////////////////////////////////////////////////////
+	state vc_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("SPC2 LOW CLEAR FAILURE CONDITION: ");
+			SPC2LUpdate = FALSE;
+		}
+
+		
+		when () {			
+			SPC2L_update_failed(SPC2L_VC);
+		} state recover_faillure
+		
+		exit {
+		    SPC2L_OLD_FAIL_COND = SPC2L_FAIL_COND;	
+		}
+	}
+}
+
+void initVault(){
+	SPC2L_INIT = TRUE;
+	SPC2L_OLD_FAIL_COND = SPC2L_FAIL_COND;
+	not_cleared(SPC2L_CLR_STATS);
+	report_error(SPC2L_INTLCK_STATS, 0);
+	pvPut(SPC2L_INIT, SYNC);
+	pvPut(SPC2L_CLR_STATS, SYNC);
+	pvPut(SPC2L_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SPC2L_update_failed(short report)
+{
+	clear_failed(SPC2L_CLR_STATS);
+	pvPut(SPC2L_CLR_STATS, SYNC);
+	report_error(SPC2L_INTLCK_STATS, report);
+	pvPut(SPC2L_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,SPC2L_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void SPC2L_update_report(short intlck) {
+	report_error(SPC2L_INTLCK_STATS, intlck);
+	pvPut(SPC2L_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SPC2L_status()
+{
+	cleared(SPC2L_CLR_STATS);
+	pvPut(SPC2L_CLR_STATS, SYNC); 		
+	report_error(SPC2L_INTLCK_STATS, 0);
+	pvPut(SPC2L_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void SPC2L_clear_underway()
+{  
+	clear_underway(SPC2L_CLR_STATS);
+	pvPut(SPC2L_CLR_STATS, SYNC); 		
+}

@@ -12,10 +12,10 @@
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define	B25OFF      119
-#define	B24ON      	118
-#define DA9S1OFF	121 
-#define DA9S2OFF	120
+#define	B25OFF      120
+#define	B24ON      	119
+#define DA9S1OFF	122 
+#define DA9S2OFF	121
 
 
 /* Variable declarations */
@@ -614,7 +614,7 @@ static void initVault(SS_ID seqg_env)
 # line 169 "../speClearanceSNC.stt"
 	not_cleared(SPE_CLR_STATS);
 # line 170 "../speClearanceSNC.stt"
-	report_error(SPE_INTLCK_STATS, 54);
+	report_error(SPE_INTLCK_STATS, 0);
 # line 171 "../speClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 3/*SPE_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 172 "../speClearanceSNC.stt"
@@ -631,7 +631,7 @@ static void resetStatus(SS_ID seqg_env)
 # line 178 "../speClearanceSNC.stt"
 	not_cleared(SPE_CLR_STATS);
 # line 179 "../speClearanceSNC.stt"
-	report_error(SPE_INTLCK_STATS, 54);
+	report_error(SPE_INTLCK_STATS, 0);
 # line 180 "../speClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*SPE_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 181 "../speClearanceSNC.stt"
@@ -676,7 +676,7 @@ static void SPE_status(SS_ID seqg_env)
 # line 201 "../speClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*SPE_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 202 "../speClearanceSNC.stt"
-	report_error(SPE_INTLCK_STATS, 54);
+	report_error(SPE_INTLCK_STATS, 0);
 # line 203 "../speClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*SPE_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }

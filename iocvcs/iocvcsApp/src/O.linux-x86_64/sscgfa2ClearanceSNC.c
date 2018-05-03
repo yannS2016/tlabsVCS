@@ -12,13 +12,13 @@
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define B13ON 		49	      
-#define B14OFF		50          
-#define B14ON		52 		
-#define B15OFF		55 
-#define DA1ON 		40	        
-#define DA1S1OFF	53	             
-#define DA1S2OFF	53	
+#define B13ON 		50	      
+#define B14OFF		51          
+#define B14ON		53 		
+#define B15OFF		56 
+#define DA1ON 		41	        
+#define DA1S1OFF	54	             
+#define DA1S2OFF	54	
 
 
 
@@ -723,7 +723,7 @@ static void initVault(SS_ID seqg_env)
 # line 201 "../sscgfa2ClearanceSNC.stt"
 	not_cleared(SSCA2_CLR_STATS);
 # line 202 "../sscgfa2ClearanceSNC.stt"
-	report_error(SSCA2_INTLCK_STATS, 54);
+	report_error(SSCA2_INTLCK_STATS, 0);
 # line 203 "../sscgfa2ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 3/*SSCA2_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 204 "../sscgfa2ClearanceSNC.stt"
@@ -770,7 +770,7 @@ static void SSCA2_status(SS_ID seqg_env)
 # line 225 "../sscgfa2ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*SSCA2_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 226 "../sscgfa2ClearanceSNC.stt"
-	report_error(SSCA2_INTLCK_STATS, 54);
+	report_error(SSCA2_INTLCK_STATS, 0);
 # line 227 "../sscgfa2ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*SSCA2_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }

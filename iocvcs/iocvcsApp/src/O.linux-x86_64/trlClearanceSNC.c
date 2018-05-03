@@ -12,14 +12,14 @@
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define TRLPNK      19
-#define	G4ON		82
-#define B34aON		85	  	       		  			
-#define B34bOFF		87		
-#define B34bON		86  	
-#define B35OFF		90			
-#define DA004AS1OFF	88		     	
-#define DA004AS2OFF	89 
+#define TRLPNK      20
+#define	G4ON		83
+#define B34aON		86	  	       		  			
+#define B34bOFF		88		
+#define B34bON		87  	
+#define B35OFF		91			
+#define DA004AS1OFF	89		     	
+#define DA004AS2OFF	90 
 
 
 /* Variable declarations */
@@ -46,15 +46,15 @@ static	short TRL_OLD_FAIL_COND;
 
 
 /* Function declarations */
-# line 195 "../trlClearanceSNC.stt"
+# line 196 "../trlClearanceSNC.stt"
 static void initVault(SS_ID seqg_env);
-# line 205 "../trlClearanceSNC.stt"
+# line 206 "../trlClearanceSNC.stt"
 static void TRL_update_failed(SS_ID seqg_env, short report);
-# line 214 "../trlClearanceSNC.stt"
+# line 215 "../trlClearanceSNC.stt"
 static void TRL_update_report(SS_ID seqg_env, short intlck);
-# line 219 "../trlClearanceSNC.stt"
+# line 220 "../trlClearanceSNC.stt"
 static void TRL_status(SS_ID seqg_env);
-# line 227 "../trlClearanceSNC.stt"
+# line 228 "../trlClearanceSNC.stt"
 static void TRL_clear_underway(SS_ID seqg_env);
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
@@ -161,8 +161,6 @@ static void seqg_action_TRL_clearance_status_0_recover_faillure(SS_ID seqg_env, 
 # line 70 "../trlClearanceSNC.stt"
 			if (!trlUpdate)
 			{
-# line 71 "../trlClearanceSNC.stt"
-				printf("%sRECOVERING FROM FAILLURE - ENTERING W34a STATE: %d%s\n", OK, TRL_W34a_STS, DEF);
 # line 72 "../trlClearanceSNC.stt"
 				trlUpdate = TRUE;
 			}
@@ -294,6 +292,8 @@ static void seqg_action_TRL_clearance_status_0_watchman_34b_pressed(SS_ID seqg_e
 		return;
 	case 1:
 		{
+# line 112 "../trlClearanceSNC.stt"
+			TRL_update_report(seqg_env, B34bON);
 		}
 		return;
 	}
@@ -304,14 +304,14 @@ static void seqg_action_TRL_clearance_status_0_watchman_34b_pressed(SS_ID seqg_e
 /* Event function for state "watchman_34b_released" in state set "TRL_clearance_status" */
 static seqBool seqg_event_TRL_clearance_status_0_watchman_34b_released(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 117 "../trlClearanceSNC.stt"
+# line 118 "../trlClearanceSNC.stt"
 	if (TRL_W34b_STS == FAIL)
 	{
 		*seqg_pnst = 9;
 		*seqg_ptrn = 0;
 		return TRUE;
 	}
-# line 121 "../trlClearanceSNC.stt"
+# line 122 "../trlClearanceSNC.stt"
 	if (TRL_W34b_STS != B34bON)
 	{
 		*seqg_pnst = 7;
@@ -342,21 +342,21 @@ static void seqg_action_TRL_clearance_status_0_watchman_34b_released(SS_ID seqg_
 /* Event function for state "door_a004a_closed" in state set "TRL_clearance_status" */
 static seqBool seqg_event_TRL_clearance_status_0_door_a004a_closed(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 127 "../trlClearanceSNC.stt"
+# line 128 "../trlClearanceSNC.stt"
 	if (TRL_FAIL_COND != VCOK)
 	{
 		*seqg_pnst = 9;
 		*seqg_ptrn = 0;
 		return TRUE;
 	}
-# line 131 "../trlClearanceSNC.stt"
+# line 132 "../trlClearanceSNC.stt"
 	if (TRL_W35_STS == DA004AS1OFF)
 	{
 		*seqg_pnst = 7;
 		*seqg_ptrn = 1;
 		return TRUE;
 	}
-# line 135 "../trlClearanceSNC.stt"
+# line 136 "../trlClearanceSNC.stt"
 	if (TRL_W35_STS == DA004AS2OFF)
 	{
 		*seqg_pnst = 7;
@@ -383,19 +383,19 @@ static void seqg_action_TRL_clearance_status_0_door_a004a_closed(SS_ID seqg_env,
 		return;
 	case 1:
 		{
-# line 132 "../trlClearanceSNC.stt"
+# line 133 "../trlClearanceSNC.stt"
 			TRL_update_report(seqg_env, DA004AS1OFF);
 		}
 		return;
 	case 2:
 		{
-# line 136 "../trlClearanceSNC.stt"
+# line 137 "../trlClearanceSNC.stt"
 			TRL_update_report(seqg_env, DA004AS2OFF);
 		}
 		return;
 	case 3:
 		{
-# line 140 "../trlClearanceSNC.stt"
+# line 141 "../trlClearanceSNC.stt"
 			TRL_update_report(seqg_env, B35OFF);
 		}
 		return;
@@ -407,14 +407,14 @@ static void seqg_action_TRL_clearance_status_0_door_a004a_closed(SS_ID seqg_env,
 /* Event function for state "watchman_35_pressed" in state set "TRL_clearance_status" */
 static seqBool seqg_event_TRL_clearance_status_0_watchman_35_pressed(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 147 "../trlClearanceSNC.stt"
+# line 148 "../trlClearanceSNC.stt"
 	if (TRL_FAIL_COND != VCOK)
 	{
 		*seqg_pnst = 9;
 		*seqg_ptrn = 0;
 		return TRUE;
 	}
-# line 152 "../trlClearanceSNC.stt"
+# line 153 "../trlClearanceSNC.stt"
 	if (!TRL_W35_STS)
 	{
 		*seqg_pnst = 1;
@@ -435,7 +435,7 @@ static void seqg_action_TRL_clearance_status_0_watchman_35_pressed(SS_ID seqg_en
 		return;
 	case 1:
 		{
-# line 154 "../trlClearanceSNC.stt"
+# line 155 "../trlClearanceSNC.stt"
 			TRL_status(seqg_env);
 		}
 		return;
@@ -447,16 +447,16 @@ static void seqg_action_TRL_clearance_status_0_watchman_35_pressed(SS_ID seqg_en
 /* Entry function for state "clearance_faillures" in state set "TRL_clearance_status" */
 static void seqg_entry_TRL_clearance_status_0_clearance_faillures(SS_ID seqg_env)
 {
-# line 163 "../trlClearanceSNC.stt"
-	printf("TRL CLEARANCE FAILURE CONDITION: ");
 # line 164 "../trlClearanceSNC.stt"
+	printf("TRL CLEARANCE FAILURE CONDITION: ");
+# line 165 "../trlClearanceSNC.stt"
 	trlUpdate = FALSE;
 }
 
 /* Exit function for state "clearance_faillures" in state set "TRL_clearance_status" */
 static void seqg_exit_TRL_clearance_status_0_clearance_faillures(SS_ID seqg_env)
 {
-# line 172 "../trlClearanceSNC.stt"
+# line 173 "../trlClearanceSNC.stt"
 	TRL_OLD_FAIL_COND = TRL_FAIL_COND;
 }
 
@@ -479,7 +479,7 @@ static void seqg_action_TRL_clearance_status_0_clearance_faillures(SS_ID seqg_en
 	{
 	case 0:
 		{
-# line 168 "../trlClearanceSNC.stt"
+# line 169 "../trlClearanceSNC.stt"
 			TRL_update_failed(seqg_env, TRL_FAIL_COND);
 		}
 		return;
@@ -491,16 +491,16 @@ static void seqg_action_TRL_clearance_status_0_clearance_faillures(SS_ID seqg_en
 /* Entry function for state "vc_faillures" in state set "TRL_clearance_status" */
 static void seqg_entry_TRL_clearance_status_0_vc_faillures(SS_ID seqg_env)
 {
-# line 181 "../trlClearanceSNC.stt"
-	printf("TRL CLEAR FAILURE CONDITION: ");
 # line 182 "../trlClearanceSNC.stt"
+	printf("TRL CLEAR FAILURE CONDITION: ");
+# line 183 "../trlClearanceSNC.stt"
 	trlUpdate = FALSE;
 }
 
 /* Exit function for state "vc_faillures" in state set "TRL_clearance_status" */
 static void seqg_exit_TRL_clearance_status_0_vc_faillures(SS_ID seqg_env)
 {
-# line 190 "../trlClearanceSNC.stt"
+# line 191 "../trlClearanceSNC.stt"
 	TRL_OLD_FAIL_COND = TRL_FAIL_COND;
 }
 
@@ -523,7 +523,7 @@ static void seqg_action_TRL_clearance_status_0_vc_faillures(SS_ID seqg_env, int 
 	{
 	case 0:
 		{
-# line 186 "../trlClearanceSNC.stt"
+# line 187 "../trlClearanceSNC.stt"
 			TRL_update_failed(seqg_env, TRL_VC);
 		}
 		return;
@@ -713,76 +713,76 @@ seqProgram trlClearanceSNC = {
 };
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 195 "../trlClearanceSNC.stt"
+# line 196 "../trlClearanceSNC.stt"
 static void initVault(SS_ID seqg_env)
 {
-# line 196 "../trlClearanceSNC.stt"
-	TRL_INIT = TRUE;
 # line 197 "../trlClearanceSNC.stt"
-	TRL_OLD_FAIL_COND = TRL_FAIL_COND;
+	TRL_INIT = TRUE;
 # line 198 "../trlClearanceSNC.stt"
-	not_cleared(TRL_CLR_STATS);
+	TRL_OLD_FAIL_COND = TRL_FAIL_COND;
 # line 199 "../trlClearanceSNC.stt"
-	report_error(TRL_INTLCK_STATS, 54);
+	not_cleared(TRL_CLR_STATS);
 # line 200 "../trlClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 3/*TRL_INIT*/, SYNC, DEFAULT_TIMEOUT);
+	report_error(TRL_INTLCK_STATS, 0);
 # line 201 "../trlClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 0/*TRL_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
+	seq_pvPutTmo(seqg_env, 3/*TRL_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 202 "../trlClearanceSNC.stt"
+	seq_pvPutTmo(seqg_env, 0/*TRL_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
+# line 203 "../trlClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*TRL_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 205 "../trlClearanceSNC.stt"
+# line 206 "../trlClearanceSNC.stt"
 static void TRL_update_failed(SS_ID seqg_env, short report)
 {
-# line 207 "../trlClearanceSNC.stt"
-	clear_failed(TRL_CLR_STATS);
 # line 208 "../trlClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 0/*TRL_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
+	clear_failed(TRL_CLR_STATS);
 # line 209 "../trlClearanceSNC.stt"
-	report_error(TRL_INTLCK_STATS, report);
+	seq_pvPutTmo(seqg_env, 0/*TRL_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 210 "../trlClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 1/*TRL_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
+	report_error(TRL_INTLCK_STATS, report);
 # line 211 "../trlClearanceSNC.stt"
+	seq_pvPutTmo(seqg_env, 1/*TRL_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
+# line 212 "../trlClearanceSNC.stt"
 	printf("%s%s%s\n", ERROR, TRL_INTLCK_STATS, DEF);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 214 "../trlClearanceSNC.stt"
+# line 215 "../trlClearanceSNC.stt"
 static void TRL_update_report(SS_ID seqg_env, short intlck)
 {
-# line 215 "../trlClearanceSNC.stt"
-	report_error(TRL_INTLCK_STATS, intlck);
 # line 216 "../trlClearanceSNC.stt"
+	report_error(TRL_INTLCK_STATS, intlck);
+# line 217 "../trlClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*TRL_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 219 "../trlClearanceSNC.stt"
+# line 220 "../trlClearanceSNC.stt"
 static void TRL_status(SS_ID seqg_env)
 {
-# line 221 "../trlClearanceSNC.stt"
-	cleared(TRL_CLR_STATS);
 # line 222 "../trlClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 0/*TRL_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
+	cleared(TRL_CLR_STATS);
 # line 223 "../trlClearanceSNC.stt"
-	report_error(TRL_INTLCK_STATS, 54);
+	seq_pvPutTmo(seqg_env, 0/*TRL_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 224 "../trlClearanceSNC.stt"
+	report_error(TRL_INTLCK_STATS, 0);
+# line 225 "../trlClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*TRL_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 227 "../trlClearanceSNC.stt"
+# line 228 "../trlClearanceSNC.stt"
 static void TRL_clear_underway(SS_ID seqg_env)
 {
-# line 229 "../trlClearanceSNC.stt"
-	clear_underway(TRL_CLR_STATS);
 # line 230 "../trlClearanceSNC.stt"
+	clear_underway(TRL_CLR_STATS);
+# line 231 "../trlClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*TRL_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var

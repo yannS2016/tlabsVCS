@@ -12,10 +12,10 @@
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define	G5AS1OFF	144
-#define	G5AS2OFF	143
-#define	B9bOFF      142
-#define	B9aON       141
+#define	G5AS1OFF	145
+#define	G5AS2OFF	144
+#define	B9bOFF      143
+#define	B9aON       142
 
 
 /* Variable declarations */
@@ -612,7 +612,7 @@ static void initVault(SS_ID seqg_env)
 # line 169 "../a13aClearanceSNC.stt"
 	not_cleared(A13A_CLR_STATS);
 # line 170 "../a13aClearanceSNC.stt"
-	report_error(A13A_INTLCK_STATS, 54);
+	report_error(A13A_INTLCK_STATS, 0);
 # line 171 "../a13aClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 3/*A13A_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 172 "../a13aClearanceSNC.stt"
@@ -659,7 +659,7 @@ static void A13A_status(SS_ID seqg_env)
 # line 193 "../a13aClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*A13A_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 194 "../a13aClearanceSNC.stt"
-	report_error(A13A_INTLCK_STATS, 54);
+	report_error(A13A_INTLCK_STATS, 0);
 # line 195 "../a13aClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*A13A_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }

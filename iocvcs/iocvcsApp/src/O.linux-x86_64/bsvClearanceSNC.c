@@ -12,10 +12,10 @@
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define	B37OFF      131
-#define	B36ON      	130
-#define DA15S1OFF	132 
-#define DA15S2OFF	133
+#define	B37OFF      132
+#define	B36ON      	131
+#define DA15S1OFF	133 
+#define DA15S2OFF	134
 
 
 /* Variable declarations */
@@ -612,7 +612,7 @@ static void initVault(SS_ID seqg_env)
 # line 169 "../bsvClearanceSNC.stt"
 	not_cleared(BSV_CLR_STATS);
 # line 170 "../bsvClearanceSNC.stt"
-	report_error(BSV_INTLCK_STATS, 54);
+	report_error(BSV_INTLCK_STATS, 0);
 # line 171 "../bsvClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 3/*BSV_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 172 "../bsvClearanceSNC.stt"
@@ -659,7 +659,7 @@ static void BSV_status(SS_ID seqg_env)
 # line 194 "../bsvClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*BSV_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 195 "../bsvClearanceSNC.stt"
-	report_error(BSV_INTLCK_STATS, 54);
+	report_error(BSV_INTLCK_STATS, 0);
 # line 196 "../bsvClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*BSV_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }

@@ -12,10 +12,10 @@
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define	G5S1OFF		8
-#define	G5S2OFF		9
-#define	B17OFF      10
-#define	B16ON      	11
+#define	G5S1OFF		9
+#define	G5S2OFF		10
+#define	B17OFF      11
+#define	B16ON      	12
 
 
 /* Variable declarations */
@@ -612,7 +612,7 @@ static void initVault(SS_ID seqg_env)
 # line 170 "../ssccabClearanceSNC.stt"
 	not_cleared(SSCCAB_CLR_STATS);
 # line 171 "../ssccabClearanceSNC.stt"
-	report_error(SSCCAB_INTLCK_STATS, 54);
+	report_error(SSCCAB_INTLCK_STATS, 0);
 # line 172 "../ssccabClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 3/*SSCCAB_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 173 "../ssccabClearanceSNC.stt"
@@ -659,7 +659,7 @@ static void SSCCAB_status(SS_ID seqg_env)
 # line 194 "../ssccabClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*SSCCAB_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 195 "../ssccabClearanceSNC.stt"
-	report_error(SSCCAB_INTLCK_STATS, 54);
+	report_error(SSCCAB_INTLCK_STATS, 0);
 # line 196 "../ssccabClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*SSCCAB_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }

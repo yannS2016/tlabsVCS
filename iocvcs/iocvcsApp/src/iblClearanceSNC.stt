@@ -1,1 +1,241 @@
-/tlabsVCS/Sources/./iblClearanceSNC.stt
+program iblClearanceSNC
+
+%{
+#include "vcs_var_mes.h" // define this here so C functions are seen
+	
+#define	VCOK       	0
+#define FAIL		-1 	
+#define	DA13S1OFF	66	
+#define	DA13S2OFF	67	
+#define B9ON        59
+#define B8OFF       65
+#define B8ON  		64
+#define B7OFF		68  
+}%
+/* Declare seq variables*/
+short IBL_INIT; 
+short IBL_VC;   
+short IBL_W9_STS;
+short IBL_W8_STS;
+short IBL_W7_STS;
+
+short IBL_FAIL_COND;
+short IBL_OLD_FAIL_COND;
+string IBL_CLR_STATS; 
+string IBL_INTLCK_STATS;
+short released = FALSE;
+/* Associate SNL variables with epics output pv's*/
+assign	IBL_CLR_STATS		to	"{SYS}:IBL-CLR-STATS"; 
+assign	IBL_INTLCK_STATS	to	"{SYS}:IBL-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	IBL_VC 				to 	"{SYS}:IBL-VC"; 
+assign 	IBL_INIT 			to 	"{SYS}:IBL-INIT";
+
+assign 	IBL_W9_STS 			to 	"{SYS}:IBL-W9-STS"; 
+assign 	IBL_W8_STS 			to  "{SYS}:IBL-W8-STS";   
+assign 	IBL_W7_STS 			to 	"{SYS}:IBL-W7-STS";
+assign	IBL_FAIL_COND		to	"{SYS}:IBL-FAIL-COND";
+
+monitor	IBL_VC;
+monitor IBL_W9_STS; 
+monitor IBL_W8_STS;   
+monitor IBL_W7_STS;
+monitor	IBL_FAIL_COND;
+
+ss IBL_clearance_status {
+    state init {
+		when (delay(3.5)) {
+			initVault();
+			printf("%sISOTOPE BEAM LINE INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_9_pressed	
+    }
+///////////////////////////////////////////////////////////////
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("%sISOTOPE BEAM LINE IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (IBL_VC != VCOK) {
+
+		} state vc_faillures
+	}
+//////////////////////////////////////////////////////////
+	state recover_faillure {
+
+		when (!IBL_FAIL_COND) {
+			if(!released) {
+				printf("%sRECOVERING FROM FAILLURE - ENTERING W9 STATE%s\n",OK,DEF);
+				released = TRUE;
+			}
+		} state  watchman_9_pressed
+			
+		when (IBL_FAIL_COND != IBL_OLD_FAIL_COND) {
+
+		} state  clearance_faillures
+	}
+//////////////////////////////////////////////////////////
+
+	state watchman_9_pressed {
+
+		when (IBL_W9_STS == FAIL) {
+			IBL_OLD_FAIL_COND = IBL_FAIL_COND;
+		} state  clearance_faillures
+			
+		when (IBL_W9_STS == B9ON) {
+			IBL_clear_underway();
+			IBL_update_report(B9ON);
+		} state watchman_9_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_9_released {
+		
+		when (IBL_W9_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+		when (IBL_W9_STS != B9ON) {
+			IBL_update_report(B8OFF);
+		} state watchman_8_pressed
+	}
+//////////////////////////////////////////////////////////
+	state watchman_8_pressed {
+
+		when (IBL_W9_STS == FAIL) {
+
+		} state   clearance_faillures
+		
+		
+		when (IBL_W8_STS == B8ON) {
+			IBL_update_report(B8ON);
+		} state watchman_8_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_8_released {
+		
+		when (IBL_W9_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+		when (IBL_W8_STS != B8ON) {
+
+		} state door_a13_closed
+		
+	}
+///////////////////////////////////////////////////////////
+	state watchman_7_pressed {
+		
+		when (IBL_W9_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+	
+		/*when (IBL_W7_STS == B7OFF) {
+			
+		} state watchman_7_pressed*/
+			
+		when (!IBL_W7_STS) {
+
+			IBL_status();
+		} state vault_cleared
+	}
+///////////////////////////////////////////////////////////
+	state door_a13_closed {
+		
+		when (IBL_W9_STS == FAIL) {
+
+		} state  clearance_faillures
+		
+		when (IBL_W7_STS == DA13S1OFF) {			
+			IBL_update_report(DA13S1OFF);
+		} state door_a13_closed
+
+		when (IBL_W7_STS == DA13S2OFF) {			
+			IBL_update_report(DA13S2OFF);
+		} state door_a13_closed
+			
+		when () {
+			IBL_update_report(B7OFF);
+		} state watchman_7_pressed
+	}
+//////////////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("IBL CLEARANCE FAILURE CONDITION: ");
+			released = FALSE;
+			IBL_OLD_FAIL_COND = IBL_FAIL_COND;
+		}
+
+		when () {
+		
+			IBL_update_failed(IBL_FAIL_COND);
+		} state recover_faillure
+			
+		exit {
+		    IBL_OLD_FAIL_COND = IBL_FAIL_COND;
+		}		
+	}
+////////////////////////////////////////////////////////////////////////////
+	state vc_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("IBL LOW CLEAR FAILURE CONDITION: ");
+			released = FALSE;
+		}
+		
+
+		when () {
+			
+			IBL_update_failed(IBL_VC);
+		} state recover_faillure
+		
+		exit {
+		    IBL_OLD_FAIL_COND = IBL_FAIL_COND;
+		}
+	}
+}
+//////////////////////////////////////////////////////////////////////
+void initVault(){
+	IBL_INIT = TRUE;
+    IBL_OLD_FAIL_COND = IBL_FAIL_COND;
+	not_cleared(IBL_CLR_STATS);
+	report_error(IBL_INTLCK_STATS, 0);
+	pvPut(IBL_INIT, SYNC);
+	pvPut(IBL_CLR_STATS, SYNC);
+	pvPut(IBL_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void IBL_update_failed(short report)
+{
+	clear_failed(IBL_CLR_STATS);
+	pvPut(IBL_CLR_STATS, SYNC);
+	report_error(IBL_INTLCK_STATS, report);
+	pvPut(IBL_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,IBL_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void IBL_update_report(short intlck) {
+	report_error(IBL_INTLCK_STATS, intlck);
+	pvPut(IBL_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void IBL_status()
+{  
+	cleared(IBL_CLR_STATS);
+	pvPut(IBL_CLR_STATS, SYNC); 		
+	report_error(IBL_INTLCK_STATS, 0);
+	pvPut(IBL_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void IBL_clear_underway()
+{  
+	clear_underway(IBL_CLR_STATS);
+	pvPut(IBL_CLR_STATS, SYNC); 		
+}
+/**********************************************************/
+

@@ -11,17 +11,17 @@
 #include "vcs_var_mes.h" // define this here so C functions are seen
 /*******************************************************************/
 #define	VCOK       	0
-#define TOUT		5
+#define TOUT		6
 #define FAIL		-1
-#define VLIPNK      138
-#define	G4ON		82
-#define	G4S1ON		83
-#define	G4S2ON		84
-#define	B33OFF      100
-#define	B32ON       97
-#define	DA004ON     96
-#define DA004S1OFF	98 
-#define DA004S2OFF	99
+#define VLIPNK      139
+#define	G4ON		83
+#define	G4S1ON		84
+#define	G4S2ON		85
+#define	B33OFF      101
+#define	B32ON       98
+#define	DA004ON     97
+#define DA004S1OFF	99 
+#define DA004S2OFF	100
 
 
 /* Variable declarations */
@@ -163,8 +163,6 @@ static void seqg_action_VLI_clearance_status_0_recover_faillure(SS_ID seqg_env, 
 # line 69 "../vliClearanceSNC.stt"
 			if (!vliUpdate)
 			{
-# line 70 "../vliClearanceSNC.stt"
-				printf("%sRECOVERING FROM FAILLURE - ENTERING W32 STATE: %d%s\n", OK, VLI_W32_STS, DEF);
 # line 71 "../vliClearanceSNC.stt"
 				vliUpdate = TRUE;
 			}
@@ -620,7 +618,7 @@ static void initVault(SS_ID seqg_env)
 # line 175 "../vliClearanceSNC.stt"
 	not_cleared(VLI_CLR_STATS);
 # line 176 "../vliClearanceSNC.stt"
-	report_error(VLI_INTLCK_STATS, 54);
+	report_error(VLI_INTLCK_STATS, 0);
 # line 177 "../vliClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 3/*VLI_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 178 "../vliClearanceSNC.stt"
@@ -637,7 +635,7 @@ static void resetStatus(SS_ID seqg_env)
 # line 184 "../vliClearanceSNC.stt"
 	not_cleared(VLI_CLR_STATS);
 # line 185 "../vliClearanceSNC.stt"
-	report_error(VLI_INTLCK_STATS, 54);
+	report_error(VLI_INTLCK_STATS, 0);
 # line 186 "../vliClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*VLI_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 187 "../vliClearanceSNC.stt"
@@ -682,7 +680,7 @@ static void VLI_status(SS_ID seqg_env)
 # line 207 "../vliClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*VLI_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 208 "../vliClearanceSNC.stt"
-	report_error(VLI_INTLCK_STATS, 54);
+	report_error(VLI_INTLCK_STATS, 0);
 # line 209 "../vliClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*VLI_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }

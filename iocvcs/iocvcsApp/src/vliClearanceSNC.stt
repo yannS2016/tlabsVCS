@@ -1,1 +1,216 @@
-/tlabsVCS/Sources/./vliClearanceSNC.stt
+program vliClearanceSNC
+
+%{
+/*******************************************************************/
+#include "vcs_var_mes.h" // define this here so C functions are seen
+/*******************************************************************/
+#define	VCOK       	0
+#define TOUT		6
+#define FAIL		-1
+#define VLIPNK      139
+#define	G4ON		83
+#define	G4S1ON		84
+#define	G4S2ON		85
+#define	B33OFF      101
+#define	B32ON       98
+#define	DA004ON     97
+#define DA004S1OFF	99 
+#define DA004S2OFF	100
+}%
+/* Declare seq variables*/
+short VLI_INIT; 
+short VLI_VC;   
+short VLI_W32_STS;
+short VLI_W33_STS;
+short VLI_FAIL_COND;
+string VLI_CLR_STATS; 
+string VLI_INTLCK_STATS;
+// CONTROL FLAGS
+short vliUpdate;
+short VLI_OLD_FAIL_COND;
+
+/* Associate SNL variables with epics output pv's*/
+assign	VLI_CLR_STATS		to	"{SYS}:VLI-CLR-STATS"; 
+assign	VLI_INTLCK_STATS	to	"{SYS}:VLI-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	VLI_VC 				to 	"{SYS}:VLI-VC"; 
+assign 	VLI_INIT 			to 	"{SYS}:VLI-INIT";
+assign 	VLI_W32_STS 		to 	"{SYS}:VLI-W32-STS";   
+assign 	VLI_W33_STS 		to 	"{SYS}:VLI-W33-STS";
+assign	VLI_FAIL_COND		to	"{SYS}:VLI-FAIL-COND";
+
+monitor	VLI_VC;
+monitor VLI_W32_STS;  
+monitor VLI_W33_STS;
+monitor	VLI_FAIL_COND;
+
+ss VLI_clearance_status {
+    state init {
+		when (delay(9.5)) {
+			initVault();
+			printf("%sVERTICAL BEAMLINE VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_32_pressed	
+    }
+///////////////////////////////////////////////////////////////
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("%sVERTICAL BEAMLINE VAULT IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (VLI_VC != VCOK) {
+
+		} state vc_faillures
+	}
+//////////////////////////////////////////////////////////
+	state recover_faillure {
+		
+		when (!VLI_FAIL_COND) {
+			if(!vliUpdate) {
+				//printf("%sRECOVERING FROM FAILLURE - ENTERING W32 STATE: %d%s\n",OK,VLI_W32_STS,DEF);
+				vliUpdate = TRUE;
+			}
+		} state  watchman_32_pressed
+			
+		when (VLI_FAIL_COND != VLI_OLD_FAIL_COND) {
+		} state  clearance_faillures
+	}
+//////////////////////////////////////////////////////////
+
+	state watchman_32_pressed {
+
+		when (VLI_FAIL_COND != VCOK) {
+			VLI_OLD_FAIL_COND = VLI_FAIL_COND;
+		} state  clearance_faillures
+			
+		when (VLI_W32_STS == B32ON) {
+			VLI_clear_underway();
+			VLI_update_report(B32ON);
+		} state watchman_32_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_32_released {
+		
+		when (VLI_W32_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+		when (VLI_W32_STS != B32ON) {
+		} state door_a004_closed
+	}
+//////////////////////////////////////////////////////////
+	state door_a004_closed {
+
+		when (VLI_FAIL_COND != VCOK) {
+
+		} state   clearance_faillures
+		
+		when (VLI_W33_STS == DA004S1OFF) {
+			VLI_update_report(DA004S1OFF);
+		} state door_a004_closed
+
+		when (VLI_W33_STS == DA004S2OFF) {
+			VLI_update_report(DA004S2OFF);
+		} state door_a004_closed
+		
+		when () {
+			VLI_update_report(B33OFF);
+		} state watchman_33_pressed
+	}
+
+///////////////////////////////////////////////////////////
+	state watchman_33_pressed {
+		
+		when (VLI_W33_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+			
+		when (!VLI_W33_STS) {
+
+			VLI_status();
+		} state vault_cleared
+	}
+///////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("VLI CLEARANCE FAILURE CONDITION: ");
+			vliUpdate = FALSE;
+		}
+
+		when () {
+			VLI_update_failed(VLI_FAIL_COND);
+		} state recover_faillure
+		
+		exit {
+		    VLI_OLD_FAIL_COND = VLI_FAIL_COND;	
+		}			
+	}
+////////////////////////////////////////////////////////////////////////////
+	state vc_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("VLI CLEAR FAILURE CONDITION: ");
+			vliUpdate = FALSE;
+		}
+		
+		when () {			
+			VLI_update_failed(VLI_VC);
+		} state recover_faillure
+		
+		exit {
+		    VLI_OLD_FAIL_COND = VLI_FAIL_COND;
+		}
+	}
+}
+///////////////////////////////////////////////////////////////////////////////
+void initVault(){
+	VLI_INIT = TRUE;
+	VLI_OLD_FAIL_COND = VLI_FAIL_COND;
+	not_cleared(VLI_CLR_STATS);
+	report_error(VLI_INTLCK_STATS, 0);
+	pvPut(VLI_INIT, SYNC);
+	pvPut(VLI_CLR_STATS, SYNC);
+	pvPut(VLI_INTLCK_STATS, SYNC);
+}
+
+void resetStatus()
+{
+	not_cleared(VLI_CLR_STATS);
+	report_error(VLI_INTLCK_STATS, 0);
+	pvPut(VLI_CLR_STATS, SYNC);
+	pvPut(VLI_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void VLI_update_failed(short report)
+{
+	clear_failed(VLI_CLR_STATS);
+	pvPut(VLI_CLR_STATS, SYNC);
+	report_error(VLI_INTLCK_STATS, report);
+	pvPut(VLI_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,VLI_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void VLI_update_report(short intlck) {
+	report_error(VLI_INTLCK_STATS, intlck);
+	pvPut(VLI_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void VLI_status()
+{
+	cleared(VLI_CLR_STATS);
+	pvPut(VLI_CLR_STATS, SYNC); 		
+	report_error(VLI_INTLCK_STATS, 0);
+	pvPut(VLI_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void VLI_clear_underway()
+{  
+	clear_underway(VLI_CLR_STATS);
+	pvPut(VLI_CLR_STATS, SYNC); 		
+}

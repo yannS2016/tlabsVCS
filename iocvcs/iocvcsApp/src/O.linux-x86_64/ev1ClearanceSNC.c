@@ -12,10 +12,10 @@
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define	B19OFF      105
-#define	B18ON      	102
-#define DA6S1OFF	103 
-#define DA6S2OFF	104
+#define	B19OFF      106
+#define	B18ON      	103
+#define DA6S1OFF	104 
+#define DA6S2OFF	105
 
 
 
@@ -44,15 +44,15 @@ static	short EV1_OLD_FAIL_COND;
 
 
 /* Function declarations */
-# line 177 "../ev1ClearanceSNC.stt"
+# line 170 "../ev1ClearanceSNC.stt"
 static void initVault(SS_ID seqg_env);
-# line 188 "../ev1ClearanceSNC.stt"
+# line 181 "../ev1ClearanceSNC.stt"
 static void EV1_update_failed(SS_ID seqg_env, short report);
-# line 197 "../ev1ClearanceSNC.stt"
+# line 190 "../ev1ClearanceSNC.stt"
 static void EV1_update_report(SS_ID seqg_env, short intlck);
-# line 202 "../ev1ClearanceSNC.stt"
+# line 195 "../ev1ClearanceSNC.stt"
 static void EV1_status(SS_ID seqg_env);
-# line 210 "../ev1ClearanceSNC.stt"
+# line 203 "../ev1ClearanceSNC.stt"
 static void EV1_clear_underway(SS_ID seqg_env);
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
@@ -160,7 +160,7 @@ static void seqg_action_EV1_clearance_status_0_recover_faillure(SS_ID seqg_env, 
 			if (!EV1Update)
 			{
 # line 68 "../ev1ClearanceSNC.stt"
-				printf("%sEV1 RECOVERING FROM FAILLURE - ENTERING WATCHMAN 18 STATE%s\n", OK, DEF);
+				printf("%sRECOVERING FROM FAILLURE - ENTERING W18 STATE%s\n", OK, DEF);
 # line 69 "../ev1ClearanceSNC.stt"
 				EV1Update = TRUE;
 			}
@@ -250,33 +250,31 @@ static void seqg_action_EV1_clearance_status_0_watchman_18_released(SS_ID seqg_e
 		return;
 	case 1:
 		{
-# line 96 "../ev1ClearanceSNC.stt"
-			printf("%sENTERING DOOR A6 STATE%s\n", OK, DEF);
 		}
 		return;
 	}
 }
 
-/****** Code for state "door_a6_closed" in state set "EV1_clearance_status" ******/
+/****** Code for state "door_a7_closed" in state set "EV1_clearance_status" ******/
 
-/* Event function for state "door_a6_closed" in state set "EV1_clearance_status" */
-static seqBool seqg_event_EV1_clearance_status_0_door_a6_closed(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
+/* Event function for state "door_a7_closed" in state set "EV1_clearance_status" */
+static seqBool seqg_event_EV1_clearance_status_0_door_a7_closed(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 102 "../ev1ClearanceSNC.stt"
+# line 101 "../ev1ClearanceSNC.stt"
 	if (EV1_FAIL_COND != VCOK)
 	{
 		*seqg_pnst = 7;
 		*seqg_ptrn = 0;
 		return TRUE;
 	}
-# line 106 "../ev1ClearanceSNC.stt"
+# line 105 "../ev1ClearanceSNC.stt"
 	if (EV1_W19_STS == DA6S1OFF)
 	{
 		*seqg_pnst = 5;
 		*seqg_ptrn = 1;
 		return TRUE;
 	}
-# line 111 "../ev1ClearanceSNC.stt"
+# line 109 "../ev1ClearanceSNC.stt"
 	if (EV1_W19_STS == DA6S2OFF)
 	{
 		*seqg_pnst = 5;
@@ -292,8 +290,8 @@ static seqBool seqg_event_EV1_clearance_status_0_door_a6_closed(SS_ID seqg_env, 
 	return FALSE;
 }
 
-/* Action function for state "door_a6_closed" in state set "EV1_clearance_status" */
-static void seqg_action_EV1_clearance_status_0_door_a6_closed(SS_ID seqg_env, int seqg_trn, int *seqg_pnst)
+/* Action function for state "door_a7_closed" in state set "EV1_clearance_status" */
+static void seqg_action_EV1_clearance_status_0_door_a7_closed(SS_ID seqg_env, int seqg_trn, int *seqg_pnst)
 {
 	switch(seqg_trn)
 	{
@@ -303,19 +301,19 @@ static void seqg_action_EV1_clearance_status_0_door_a6_closed(SS_ID seqg_env, in
 		return;
 	case 1:
 		{
-# line 108 "../ev1ClearanceSNC.stt"
+# line 106 "../ev1ClearanceSNC.stt"
 			EV1_update_report(seqg_env, DA6S1OFF);
 		}
 		return;
 	case 2:
 		{
-# line 113 "../ev1ClearanceSNC.stt"
+# line 110 "../ev1ClearanceSNC.stt"
 			EV1_update_report(seqg_env, DA6S2OFF);
 		}
 		return;
 	case 3:
 		{
-# line 118 "../ev1ClearanceSNC.stt"
+# line 115 "../ev1ClearanceSNC.stt"
 			EV1_update_report(seqg_env, B19OFF);
 		}
 		return;
@@ -327,25 +325,18 @@ static void seqg_action_EV1_clearance_status_0_door_a6_closed(SS_ID seqg_env, in
 /* Event function for state "watchman_19_pressed" in state set "EV1_clearance_status" */
 static seqBool seqg_event_EV1_clearance_status_0_watchman_19_pressed(SS_ID seqg_env, int *seqg_ptrn, int *seqg_pnst)
 {
-# line 125 "../ev1ClearanceSNC.stt"
+# line 122 "../ev1ClearanceSNC.stt"
 	if (EV1_FAIL_COND != VCOK)
 	{
 		*seqg_pnst = 7;
 		*seqg_ptrn = 0;
 		return TRUE;
 	}
-# line 130 "../ev1ClearanceSNC.stt"
+# line 127 "../ev1ClearanceSNC.stt"
 	if (!EV1_W19_STS)
 	{
 		*seqg_pnst = 1;
 		*seqg_ptrn = 1;
-		return TRUE;
-	}
-# line 135 "../ev1ClearanceSNC.stt"
-	if (EV1_W19_STS != B19OFF)
-	{
-		*seqg_pnst = 5;
-		*seqg_ptrn = 2;
 		return TRUE;
 	}
 	return FALSE;
@@ -362,14 +353,8 @@ static void seqg_action_EV1_clearance_status_0_watchman_19_pressed(SS_ID seqg_en
 		return;
 	case 1:
 		{
-# line 131 "../ev1ClearanceSNC.stt"
-			printf("%sENTERING CLEARED STATE%s\n", OK, DEF);
-# line 132 "../ev1ClearanceSNC.stt"
+# line 129 "../ev1ClearanceSNC.stt"
 			EV1_status(seqg_env);
-		}
-		return;
-	case 2:
-		{
 		}
 		return;
 	}
@@ -380,16 +365,16 @@ static void seqg_action_EV1_clearance_status_0_watchman_19_pressed(SS_ID seqg_en
 /* Entry function for state "clearance_faillures" in state set "EV1_clearance_status" */
 static void seqg_entry_EV1_clearance_status_0_clearance_faillures(SS_ID seqg_env)
 {
-# line 145 "../ev1ClearanceSNC.stt"
+# line 138 "../ev1ClearanceSNC.stt"
 	printf("EV1 CLEARANCE FAILURE CONDITION: ");
-# line 146 "../ev1ClearanceSNC.stt"
+# line 139 "../ev1ClearanceSNC.stt"
 	EV1Update = FALSE;
 }
 
 /* Exit function for state "clearance_faillures" in state set "EV1_clearance_status" */
 static void seqg_exit_EV1_clearance_status_0_clearance_faillures(SS_ID seqg_env)
 {
-# line 154 "../ev1ClearanceSNC.stt"
+# line 147 "../ev1ClearanceSNC.stt"
 	EV1_OLD_FAIL_COND = EV1_FAIL_COND;
 }
 
@@ -412,7 +397,7 @@ static void seqg_action_EV1_clearance_status_0_clearance_faillures(SS_ID seqg_en
 	{
 	case 0:
 		{
-# line 150 "../ev1ClearanceSNC.stt"
+# line 143 "../ev1ClearanceSNC.stt"
 			EV1_update_failed(seqg_env, EV1_FAIL_COND);
 		}
 		return;
@@ -424,16 +409,16 @@ static void seqg_action_EV1_clearance_status_0_clearance_faillures(SS_ID seqg_en
 /* Entry function for state "vc_faillures" in state set "EV1_clearance_status" */
 static void seqg_entry_EV1_clearance_status_0_vc_faillures(SS_ID seqg_env)
 {
-# line 163 "../ev1ClearanceSNC.stt"
+# line 156 "../ev1ClearanceSNC.stt"
 	printf("EV1 CLEAR FAILURE CONDITION: ");
-# line 164 "../ev1ClearanceSNC.stt"
+# line 157 "../ev1ClearanceSNC.stt"
 	EV1Update = FALSE;
 }
 
 /* Exit function for state "vc_faillures" in state set "EV1_clearance_status" */
 static void seqg_exit_EV1_clearance_status_0_vc_faillures(SS_ID seqg_env)
 {
-# line 172 "../ev1ClearanceSNC.stt"
+# line 165 "../ev1ClearanceSNC.stt"
 	EV1_OLD_FAIL_COND = EV1_FAIL_COND;
 }
 
@@ -456,7 +441,7 @@ static void seqg_action_EV1_clearance_status_0_vc_faillures(SS_ID seqg_env, int 
 	{
 	case 0:
 		{
-# line 168 "../ev1ClearanceSNC.stt"
+# line 161 "../ev1ClearanceSNC.stt"
 			EV1_update_failed(seqg_env, EV1_VC);
 		}
 		return;
@@ -495,7 +480,7 @@ static const seqMask seqg_mask_EV1_clearance_status_0_watchman_18_pressed[] = {
 static const seqMask seqg_mask_EV1_clearance_status_0_watchman_18_released[] = {
 	0x000000a0,
 };
-static const seqMask seqg_mask_EV1_clearance_status_0_door_a6_closed[] = {
+static const seqMask seqg_mask_EV1_clearance_status_0_door_a7_closed[] = {
 	0x000000c0,
 };
 static const seqMask seqg_mask_EV1_clearance_status_0_watchman_19_pressed[] = {
@@ -556,12 +541,12 @@ static seqState seqg_states_EV1_clearance_status[] = {
 	/* state options */     (0)
 	},
 	{
-	/* state name */        "door_a6_closed",
-	/* action function */   seqg_action_EV1_clearance_status_0_door_a6_closed,
-	/* event function */    seqg_event_EV1_clearance_status_0_door_a6_closed,
+	/* state name */        "door_a7_closed",
+	/* action function */   seqg_action_EV1_clearance_status_0_door_a7_closed,
+	/* event function */    seqg_event_EV1_clearance_status_0_door_a7_closed,
 	/* entry function */    0,
 	/* exit function */     0,
-	/* event mask array */  seqg_mask_EV1_clearance_status_0_door_a6_closed,
+	/* event mask array */  seqg_mask_EV1_clearance_status_0_door_a7_closed,
 	/* state options */     (0)
 	},
 	{
@@ -621,96 +606,96 @@ seqProgram ev1ClearanceSNC = {
 };
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 177 "../ev1ClearanceSNC.stt"
+# line 170 "../ev1ClearanceSNC.stt"
 static void initVault(SS_ID seqg_env)
 {
-# line 178 "../ev1ClearanceSNC.stt"
+# line 171 "../ev1ClearanceSNC.stt"
 	EV1_INIT = TRUE;
-# line 179 "../ev1ClearanceSNC.stt"
+# line 172 "../ev1ClearanceSNC.stt"
 	EV1_OLD_FAIL_COND = EV1_FAIL_COND;
-# line 180 "../ev1ClearanceSNC.stt"
+# line 173 "../ev1ClearanceSNC.stt"
 	not_cleared(EV1_CLR_STATS);
-# line 181 "../ev1ClearanceSNC.stt"
-	report_error(EV1_INTLCK_STATS, 54);
-# line 182 "../ev1ClearanceSNC.stt"
+# line 174 "../ev1ClearanceSNC.stt"
+	report_error(EV1_INTLCK_STATS, 0);
+# line 175 "../ev1ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 3/*EV1_INIT*/, SYNC, DEFAULT_TIMEOUT);
-# line 183 "../ev1ClearanceSNC.stt"
+# line 176 "../ev1ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*EV1_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
-# line 184 "../ev1ClearanceSNC.stt"
+# line 177 "../ev1ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*EV1_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 188 "../ev1ClearanceSNC.stt"
+# line 181 "../ev1ClearanceSNC.stt"
 static void EV1_update_failed(SS_ID seqg_env, short report)
 {
-# line 190 "../ev1ClearanceSNC.stt"
+# line 183 "../ev1ClearanceSNC.stt"
 	clear_failed(EV1_CLR_STATS);
-# line 191 "../ev1ClearanceSNC.stt"
+# line 184 "../ev1ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*EV1_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
-# line 192 "../ev1ClearanceSNC.stt"
+# line 185 "../ev1ClearanceSNC.stt"
 	report_error(EV1_INTLCK_STATS, report);
-# line 193 "../ev1ClearanceSNC.stt"
+# line 186 "../ev1ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*EV1_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
-# line 194 "../ev1ClearanceSNC.stt"
+# line 187 "../ev1ClearanceSNC.stt"
 	printf("%s%s%s\n", ERROR, EV1_INTLCK_STATS, DEF);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 197 "../ev1ClearanceSNC.stt"
+# line 190 "../ev1ClearanceSNC.stt"
 static void EV1_update_report(SS_ID seqg_env, short intlck)
 {
-# line 198 "../ev1ClearanceSNC.stt"
+# line 191 "../ev1ClearanceSNC.stt"
 	report_error(EV1_INTLCK_STATS, intlck);
-# line 199 "../ev1ClearanceSNC.stt"
+# line 192 "../ev1ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*EV1_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 202 "../ev1ClearanceSNC.stt"
+# line 195 "../ev1ClearanceSNC.stt"
 static void EV1_status(SS_ID seqg_env)
 {
-# line 204 "../ev1ClearanceSNC.stt"
+# line 197 "../ev1ClearanceSNC.stt"
 	cleared(EV1_CLR_STATS);
-# line 205 "../ev1ClearanceSNC.stt"
+# line 198 "../ev1ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*EV1_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
-# line 206 "../ev1ClearanceSNC.stt"
-	report_error(EV1_INTLCK_STATS, 54);
-# line 207 "../ev1ClearanceSNC.stt"
+# line 199 "../ev1ClearanceSNC.stt"
+	report_error(EV1_INTLCK_STATS, 0);
+# line 200 "../ev1ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*EV1_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 210 "../ev1ClearanceSNC.stt"
+# line 203 "../ev1ClearanceSNC.stt"
 static void EV1_clear_underway(SS_ID seqg_env)
 {
-# line 212 "../ev1ClearanceSNC.stt"
+# line 205 "../ev1ClearanceSNC.stt"
 	clear_underway(EV1_CLR_STATS);
-# line 213 "../ev1ClearanceSNC.stt"
+# line 206 "../ev1ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*EV1_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var
-# line 216 "../ev1ClearanceSNC.stt"
+# line 209 "../ev1ClearanceSNC.stt"
 
 
 inline void cleared(string vault_status) {   
-    strcpy(vault_status, mes_array[0]); // Area cleared  
+    strcpy(vault_status, mes_array[1]); // Area cleared  
 }
 ////////////////////////////////////////////////
 inline void not_cleared(string vault_status) {  
-   strcpy(vault_status, mes_array[1]); // Area not cleared    
+   strcpy(vault_status, mes_array[2]); // Area not cleared    
 }
 ///////////////////////////////////////////////
 inline void clear_underway(string vault_status) { 
-   strcpy(vault_status, mes_array[2]);  // Area clearance underway    
+   strcpy(vault_status, mes_array[3]);  // Area clearance underway    
 }
 //////////////////////////////////////////////
 inline void clear_failed(string vault_status) { 
-   strcpy(vault_status, mes_array[4]); // Area clearance fail   
+   strcpy(vault_status, mes_array[5]); // Area clearance fail   
 }
 ////////////////////////////////////////////////
 inline void report_error(string vault_interlock, short intlock)

@@ -12,10 +12,10 @@
 /*******************************************************************/
 #define	VCOK       	0
 #define FAIL		-1
-#define SSCPNK      19
-#define B11ON 		146	  
-#define B12OFF		47   	  
-#define G3OFF		46	
+#define SSCPNK      20
+#define B11ON 		147	  
+#define B12OFF		48   	  
+#define G3OFF		47	
 
 
 
@@ -41,15 +41,15 @@ static	short SSCA1_OLD_FAIL_COND;
 
 
 /* Function declarations */
-# line 164 "../sscgfa1ClearanceSNC.stt"
+# line 165 "../sscgfa1ClearanceSNC.stt"
 static void initVault(SS_ID seqg_env);
-# line 174 "../sscgfa1ClearanceSNC.stt"
+# line 175 "../sscgfa1ClearanceSNC.stt"
 static void SSCA1_update_failed(SS_ID seqg_env, short report);
-# line 183 "../sscgfa1ClearanceSNC.stt"
+# line 184 "../sscgfa1ClearanceSNC.stt"
 static void SSCA1_update_report(SS_ID seqg_env, short intlck);
-# line 188 "../sscgfa1ClearanceSNC.stt"
+# line 189 "../sscgfa1ClearanceSNC.stt"
 static void SSCA1_status(SS_ID seqg_env);
-# line 196 "../sscgfa1ClearanceSNC.stt"
+# line 197 "../sscgfa1ClearanceSNC.stt"
 static void SSCA1_clear_underway(SS_ID seqg_env);
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
@@ -358,7 +358,7 @@ static void seqg_entry_SSCA1_clearance_status_0_clearance_faillures(SS_ID seqg_e
 /* Exit function for state "clearance_faillures" in state set "SSCA1_clearance_status" */
 static void seqg_exit_SSCA1_clearance_status_0_clearance_faillures(SS_ID seqg_env)
 {
-# line 141 "../sscgfa1ClearanceSNC.stt"
+# line 142 "../sscgfa1ClearanceSNC.stt"
 	SSCA1_OLD_FAIL_COND = SSCA1_FAIL_COND;
 }
 
@@ -383,6 +383,8 @@ static void seqg_action_SSCA1_clearance_status_0_clearance_faillures(SS_ID seqg_
 		{
 # line 137 "../sscgfa1ClearanceSNC.stt"
 			SSCA1_update_failed(seqg_env, SSCA1_FAIL_COND);
+# line 138 "../sscgfa1ClearanceSNC.stt"
+			printf("PROBLEM: %d\n", SSCA1_FAIL_COND);
 		}
 		return;
 	}
@@ -393,16 +395,16 @@ static void seqg_action_SSCA1_clearance_status_0_clearance_faillures(SS_ID seqg_
 /* Entry function for state "vc_faillures" in state set "SSCA1_clearance_status" */
 static void seqg_entry_SSCA1_clearance_status_0_vc_faillures(SS_ID seqg_env)
 {
-# line 150 "../sscgfa1ClearanceSNC.stt"
-	printf("SSC GF A1 CLEAR FAILURE CONDITION: ");
 # line 151 "../sscgfa1ClearanceSNC.stt"
+	printf("SSC GF A1 CLEAR FAILURE CONDITION: ");
+# line 152 "../sscgfa1ClearanceSNC.stt"
 	SSCA1Update = FALSE;
 }
 
 /* Exit function for state "vc_faillures" in state set "SSCA1_clearance_status" */
 static void seqg_exit_SSCA1_clearance_status_0_vc_faillures(SS_ID seqg_env)
 {
-# line 159 "../sscgfa1ClearanceSNC.stt"
+# line 160 "../sscgfa1ClearanceSNC.stt"
 	SSCA1_OLD_FAIL_COND = SSCA1_FAIL_COND;
 }
 
@@ -425,7 +427,7 @@ static void seqg_action_SSCA1_clearance_status_0_vc_faillures(SS_ID seqg_env, in
 	{
 	case 0:
 		{
-# line 155 "../sscgfa1ClearanceSNC.stt"
+# line 156 "../sscgfa1ClearanceSNC.stt"
 			SSCA1_update_failed(seqg_env, SSCA1_VC);
 		}
 		return;
@@ -590,76 +592,76 @@ seqProgram sscgfa1ClearanceSNC = {
 };
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 164 "../sscgfa1ClearanceSNC.stt"
+# line 165 "../sscgfa1ClearanceSNC.stt"
 static void initVault(SS_ID seqg_env)
 {
-# line 165 "../sscgfa1ClearanceSNC.stt"
-	SSCA1_INIT = TRUE;
 # line 166 "../sscgfa1ClearanceSNC.stt"
-	SSCA1_OLD_FAIL_COND = SSCA1_FAIL_COND;
+	SSCA1_INIT = TRUE;
 # line 167 "../sscgfa1ClearanceSNC.stt"
-	not_cleared(SSCA1_CLR_STATS);
+	SSCA1_OLD_FAIL_COND = SSCA1_FAIL_COND;
 # line 168 "../sscgfa1ClearanceSNC.stt"
-	report_error(SSCA1_INTLCK_STATS, 54);
+	not_cleared(SSCA1_CLR_STATS);
 # line 169 "../sscgfa1ClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 3/*SSCA1_INIT*/, SYNC, DEFAULT_TIMEOUT);
+	report_error(SSCA1_INTLCK_STATS, 0);
 # line 170 "../sscgfa1ClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 0/*SSCA1_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
+	seq_pvPutTmo(seqg_env, 3/*SSCA1_INIT*/, SYNC, DEFAULT_TIMEOUT);
 # line 171 "../sscgfa1ClearanceSNC.stt"
+	seq_pvPutTmo(seqg_env, 0/*SSCA1_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
+# line 172 "../sscgfa1ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*SSCA1_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 174 "../sscgfa1ClearanceSNC.stt"
+# line 175 "../sscgfa1ClearanceSNC.stt"
 static void SSCA1_update_failed(SS_ID seqg_env, short report)
 {
-# line 176 "../sscgfa1ClearanceSNC.stt"
-	clear_failed(SSCA1_CLR_STATS);
 # line 177 "../sscgfa1ClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 0/*SSCA1_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
+	clear_failed(SSCA1_CLR_STATS);
 # line 178 "../sscgfa1ClearanceSNC.stt"
-	report_error(SSCA1_INTLCK_STATS, report);
+	seq_pvPutTmo(seqg_env, 0/*SSCA1_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 179 "../sscgfa1ClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 1/*SSCA1_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
+	report_error(SSCA1_INTLCK_STATS, report);
 # line 180 "../sscgfa1ClearanceSNC.stt"
+	seq_pvPutTmo(seqg_env, 1/*SSCA1_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
+# line 181 "../sscgfa1ClearanceSNC.stt"
 	printf("%s%s%s\n", ERROR, SSCA1_INTLCK_STATS, DEF);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 183 "../sscgfa1ClearanceSNC.stt"
+# line 184 "../sscgfa1ClearanceSNC.stt"
 static void SSCA1_update_report(SS_ID seqg_env, short intlck)
 {
-# line 184 "../sscgfa1ClearanceSNC.stt"
-	report_error(SSCA1_INTLCK_STATS, intlck);
 # line 185 "../sscgfa1ClearanceSNC.stt"
+	report_error(SSCA1_INTLCK_STATS, intlck);
+# line 186 "../sscgfa1ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*SSCA1_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 188 "../sscgfa1ClearanceSNC.stt"
+# line 189 "../sscgfa1ClearanceSNC.stt"
 static void SSCA1_status(SS_ID seqg_env)
 {
-# line 190 "../sscgfa1ClearanceSNC.stt"
-	cleared(SSCA1_CLR_STATS);
 # line 191 "../sscgfa1ClearanceSNC.stt"
-	seq_pvPutTmo(seqg_env, 0/*SSCA1_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
+	cleared(SSCA1_CLR_STATS);
 # line 192 "../sscgfa1ClearanceSNC.stt"
-	report_error(SSCA1_INTLCK_STATS, 54);
+	seq_pvPutTmo(seqg_env, 0/*SSCA1_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 # line 193 "../sscgfa1ClearanceSNC.stt"
+	report_error(SSCA1_INTLCK_STATS, 0);
+# line 194 "../sscgfa1ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 1/*SSCA1_INTLCK_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var
 
 #define seqg_var (*(struct seqg_vars *const *)seqg_env)
-# line 196 "../sscgfa1ClearanceSNC.stt"
+# line 197 "../sscgfa1ClearanceSNC.stt"
 static void SSCA1_clear_underway(SS_ID seqg_env)
 {
-# line 198 "../sscgfa1ClearanceSNC.stt"
-	clear_underway(SSCA1_CLR_STATS);
 # line 199 "../sscgfa1ClearanceSNC.stt"
+	clear_underway(SSCA1_CLR_STATS);
+# line 200 "../sscgfa1ClearanceSNC.stt"
 	seq_pvPutTmo(seqg_env, 0/*SSCA1_CLR_STATS*/, SYNC, DEFAULT_TIMEOUT);
 }
 #undef seqg_var

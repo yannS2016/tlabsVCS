@@ -1,1 +1,304 @@
-/tlabsVCS/Sources/./expClearanceSNC.stt
+program expClearanceSNC
+
+%{
+/*******************************************************************/
+#include "vcs_var_mes.h" // define this here so C functions are seen
+/*******************************************************************/	
+#define	VCOK       	0
+#define FAIL		-1
+#define B26ON		70
+#define B28bOFF		75
+#define B28bON		81 
+#define B28aOFF		74
+#define B28aON		80
+#define B27ON		79 
+#define B27OFF		73
+#define B29OFF		78  
+#define	DA12S1OFF	76
+#define	DA12S2OFF	77   
+#define	G10OFF		155          
+}%
+/* Declare seq variables*/
+short EXP_INIT; 
+short EXP_VC;   
+short EXP_W26_STS;
+short EXP_W28b_STS;
+short EXP_W28a_STS;
+short EXP_W27_STS;
+short EXP_W29_STS;
+short EXP_FAIL_COND;
+short EXP_OLD_FAIL_COND;
+short EXP_UPDATE;
+short EXP_G10_STS;
+/////////////////////////////////
+string EXP_CLR_STATS; 
+string EXP_INTLCK_STATS;
+/* Associate SNL variables with epics output pv's*/
+assign	EXP_CLR_STATS		to	"{SYS}:EXP-CLR-STATS"; 
+assign	EXP_INTLCK_STATS	to	"{SYS}:EXP-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	EXP_VC 				to 	"{SYS}:EXP-VC"; 
+assign 	EXP_INIT 			to 	"{SYS}:EXP-INIT";
+assign 	EXP_W26_STS 		to 	"{SYS}:EXP-W26-STS"; 
+assign 	EXP_W28b_STS 		to  "{SYS}:EXP-W28b-STS";   
+assign 	EXP_W28a_STS 		to 	"{SYS}:EXP-W28a-STS";
+assign 	EXP_W27_STS 		to 	"{SYS}:EXP-W27-STS";
+assign	EXP_W29_STS			to	"{SYS}:EXP-W29-STS";
+assign	EXP_FAIL_COND		to	"{SYS}:EXP-FAIL-COND";
+assign	EXP_G10_STS			to	"{SYS}:EXP-G10-STS";
+
+monitor	EXP_VC;
+monitor EXP_W26_STS; 
+monitor EXP_W28b_STS;   
+monitor EXP_W28a_STS;
+monitor EXP_W27_STS;
+monitor	EXP_W29_STS;
+monitor	EXP_FAIL_COND;
+monitor	EXP_G10_STS;
+
+ss EXP_clearance_status {
+    state init {
+		when (delay(4.5)) {
+			initVault();
+			printf("\n%sEXPERIMENTAL VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_26_pressed	
+    }
+///////////////////////////////////////////////////////////////
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("%sEXPERIMENTAL VAULT IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (EXP_VC != VCOK) {
+
+		} state vc_faillures
+	}
+//////////////////////////////////////////////////////////
+	state recover_faillure {
+
+		when (!EXP_FAIL_COND) {
+			if(!EXP_UPDATE) {
+				printf("%sEXP RECOVERING FROM FAILLURE - ENTERING W26 STATE%s\n",OK,DEF);
+				EXP_UPDATE = TRUE;
+			}
+		} state  watchman_26_pressed
+		
+		when (EXP_FAIL_COND != EXP_OLD_FAIL_COND) {
+
+		} state  clearance_faillures
+	}
+//////////////////////////////////////////////////////////
+
+	state watchman_26_pressed {
+
+		when (EXP_FAIL_COND != VCOK) {
+
+		} state  clearance_faillures
+			
+		when (EXP_W26_STS == B26ON) {
+			EXP_update_report(B26ON);
+			EXP_clear_underway();
+		} state watchman_26_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_26_released {
+		
+		when (EXP_W26_STS == FAIL) {
+
+		} state  clearance_faillures
+		
+		when (EXP_W26_STS != B26ON) {
+			EXP_update_report(G10OFF);
+		} state gate_g10_closed
+	}
+//////////////////////////////////////////////////////////
+	state gate_g10_closed {
+		
+		when (EXP_W26_STS == FAIL) {
+
+		} state  clearance_faillures
+		
+		when (!EXP_G10_STS) {
+			EXP_update_report(B28bOFF);
+		} state watchman_28b_pressed
+	}
+//////////////////////////////////////////////////////////
+	state watchman_28b_pressed {
+
+		when (EXP_W26_STS == FAIL) {
+
+		} state   clearance_faillures
+		
+		
+		when (EXP_W28b_STS == B28bON) {
+			EXP_update_report(B28bON);
+		} state watchman_28b_released
+	}
+////////////////////////////////////////////////////////////
+	state watchman_28b_released {
+
+		when (EXP_W26_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+	
+		when (EXP_W28b_STS != B28bON) {
+			EXP_update_report(B28aOFF);
+		} state watchman_28a_pressed
+	}
+///////////////////////////////////////////////////////////
+	state watchman_28a_pressed {
+		
+		when (EXP_W26_STS == FAIL) {
+
+		} state  clearance_faillures
+		
+
+		when (EXP_W28a_STS == B28aON) {
+			EXP_update_report(B28aON);
+		} state watchman_28a_released
+	}
+////////////////////////////////////////////////////////////
+	state watchman_28a_released {
+
+		when (EXP_W26_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+	
+		when (EXP_W28a_STS != B28aON) {
+			EXP_update_report(B27OFF);
+		} state watchman_27_pressed
+	}	
+////////////////////////////////////////////////////////////
+	state watchman_27_pressed {
+
+		when (EXP_W26_STS == FAIL) {
+
+		} state  clearance_faillures
+		
+		
+		when (EXP_W27_STS == B27ON) {
+			EXP_update_report(B27ON);
+		} state watchman_27_released
+	}	
+/////////////////////////////////////////////////////////////
+	state watchman_27_released {
+
+		when (EXP_W26_STS == FAIL) {
+
+		} state  clearance_faillures
+		
+		when (EXP_W27_STS != B27ON) {
+		} state door_a12_closed		
+	}
+//////////////////////////////////////////////////////////
+	state door_a12_closed {
+		
+		when (EXP_W26_STS == FAIL) {
+
+		} state  clearance_faillures
+		
+		when (EXP_W29_STS == DA12S1OFF) {
+			EXP_update_report(DA12S1OFF);
+		} state door_a12_closed
+		
+		when (EXP_W29_STS == DA12S2OFF) {
+			EXP_update_report(DA12S2OFF);
+		} state door_a12_closed
+		
+		when () {
+			EXP_update_report(B29OFF);
+		} state watchman_29_pressed	
+	}
+////////////////////////////////////////////////
+	state watchman_29_pressed {
+		
+		when (EXP_W26_STS == FAIL) {
+
+		} state  clearance_faillures
+		
+
+		when (!EXP_W29_STS) {
+			
+			EXP_status();
+		} state vault_cleared	
+	}
+//////////////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		option -e;
+		option -x;
+		
+		entry {
+			printf("EXP CLEARANCE FAILURE CONDITION: ");
+			EXP_UPDATE = FALSE;
+		}
+
+		when () {		
+			EXP_update_failed(EXP_FAIL_COND);
+		} state recover_faillure
+		
+		exit {
+			EXP_OLD_FAIL_COND = EXP_FAIL_COND;
+		}
+	}
+////////////////////////////////////////////////////////////////////////////
+	state vc_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("EXP LOW CLEAR FAILURE CONDITION: ");
+			EXP_UPDATE = FALSE;
+		}
+		
+		when () {
+			EXP_update_failed(EXP_VC);
+
+		} state recover_faillure
+
+		exit {
+			EXP_OLD_FAIL_COND = EXP_FAIL_COND;
+		}
+	}
+}
+///////////////////////////////////////////////////////////////////////////////
+void initVault(){
+	EXP_INIT = TRUE;
+	EXP_UPDATE = FALSE;
+	EXP_OLD_FAIL_COND = EXP_FAIL_COND; 
+	not_cleared(EXP_CLR_STATS);
+	report_error(EXP_INTLCK_STATS, 0);
+	pvPut(EXP_INIT, SYNC);
+	pvPut(EXP_CLR_STATS, SYNC);
+	pvPut(EXP_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void EXP_update_failed(short report)
+{
+	clear_failed(EXP_CLR_STATS);
+	pvPut(EXP_CLR_STATS, SYNC);
+	report_error(EXP_INTLCK_STATS, report);
+	pvPut(EXP_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,EXP_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void EXP_update_report(short intlck) {
+	report_error(EXP_INTLCK_STATS, intlck);
+	pvPut(EXP_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void EXP_status()
+{  
+	cleared(EXP_CLR_STATS);
+	pvPut(EXP_CLR_STATS, SYNC); 		
+	report_error(EXP_INTLCK_STATS, 0);
+	pvPut(EXP_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void EXP_clear_underway()
+{  
+	clear_underway(EXP_CLR_STATS);
+	pvPut(EXP_CLR_STATS, SYNC); 		
+}

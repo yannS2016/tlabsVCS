@@ -1,1 +1,201 @@
-/tlabsVCS/Sources/./spc1gfClearanceSNC.stt
+program spc1gfClearanceSNC
+
+%{
+/*******************************************************************/
+#include "vcs_var_mes.h" // define this here so C functions are seen
+/*******************************************************************/
+#define	VCOK       	0
+#define FAIL		-1 
+#define B40ON		177
+#define B41OFF		179
+#define G7OFF 		184
+}%
+/* Declare seq variables*/
+short SPC1GF_INIT; 
+
+short SPC1GF_VC;   
+short SPC1_W40_STS;
+short SPC1_W41_STS;
+short SPC1GF_FAIL_COND;
+string SPC1GF_CLR_STATS; 
+string SPC1GF_INTLCK_STATS;
+// CONTROL FLAGS
+short spc1GFUpdate = FALSE;
+short SPC1GF_OLD_FAIL_COND;
+
+/* Associate SNL variables with epics output pv's*/
+assign	SPC1GF_CLR_STATS		to	"{SYS}:SPC1GF-CLR-STATS"; 
+assign	SPC1GF_INTLCK_STATS		to	"{SYS}:SPC1GF-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	SPC1GF_VC 				to 	"{SYS}:SPC1GF-VC"; 
+assign 	SPC1GF_INIT 			to 	"{SYS}:SPC1GF-INIT";
+assign 	SPC1_W40_STS 			to 	"{SYS}:SPC1-W40-STS";   
+assign 	SPC1_W41_STS 			to 	"{SYS}:SPC1-W41-STS";
+assign	SPC1GF_FAIL_COND		to	"{SYS}:SPC1GF-FAIL-COND";
+
+monitor	SPC1GF_VC;
+monitor SPC1_W40_STS;  
+monitor SPC1_W41_STS;
+monitor	SPC1GF_FAIL_COND;
+
+ss SPC1GF_clearance_status {
+    state init {
+		when (delay(0.8)) {
+			initVault();
+			printf("%sSPC1 GROUND-FLOOR VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_40_pressed	
+    }
+///////////////////////////////////////////////////////////////
+	/*VAULT CLEARED STATE*/
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("%sSPC1 GROUND-FLOOR VAULT IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (SPC1GF_VC != VCOK) {
+
+		} state vc_faillures
+	}
+//////////////////////////////////////////////////////////
+	state recover_faillure {
+		
+		when (!SPC1GF_FAIL_COND) {
+			if(!spc1GFUpdate) {
+				spc1GFUpdate = TRUE;
+			}
+		} state  watchman_40_pressed
+			
+		when (SPC1GF_FAIL_COND != SPC1GF_OLD_FAIL_COND) {
+
+		} state  clearance_faillures
+	}
+//////////////////////////////////////////////////////////
+
+	state watchman_40_pressed {
+
+		when (SPC1_W40_STS == FAIL) {
+			SPC1GF_OLD_FAIL_COND = SPC1GF_FAIL_COND;
+		} state  clearance_faillures
+			
+		when (SPC1_W40_STS == B40ON) {
+			SPC1GF_clear_underway();
+			SPC1GF_update_report(B40ON);
+		} state watchman_40_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_40_released {
+		
+		when (SPC1_W40_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+		when (SPC1_W40_STS != B40ON) {
+			SPC1GF_update_report(G7OFF);
+		} state gate_g7_closed
+	}
+//////////////////////////////////////////////////////////
+	state gate_g7_closed {
+
+		when (SPC1_W40_STS == FAIL) {
+
+		} state   clearance_faillures
+		
+		
+		when (SPC1_W41_STS != G7OFF) {
+			SPC1GF_update_report(B41OFF);
+		} state watchman_41_pressed
+	}
+
+///////////////////////////////////////////////////////////
+	state watchman_41_pressed {
+		
+		when (SPC1_W40_STS == FAIL) {
+
+		} state  clearance_faillures
+			
+			
+		when (!SPC1_W41_STS) {
+
+			SPC1GF_status();
+		} state vault_cleared
+	}
+///////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("SPC1 GF CLEARANCE FAILURE CONDITION: ");
+			spc1GFUpdate = FALSE;
+		}
+
+		when () {
+		
+			//SPC1GF_update_failed(SPC1GF_FAIL_COND = 0?54:SPC1GF_FAIL_COND);
+			SPC1GF_update_failed(SPC1GF_FAIL_COND);
+			printf("\nINTERLOCK VALUE: %d\n",SPC1GF_FAIL_COND);
+			
+		} state recover_faillure
+	
+		
+		exit {
+		    SPC1GF_OLD_FAIL_COND = SPC1GF_FAIL_COND;	
+		}			
+	}
+////////////////////////////////////////////////////////////////////////////
+	state vc_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("SPC1 GF CLEAR FAILURE CONDITION: ");
+			spc1GFUpdate = FALSE;
+		}
+		
+		when () {			
+			SPC1GF_update_failed(SPC1GF_VC);
+		} state recover_faillure
+		
+		exit {
+		    SPC1GF_OLD_FAIL_COND = SPC1GF_FAIL_COND;		
+		}
+	}
+}
+/////////////////////////////////////////////////////////////////////////////////////
+void initVault(){
+	SPC1GF_INIT = TRUE;
+	SPC1GF_OLD_FAIL_COND = SPC1GF_FAIL_COND;
+	not_cleared(SPC1GF_CLR_STATS);
+	report_error(SPC1GF_INTLCK_STATS,0);
+	pvPut(SPC1GF_INIT, SYNC);
+	pvPut(SPC1GF_CLR_STATS, SYNC);
+	pvPut(SPC1GF_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SPC1GF_update_failed(short report)
+{
+	clear_failed(SPC1GF_CLR_STATS);
+	pvPut(SPC1GF_CLR_STATS, SYNC);
+	report_error(SPC1GF_INTLCK_STATS, report);
+	pvPut(SPC1GF_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,SPC1GF_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void SPC1GF_update_report(short intlck) {
+	report_error(SPC1GF_INTLCK_STATS, intlck);
+	pvPut(SPC1GF_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SPC1GF_status()
+{
+	cleared(SPC1GF_CLR_STATS);
+	pvPut(SPC1GF_CLR_STATS, SYNC); 		
+	report_error(SPC1GF_INTLCK_STATS, 0);
+	pvPut(SPC1GF_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void SPC1GF_clear_underway()
+{  
+	clear_underway(SPC1GF_CLR_STATS);
+	pvPut(SPC1GF_CLR_STATS, SYNC); 		
+}
