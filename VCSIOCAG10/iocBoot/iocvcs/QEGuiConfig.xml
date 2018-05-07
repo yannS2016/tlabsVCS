@@ -32,7 +32,7 @@
    <Identity id="0">
     <Title>QEGui ssc_cable</Title>
    </Identity>
-   <Geometry X="2802" Height="402" Y="197" Width="681"/>
+   <Geometry X="1239" Height="402" Y="197" Width="681"/>
    <State Flags="0"/>
    <Gui Name="/tlabsVCS/epicsQtDisplays/SPC2.ui" ID="QEGui_window_0_form_0">
     <Title>QEGui SPC2</Title>
@@ -51,7 +51,7 @@
    <Gui Name="/tlabsVCS/epicsQtDisplays/ssc_bas.ui" ID="QEGui_window_0_form_3">
     <Title>QEGui ssc_bas</Title>
     <Presentation>Dock</Presentation>
-    <Docking X="2054" Height="840" Features="7" Area="1" Floating="1" Y="244" Width="736" Hidden="0" AllowedAreas="15"/>
+    <Docking X="1184" Height="840" Features="7" Area="1" Floating="1" Y="240" Width="736" Hidden="0" AllowedAreas="15"/>
    </Gui>
   </Component>
   <Component Name="QEGui_window_0_form_0_QEForm"/>
