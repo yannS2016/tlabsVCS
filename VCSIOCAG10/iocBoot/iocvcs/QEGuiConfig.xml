@@ -30,21 +30,33 @@
   </Component>
   <Component Name="QEGuiMainWindow_0">
    <Identity id="0">
-    <Title>QEGui SPC2-LOW</Title>
+    <Title>QEGui ssc_cable</Title>
    </Identity>
-   <Geometry X="2003" Height="490" Y="302" Width="648"/>
+   <Geometry X="2802" Height="402" Y="197" Width="681"/>
    <State Flags="0"/>
-   <Gui Name="/tlabsVCS/epicsQtDisplays/SPC2-LOW.ui" ID="QEGui_window_0_form_0" CurrentGui="1">
-    <Title>QEGui SPC2-LOW</Title>
-    <Presentation>Central</Presentation>
-   </Gui>
-   <Gui Name="/tlabsVCS/epicsQtDisplays/SPC2.ui" ID="QEGui_window_0_form_1">
+   <Gui Name="/tlabsVCS/epicsQtDisplays/SPC2.ui" ID="QEGui_window_0_form_0">
     <Title>QEGui SPC2</Title>
     <Presentation>Dock</Presentation>
-    <Docking X="2887" Height="657" Features="7" Area="1" Floating="1" Y="330" Width="864" Hidden="0" AllowedAreas="15"/>
+    <Docking X="2699" Height="657" Features="7" Area="1" Floating="1" Y="240" Width="864" Hidden="1" AllowedAreas="15"/>
+   </Gui>
+   <Gui Name="/tlabsVCS/epicsQtDisplays/SPC1-LOW.ui" ID="QEGui_window_0_form_1">
+    <Title>QEGui SPC1-LOW</Title>
+    <Presentation>Dock</Presentation>
+    <Docking X="525" Height="565" Features="7" Area="1" Floating="1" Y="436" Width="694" Hidden="1" AllowedAreas="15"/>
+   </Gui>
+   <Gui Name="/tlabsVCS/epicsQtDisplays/ssc_cable.ui" ID="QEGui_window_0_form_2" CurrentGui="1">
+    <Title>QEGui ssc_cable</Title>
+    <Presentation>Central</Presentation>
+   </Gui>
+   <Gui Name="/tlabsVCS/epicsQtDisplays/ssc_bas.ui" ID="QEGui_window_0_form_3">
+    <Title>QEGui ssc_bas</Title>
+    <Presentation>Dock</Presentation>
+    <Docking X="2054" Height="840" Features="7" Area="1" Floating="1" Y="244" Width="736" Hidden="0" AllowedAreas="15"/>
    </Gui>
   </Component>
   <Component Name="QEGui_window_0_form_0_QEForm"/>
   <Component Name="QEGui_window_0_form_1_QEForm"/>
+  <Component Name="QEGui_window_0_form_2_QEForm"/>
+  <Component Name="QEGui_window_0_form_3_QEForm"/>
  </Config>
 </QEGuiConfig>

@@ -38,7 +38,7 @@ record(calcout, "$(SYS):SPC1GF-VC") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(FLNK, "$(SYS):SPC1GF-FAIL-COND")
-  field(CALC, "!A?!B?!C?D?$(SPC1PNK):$(VCOK):$(G7ON):$(DA2ON):$(RA2ON)")
+  field(CALC, "!A?B?!C?D?$(SPC1PNK):$(VCOK):$(G7ON):$(DA2ON):$(RA2ON)")
   field(INPA, "$(SYS):SW-RF-A2.VAL")
   field(INPB, "$(SYS):SPC1-DA2-CLSD.VAL PP") 
   field(INPC, "$(SYS):SW-G7-A2.VAL")  
@@ -74,7 +74,7 @@ record(seq, "$(SYS):RST-SPC1GF") { # HANDLE BY SEQ
 record(calcout, "$(SYS):SPC1GF-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!A?!B?!C?$(VCOK):$(TOUT):$(DA2ON):$(RA2ON)")
+  field(CALC, "!A?B?!C?$(VCOK):$(TOUT):$(DA2ON):$(RA2ON)")
   field(INPA, "$(SYS):SW-RF-A2 NPP") 
   field(INPB, "$(SYS):SPC1-DA2-CLSD PP")
   field(INPC, "$(SYS):SPC1GF-TIMEOUT NPP")
@@ -169,7 +169,7 @@ record(calc, "$(SYS):SPC1-WATCH-40-RLSD") {
 }
 #################### DOOR A2 CLOSED ##################################
 record(calc, "$(SYS):SPC1-DA2-CLSD") {
-  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(CALC, "!A&&!B?$(ON):$(OFF)")
   field(INPA, "$(SYS):SW-I-SPC1-A2.VAL")
   field(INPB, "$(SYS):SW-II-SPC1-A2.VAL")
 }

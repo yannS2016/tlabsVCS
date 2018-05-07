@@ -38,7 +38,7 @@ record(calcout, "$(SYS):SPC1L-VC") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(FLNK, "$(SYS):SPC1L-FAIL-COND")
-  field(CALC, "!A?B?!C?!D?!E?F?$(SPC1PNK):$(VCOK):$(DA005AON):$(DA005ON):$(DA001ON):$(A005ON):$(RA2ON)")
+  field(CALC, "!A?B?C?D?E?F?$(SPC1PNK):$(VCOK):$(DA005AON):$(DA005ON):$(DA001ON):$(A005ON):$(RA2ON)")
   field(INPA, "$(SYS):SW-RF-A2.VAL NPP")
   field(INPB, "$(SYS):SPC1GF-CLR.VAL NPP")# SPC1 GROUND FLOOR MUST BE CLEARED
   field(INPC, "$(SYS):SPC1-DA001-CLSD.VAL PP") 
@@ -53,7 +53,7 @@ record(calcout, "$(SYS):SPC1L-VC") {
 record(calcout, "$(SYS):SPC1L-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!F?$(VCOK):!A?B?!C?!D?!E?$(VCOK):$(TOUT):$(DA005AON):$(DA001ON):$(A005ON):$(RA2ON)")
+  field(CALC, "!F?$(VCOK):!A?B?C?D?!E?$(VCOK):$(TOUT):$(DA005AON):$(DA001ON):$(A005ON):$(RA2ON)")
   field(INPA, "$(SYS):SW-RF-A2.VAL NPP") 
   field(INPB, "$(SYS):SPC1GF-CLR.VAL NPP")# SPC1 GROUND FLOOR MUST BE CLEARED
   field(INPC, "$(SYS):SPC1-DA001-CLSD PP") 
@@ -129,7 +129,7 @@ record(calcout, "$(SYS):SPC1-W43-STS") {
   field(DESC, "Vault clearance stage 2")
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!A?!B?C&&!D?$(VCOK):$(B43OFF):$(DA005OFF):$(FAIL)")
+  field(CALC, "!A?B?C&&!D?$(VCOK):$(B43OFF):$(DA005OFF):$(FAIL)")
   field(INPA, "$(SYS):SPC1L-FAIL-COND PP")
   field(INPB, "$(SYS):SPC1-DA005-CLSD PP") 
   field(INPC, "$(SYS):SPC1-WATCH-42-RLSD.VAL PP")
@@ -180,19 +180,19 @@ record(calc, "$(SYS):SPC1L-PNK") {
 }
 #################### DOOR A001 CLOSED ##################################
 record(calc, "$(SYS):SPC1-DA001-CLSD") {
-  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(CALC, "!A&&!B?$(ON):$(OFF)")
   field(INPA, "$(SYS):SW-I-SPC1-A001.VAL")
   field(INPB, "$(SYS):SW-II-SPC1-A001.VAL")
 }
 #################### DOOR A005 CLOSED ##################################
 record(calc, "$(SYS):SPC1-DA005-CLSD") {
-  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(CALC, "!A&&!B?$(ON):$(OFF)")
   field(INPA, "$(SYS):SW-I-SPC1-A005.VAL")
   field(INPB, "$(SYS):SW-II-SPC1-A005.VAL")
 }
 #################### DOOR A005A CLOSED ##################################
 record(calc, "$(SYS):SPC1-DA005A-CLSD") {
-  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(CALC, "!A&&!B?$(ON):$(OFF)")
   field(INPA, "$(SYS):SW-I-SPC1-A005A.VAL")
   field(INPB, "$(SYS):SW-II-SPC1-A005A.VAL")
 }

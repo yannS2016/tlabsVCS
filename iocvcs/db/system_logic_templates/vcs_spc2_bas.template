@@ -72,7 +72,7 @@ record(seq, "$(SYS):RST-SPC2L") { # HANDLE BY SEQ
 record(calcout, "$(SYS):SPC2L-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!C?$(VCOK):!A?!B?$(VCOK):$(TOUT):$(DA007ON)") 
+  field(CALC, "!C?$(VCOK):A?!B?$(VCOK):$(TOUT):$(DA007ON)") 
   field(INPA, "$(SYS):SPC2-DA007-CLSD PP")
   field(INPB, "$(SYS):SPC2L-TIMEOUT NPP")
   field(INPC, "$(SYS):SPC2L-INIT") 
@@ -165,7 +165,7 @@ record(calc, "$(SYS):SPC2-WATCH-44-RLSD") {
 }
 #################### DOOR A007 CLOSED ##################################
 record(calc, "$(SYS):SPC2-DA007-CLSD") {
-  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(CALC, "!A&&!B?$(ON):$(OFF)")
   field(INPA, "$(SYS):SW-I-SPC2-A007.VAL")
   field(INPB, "$(SYS):SW-II-SPC2-A007.VAL")
 }

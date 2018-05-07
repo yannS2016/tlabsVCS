@@ -25,7 +25,7 @@ record(calcout, "$(SYS):SSCCAB-VC") {
   field(DESC, "SSCCAB Vault clear stage")
   field(SCAN, "Passive")
   field(FLNK, "$(SYS):SSCCAB-FAIL-COND")
-  field(CALC, "A?!B?C?$(CABPNK):$(VCOK):$(G5ON):$(DA001AON)")
+  field(CALC, "A?B?C?$(CABPNK):$(VCOK):$(G5ON):$(DA001AON)")
 # IN LIVE APP USE A FLNK FROM  SW-I-SSC-A001A OR SW-I-SSC-A001A (SCAN=Intr) TO PROCESS THIS RECORD
 # AND ACCES IT HERE WITH NPP OR ACCES IT WITH PP BUT USE NPP ON ITS INPUTS
   field(INPA, "$(SYS):SSC-A001A-CLSD.VAL PP")  
@@ -107,6 +107,7 @@ record(seq, "$(SYS):SSCW16-WRT-OUTS") { # HANDLE BY SEQ
 record(calcout, "$(SYS):SSC-W17-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
+  field(FLNK, "$(SYS):SSC-G5-CLSD")
   field(CALC, "!A?!B?!C?D&&!E?$(VCOK):$(B17OFF):$(G5S2OFF):$(G5S1OFF):$(FAIL)")
   field(INPA, "$(SYS):SSCCAB-FAIL-COND PP")
   field(INPB, "$(SYS):SW-I-SSC-G5.VAL")
@@ -151,7 +152,7 @@ record(calc, "$(SYS):SSC-A001A-CLSD") {
 }
 #################### GATE G5 CLOSED ##################################
 record(calc, "$(SYS):SSC-G5-CLSD") {
-  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(CALC, "!A&&!B?$(ON):$(OFF)")
   field(INPA, "$(SYS):SW-I-SSC-G5.VAL")
   field(INPB, "$(SYS):SW-II-SSC-G5.VAL")
 }

@@ -37,9 +37,10 @@ record(calcout, "$(SYS):SPC2GF-VC") {
   field(DESC, "SPC2GF Vault clear stage")
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!A?!B?$(VCOK):$(SPC2PNK):A")
+  field(CALC, "!A?B?!C?$(VCOK):$(SPC2PNK):$(DA3ON):A")
   field(INPA, "$(SYS):SPC2GF-FAIL-COND.VAL PP")
-  field(INPB, "$(SYS):SPC2GF-PNK.VAL PP")
+  field(INPB, "$(SYS):SPC2-DA3-CLSD PP")
+  field(INPC, "$(SYS):SPC2GF-PNK PP")
   field(OUT,  "$(SYS):RST-SPC2GF.PROC PP")  
   field(OOPT, "When Non-zero")
 }
@@ -48,12 +49,11 @@ record(calcout, "$(SYS):SPC2GF-VC") {
 record(calcout, "$(SYS):SPC2GF-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!H?$(VCOK):!A?B?C?!D?E?!F?$(VCOK):$(TOUT):$(DA3ON):$(G6aON):$(DA3aON):$(A007ON):$(RA3ON)")
-  field(INPA, "$(SYS):SW-RF-A3-CLSD.VAL NPP") 
-  field(INPB, "$(SYS):SPC2L-CLR.VAL NPP")# SPC2 BASEMENT FLOOR MUST BE CLEARED
+  field(CALC, "!H?$(VCOK):A?!B?!C?!D?!F?$(VCOK):$(TOUT):$(G6aON):$(DA3aON):$(RA3ON):$(A007ON)")
+  field(INPA, "$(SYS):SPC2L-CLR.VAL NPP")# SPC2 BASEMENT FLOOR MUST BE CLEARED
+  field(INPB, "$(SYS):SW-RF-A3-CLSD.VAL NPP") 
   field(INPC, "$(SYS):SPC2-DA3a-CLSD PP") 
   field(INPD, "$(SYS):SW-II-SPC2-G6a NPP") 
-  field(INPE, "$(SYS):SPC2-DA3-OP PP")
   field(INPF, "$(SYS):SPC2GF-TIMEOUT NPP") 
   field(INPH, "$(SYS):SPC2GF-INIT NPP") 
   field(OUT,  "$(SYS):RST-SPC2GF.PROC PP")  
@@ -221,7 +221,7 @@ record(calc, "$(SYS):SPC2GF-PNK") {
 }
 #################### DOOR A3a CLOSED ##################################
 record(calc, "$(SYS):SPC2-DA3a-CLSD") {
-  field(CALC, "!A&&!B?$(ON):$(OFF)")
+  field(CALC, "!A&&!B?$(OFF):$(ON)")
   field(INPA, "$(SYS):SW-I-SPC2-A3a.VAL")
   field(INPB, "$(SYS):SW-II-SPC2-A3a.VAL")
 }
@@ -232,14 +232,6 @@ record(calc, "$(SYS):SPC2-DA3-CLSD") {
   field(INPB, "$(SYS):SW-II-SPC2-A3.VAL")
 }
 ########################### Outputs ##################################
-
-######################### Door A3 Fail state check #
-record(calc, "$(SYS):SPC2-DA3-OP") {
-  field(CALC, "B&&A?$(OFF):$(ON)") # OFF  close, ON open
-  field(INPA, "$(SYS):SPC2-CLR NPP") 
-  field(INPB, "$(SYS):SPC2-DA3-CLSD PP") # this must be in PP to catch changes in A3 switches
-}
-
 
 
 record(bo, "$(SYS):SPC2-CLR") {
