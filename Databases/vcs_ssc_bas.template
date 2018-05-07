@@ -25,7 +25,7 @@ record(calcout, "$(SYS):SSCL-VC") {
   field(SCAN, "Passive")
   field(PINI, "YES")
   field(FLNK, "$(SYS):SSCL-FAIL-COND") # THIS RECORD MUST IMMEDIATELY READ A FAIL CONDITION 
-  field(CALC, "!F?$(VCOK):A?!B?!C?!D?E?$(SSCPNK):$(VCOK):$(G2ON):$(G1ON):$(DA001ON):$(A001AON)")
+  field(CALC, "!F?$(VCOK):A?B?C?D?E?$(SSCPNK):$(VCOK):$(G2ON):$(G1ON):$(DA001ON):$(A001AON)")
   field(INPA, "$(SYS):SSCCAB-CLR.VAL NPP")
   field(INPB, "$(SYS):SSC-DA001-CLSD.VAL PP")
   field(INPC, "$(SYS):SSC-G1-CLSD.VAL.VAL PP")  
@@ -86,6 +86,7 @@ record(seq, "$(SYS):RST-SSCL-FLAGS") { # MAY BE HANDLE BY SEQ
 record(calcout, "$(SYS):SSCL-FAIL-COND") {
   field(SCAN, "Passive")
   field(PINI, "YES")
+  field(FLNK, "$(SYS):SSCL-UP-INPSTS")# we need to track this door state for UI
   field(CALC, "!F?$(VCOK):A?!B?!C?!D?!E?$(VCOK):E:D:$(TOUT):B:$(A001AON)")
   field(INPA, "$(SYS):SSCCAB-CLR.VAL NPP") 
   field(INPB, "$(SYS):SSCL-GD-FAIL PP")
@@ -99,6 +100,7 @@ record(calcout, "$(SYS):SSCL-FAIL-COND") {
 record(calcout, "$(SYS):SSCL-GD-FAIL") {
   field(SCAN, "Passive")
   field(PINI, "YES")
+ # field(FLNK, "$(SYS):SSC-DA001-CLSD")# we need to track this door state for UI
   field(CALC, "!A?!B?!C?!D?$(VCOK):$(G1S2ON):$(G1S1ON):$(DA001S2ON):$(DA001S1ON)")
   field(INPA, "$(SYS):SW-I-SSC-A001.VAL NPP")
   field(INPB, "$(SYS):SW-II-SSC-A001.VAL NPP") 
@@ -271,7 +273,7 @@ record(seq, "$(SYS):SSCW5-WRT-OUTS") { # MAY BE HANDLED BY SEQ
 record(calcout, "$(SYS):SSC-W6-STS") {
   field(SCAN, "Passive")
   field(PINI, "YES")
-  field(CALC, "!C?A&&B&&!D?$(VCOK):$(B6OFF):$(G2OFF)") 
+  field(CALC, "C?A&&B&&!D?$(VCOK):$(B6OFF):$(G2OFF)") 
   field(INPA, "$(SYS):SSC-W4-RLSD.VAL PP")
   field(INPB, "$(SYS):SSC-W5-RLSD.VAL PP")
   field(INPC, "$(SYS):SSC-G2-CLSD.VAL PP")
@@ -354,11 +356,21 @@ record(calc, "$(SYS):SSCL-PNK") {
   field(INPG, "$(SYS):WATCHMAN-SSC-6-ACT.VAL")
 }
 
+################ Update UI #############################
+
+record(fanout, "$(SYS):SSCL-UP-INPSTS") {
+  field(SCAN, "Passive")
+  field(LNK1, "$(SYS):SSC-DA001-CLSD")
+  field(LNK2, "$(SYS):SSC-G1-CLSD")
+  field(LNK3, "$(SYS):SSC-G2-CLSD")
+  field(SELM, "All")
+}
+
 #####################################################################
 # GATE G1 CLOSED	
 record(calc, "$(SYS):SSC-G1-CLSD") {
   field(SCAN, "Passive")
-  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(CALC, "!A&&!B?$(ON):$(OFF)")
   field(INPA, "$(SYS):SW-I-SSC-G1.VAL")
   field(INPB, "$(SYS):SW-II-SSC-G1.VAL")
 }
@@ -367,7 +379,7 @@ record(calc, "$(SYS):SSC-G1-CLSD") {
 # GATE G2 CLOSED	
 record(calc, "$(SYS):SSC-G2-CLSD") {
   field(SCAN, "Passive")
-  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(CALC, "!A&&!B?$(ON):$(OFF)")
   field(INPA, "$(SYS):SW-I-SSC-G2.VAL")
   field(INPB, "$(SYS):SW-II-SSC-G2.VAL")
 }
@@ -376,7 +388,7 @@ record(calc, "$(SYS):SSC-G2-CLSD") {
 # DOOR A001 CLOSED
 record(calc, "$(SYS):SSC-DA001-CLSD") {
   field(SCAN, "Passive")
-  field(CALC, "!A&&!B?$(OFF):$(ON)")
+  field(CALC, "!A&&!B?$(ON):$(OFF)")
   field(INPA, "$(SYS):SW-I-SSC-A001.VAL")
   field(INPB, "$(SYS):SW-II-SSC-A001.VAL")
 }

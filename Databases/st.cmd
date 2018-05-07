@@ -1,4 +1,4 @@
-#!../../bin/linux-x86/vcs
+#!../../bin/linux-x86_64/iocvcs
 
 ## You may have to change vcs to something else
 ## everywhere it appears in this file
@@ -8,8 +8,8 @@
 cd "${TOP}"
 
 ## Register all support components
-dbLoadDatabase "dbd/vcs.dbd"
-vcs_registerRecordDeviceDriver pdbbase
+dbLoadDatabase "dbd/iocvcs.dbd"
+iocvcs_registerRecordDeviceDriver pdbbase
 
 ## Load record instances
 dbLoadTemplate "db/vcs.substitutions"
