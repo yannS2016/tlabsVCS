@@ -1,0 +1,47 @@
+--- ethercatApp/scannerSrc/parsertest.c	2018-06-24 00:08:10.430087602 +0200
++++ ./parsertest_patched.c	2018-06-24 00:08:51.926896903 +0200
+@@ -4,11 +4,16 @@
+ #include <stdlib.h>
+ #include <assert.h>
+ #include "classes.h"
++#include <linux/version.h>
+ #include "parser.h"
+ 
+ typedef enum _CONFIG_CHECK { CONFIG_ERROR=0,  CONFIG_OKAY=1 } CONFIG_CHECK;
+-//typedef enum _BOOL { FALSE = 0, TRUE = 1} BOOL;
+-typedef enum _BOOL { false = 0, true = 1} BOOL;
++#if LINUX_VERSION_CODE <= KERNEL_VERSION(3, 4, 0)
++	typedef enum _BOOL { FALSE = 0, TRUE = 1} BOOL;
++#else
++
++	typedef enum _BOOL { false = 0, true = 1} BOOL;
++#endif
+ /* typdef enum _CONFIG_CHECK CONFIG_CHECK; */
+ 
+ typedef struct testdata
+--- ethercatApp/scannerSrc/scanner.c	2018-06-24 00:09:29.275625306 +0200
++++ ./scanner_patched.c	2018-06-24 00:09:22.343490110 +0200
+@@ -9,7 +9,7 @@
+ #include <sys/types.h>
+ #include <sys/socket.h>
+ #include <errno.h>
+-
++#include <linux/version.h>
+ #include <ecrt.h>
+ #include <ellLib.h>
+ #include <iocsh.h>
+@@ -32,9 +32,12 @@
+ int dumplatency = 0;
+ // Time to wait for EtherCAT frame to return. Default to 50 us.
+ long frame_time_ns = 50000;
++#if LINUX_VERSION_CODE <= KERNEL_VERSION(3, 4, 0)
++	typedef enum _BOOL { FALSE = 0, TRUE = 1} BOOL;
++#else
+ 
+-//typedef enum _BOOL { FALSE = 0, TRUE = 1} BOOL;
+-typedef enum _BOOL { false = 0, true = 1} BOOL;
++	typedef enum _BOOL { false = 0, true = 1} BOOL;
++#endif
+ 
+ enum { PERIOD_NS = 1000000 };
+ #define TIMESPEC2NS(T) ((uint64_t) (T).tv_sec * NSEC_PER_SEC + (T).tv_nsec)
