@@ -1,0 +1,160 @@
+--- /epics/drivers/ethercat/etherlabmaster-code/devices/generic.c	2015-10-14 16:16:57.000000000 +0200
++++ ./generic_patched.c	2018-06-23 19:01:47.663284020 +0200
+@@ -149,7 +149,12 @@
+     dev->socket = NULL;
+     dev->rx_buf = NULL;
+ 
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0)
++    dev->netdev = alloc_netdev(sizeof(ec_gen_device_t *), &null,
++            NET_NAME_UNKNOWN, ether_setup);
++#else
+     dev->netdev = alloc_netdev(sizeof(ec_gen_device_t *), &null, ether_setup);
++#endif
+     if (!dev->netdev) {
+         return -ENOMEM;
+     }
+@@ -207,8 +212,13 @@
+         return -ENOMEM;
+     }
+ 
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)
++    ret = sock_create_kern(&init_net, PF_PACKET, SOCK_RAW,
++            htons(ETH_P_ETHERCAT), &dev->socket);
++#else
+     ret = sock_create_kern(PF_PACKET, SOCK_RAW, htons(ETH_P_ETHERCAT),
+             &dev->socket);
++#endif
+     if (ret) {
+         printk(KERN_ERR PFX "Failed to create socket (ret = %i).\n", ret);
+         return ret;
+--- /epics/drivers/ethercat/etherlabmaster-code/master/ethernet.c	2015-10-14 16:16:56.000000000 +0200
++++ ./ethernet_patched.c	2018-06-23 19:07:57.314682393 +0200
+@@ -148,7 +148,13 @@
+ 
+     snprintf(eoe->datagram.name, EC_DATAGRAM_NAME_SIZE, name);
+ 
+-    if (!(eoe->dev = alloc_netdev(sizeof(ec_eoe_t *), name, ether_setup))) {
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0)
++    eoe->dev = alloc_netdev(sizeof(ec_eoe_t *), name, NET_NAME_UNKNOWN,
++            ether_setup);
++#else
++    eoe->dev = alloc_netdev(sizeof(ec_eoe_t *), name, ether_setup);
++#endif
++    if (!eoe->dev) {
+         EC_SLAVE_ERR(slave, "Unable to allocate net_device %s"
+                 " for EoE handler!\n", name);
+         ret = -ENODEV;
+
+--- /epics/drivers/ethercat/etherlabmaster-code/master/cdev.c	2018-06-23 20:24:05.790165841 +0200
++++ ./cdev_patched.c	2018-06-23 20:36:45.349348534 +0200
+@@ -63,8 +63,11 @@
+ #define PAGE_FAULT_VERSION KERNEL_VERSION(2, 6, 23)
+ 
+ #if LINUX_VERSION_CODE >= PAGE_FAULT_VERSION
+-//static int eccdev_vma_fault(struct vm_area_struct *, struct vm_fault *);
+-static int eccdev_vma_fault(struct vm_fault *vmf);
++static int eccdev_vma_fault(
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 11, 0)
++        struct vm_area_struct *,
++#endif
++        struct vm_fault *);
+ #else
+ static struct page *eccdev_vma_nopage(
+         struct vm_area_struct *, unsigned long, int *);
+@@ -254,11 +257,18 @@
+  *
+  * \return Zero on success, otherwise a negative error code.
+  */
+-static int eccdev_vma_fault(struct vm_fault *vmf /**< Fault data. */)
++static int eccdev_vma_fault(
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 11, 0)
++        struct vm_area_struct *vma, /**< Virtual memory area. */
++#endif
++        struct vm_fault *vmf /**< Fault data. */
++        )
+ {
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
++    struct vm_area_struct *vma = vmf->vma;
++#endif
+     unsigned long offset = vmf->pgoff << PAGE_SHIFT;
+-    //ec_cdev_priv_t *priv = (ec_cdev_priv_t *) vma->vm_private_data;
+-    ec_cdev_priv_t *priv = (ec_cdev_priv_t *) vmf->vma->vm_private_data;
++    ec_cdev_priv_t *priv = (ec_cdev_priv_t *) vma->vm_private_data;
+     struct page *page;
+ 
+     if (offset >= priv->ctx.process_data_size) {
+@@ -273,9 +283,8 @@
+     get_page(page);
+     vmf->page = page;
+ 
+-    EC_MASTER_DBG(priv->cdev->master, 1, "Vma fault, virtual_address = %p,"
+-            //" offset = %lu, page = %p\n", vmf->virtual_address, offset, page);
+-            " offset = %lu, page = %p\n", (void*)vmf->address, offset, page);
++    EC_MASTER_DBG(priv->cdev->master, 1, "Vma fault,"
++            " offset = %lu, page = %p\n", offset, page);
+ 
+     return 0;
+ }
+--- /epics/drivers/ethercat/etherlabmaster-code/master/cdev.c	2018-06-23 20:40:29.113821300 +0200
++++ ./cdev_patched.c	2018-06-23 20:36:45.349348534 +0200
+@@ -37,7 +37,8 @@
+ #include <linux/module.h>
+ #include <linux/vmalloc.h>
+ #include <linux/mm.h>
+-
++#include <linux/sched/signal.h>
++#include <uapi/linux/sched/types.h>
+ #include "cdev.h"
+ #include "master.h"
+ #include "slave_config.h"
+@@ -62,7 +63,11 @@
+ #define PAGE_FAULT_VERSION KERNEL_VERSION(2, 6, 23)
+ 
+ #if LINUX_VERSION_CODE >= PAGE_FAULT_VERSION
+-static int eccdev_vma_fault(struct vm_area_struct *, struct vm_fault *);
++static int eccdev_vma_fault(
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 11, 0)
++        struct vm_area_struct *,
++#endif
++        struct vm_fault *);
+ #else
+ static struct page *eccdev_vma_nopage(
+         struct vm_area_struct *, unsigned long, int *);
+@@ -253,10 +258,15 @@
+  * \return Zero on success, otherwise a negative error code.
+  */
+ static int eccdev_vma_fault(
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 11, 0)
+         struct vm_area_struct *vma, /**< Virtual memory area. */
++#endif
+         struct vm_fault *vmf /**< Fault data. */
+         )
+ {
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
++    struct vm_area_struct *vma = vmf->vma;
++#endif
+     unsigned long offset = vmf->pgoff << PAGE_SHIFT;
+     ec_cdev_priv_t *priv = (ec_cdev_priv_t *) vma->vm_private_data;
+     struct page *page;
+@@ -273,8 +283,8 @@
+     get_page(page);
+     vmf->page = page;
+ 
+-    EC_MASTER_DBG(priv->cdev->master, 1, "Vma fault, virtual_address = %p,"
+-            " offset = %lu, page = %p\n", vmf->virtual_address, offset, page);
++    EC_MASTER_DBG(priv->cdev->master, 1, "Vma fault,"
++            " offset = %lu, page = %p\n", offset, page);
+ 
+     return 0;
+ }
+--- /epics/drivers/ethercat/etherlabmaster-code/master/master.c	2018-06-23 20:42:19.796033693 +0200
++++ ./master_patched.c	2018-06-23 20:42:10.947856829 +0200
+@@ -44,6 +44,8 @@
+ #include <linux/device.h>
+ #include <linux/version.h>
+ #include <linux/hrtimer.h>
++#include <linux/sched/signal.h>
++#include <uapi/linux/sched/types.h>
+ #include "globals.h"
+ #include "slave.h"
+ #include "slave_config.h"
