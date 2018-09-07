@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/*******************************************************************************
+* Copyright (c) 2010-2015 ITER Organization.
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the Eclipse Public License v1.0
+* which accompanies this distribution, and is available at
+* http://www.eclipse.org/legal/epl-v10.html
+******************************************************************************/
+-->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="63"
+   height="63"
+   viewBox="0 0 50.4 50.4"
+   version="1.1"
+   id="svg3395"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="xyslit.svg">
+  <metadata
+     id="metadata3414">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs3412" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1855"
+     inkscape:window-height="1176"
+     id="namedview3410"
+     showgrid="false"
+     inkscape:zoom="5.6568542"
+     inkscape:cx="73.429965"
+     inkscape:cy="-22.925007"
+     inkscape:window-x="65"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg3395"
+     units="px" />
+  <rect
+     style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:0.91855645px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     id="rect3418"
+     width="49.481441"
+     height="6.2814436"
+     x="0.45927823"
+     y="7.6592779" />
+  <rect
+     style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:0.89036518px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     id="rect3418-6"
+     width="5.8984346"
+     height="49.509636"
+     x="7.6451826"
+     y="0.44518256" />
+  <rect
+     style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:0.91855645px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     id="rect3418-7"
+     width="49.481441"
+     height="6.2814436"
+     x="0.45927823"
+     y="36.459278" />
+  <rect
+     style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:0.91855639px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     id="rect3418-7-5"
+     width="49.481441"
+     height="6.2814436"
+     x="0.4592782"
+     y="22.059277" />
+  <rect
+     style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:0.91855633px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     id="rect3418-6-3"
+     width="6.2814436"
+     height="49.481445"
+     x="22.059278"
+     y="0.45927665" />
+  <rect
+     style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:0.91855639px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     id="rect3418-6-5"
+     width="6.2814436"
+     height="49.481445"
+     x="36.459278"
+     y="0.45927671" />
+</svg>

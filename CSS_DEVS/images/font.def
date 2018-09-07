@@ -1,0 +1,39 @@
+# fonts.def
+
+// Default
+Default = Arial-regular-12
+Default(linux_gtk) = Arial-regular-12
+Default(macosx) = Arial-regular-11
+
+// Default Bold
+Default Bold = Arial-bold-11
+Default Bold(linux_gtk) = Arial-bold-11
+Default Bold(macosx) = Arial-bold-11
+
+// Header 1
+Header 1 = Arial-bold-17
+Header 1(linux_gtk) = Arial-bold-17
+Header 1(macosx) = Arial-bold-17
+
+// Header 2
+Header 2 = Arial-bold-13
+Header 2(linux_gtk) = Arial-bold-13
+Header 2(macosx) = Arial-bold-13
+
+// Header 3
+Header 3 = Arial-bold-11
+Header 3(linux_gtk) = Arial-bold-11
+Header 3(macosx) = Arial-bold-11
+
+// Fine Print
+Fine Print = Arial-regular-7
+Fine Print(linux_gtk) = Arial-regular-7
+Fine Print(macosx) = Arial-regular-7
+
+// Comment
+Comment = Arial-italic-9
+Comment(linux_gtk) = Arial-italic-9
+Comment(macosx) = Arial-italic-9
+
+
+
