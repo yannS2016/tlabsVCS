@@ -1,0 +1,5 @@
+file "db/A13A/vcs_a13a.template" {
+pattern 
+{ SYS	S0  S1  PNK  TOUT	FAIL  STOK	 B9aON	 B9bOFF	 G5AON	 G5AS1OFF	G5AS2OFF	A13APNK		ON   A13ATOUT   SCAN         }
+{ VCS  	1   2   3	 5	 	-1	  0		 141     142     140	 144        143      	139     	1    120       	".04 second" } 
+}

@@ -1,0 +1,282 @@
+program spc2basClearanceSNC
+
+%{
+#include "vcs_var_mes.h" // define this here so C functions are seen
+	
+#define	STOK       	0
+#define  FAIL		 -1
+#define WFVC		 55
+#define B44ON       155
+#define B45OFF		157
+#define DA007ON		153
+#define G6ON    	152      
+#define G6OFF 		156
+#define SPC2BASPNK	154
+}%
+/* Declare seq variables*/
+
+short SPC2BAS_VC;   
+short SPC2BAS_W44_STS;
+short SPC2BAS_W45_STS;
+short SPC2BAS_FAIL_COND;
+short SPC2BAS_RST_OUTS;
+short SPC2BAS_PNK;
+// OPI variable
+string SPC2BAS_CLR_STATS; 
+string SPC2BAS_INTLCK_STATS;
+
+
+// CONTROL FLAGS
+short SPC2BAS_OLD_FAIL_COND;
+short SPC2BAS_FAILED_RST;
+/* Associate SNL variables with epics output pv's*/
+assign	SPC2BAS_RST_OUTS		to	"{SYS}:RST-SPC2BAS.PROC"; 
+assign	SPC2BAS_CLR_STATS		to	"{SYS}:SPC2BAS-CLR-STATS"; 
+assign	SPC2BAS_INTLCK_STATS	to	"{SYS}:SPC2BAS-INTLCK-STATS"; 
+
+/* Associate SNL variables with epics input pv's*/
+assign 	SPC2BAS_VC 			    to 	"{SYS}:SPC2BAS-VC"; 
+assign 	SPC2BAS_W44_STS 		to 	"{SYS}:SPC2-W44-STS";   
+assign 	SPC2BAS_W45_STS 		to 	"{SYS}:SPC2-W45-STS";
+assign	SPC2BAS_FAIL_COND		to	"{SYS}:SPC2BAS-FAIL-COND";
+assign	SPC2BAS_PNK		        to	"{SYS}:SPC2BAS-PNK";
+
+// monitor changes
+monitor	SPC2BAS_VC;
+monitor SPC2BAS_W44_STS;  
+monitor SPC2BAS_W45_STS;
+monitor	SPC2BAS_FAIL_COND;
+monitor	SPC2BAS_PNK;
+
+ss SPC2BAS_clearance_status {
+    
+    state init {
+		when (delay(1)) {
+			initVault();
+			printf("\n%sSPC2 BASEMENT VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_44_pressed	
+    }
+//////////////////////////////////////////////////////////
+	state watchman_44_pressed {
+
+		when (SPC2BAS_FAIL_COND != STOK) {
+			SPC2BAS_OLD_FAIL_COND = SPC2BAS_FAIL_COND;
+		} state  clearance_faillures
+        
+        
+		when (SPC2BAS_W44_STS == WFVC) {
+
+		} state clearance_pending   
+			
+		when (SPC2BAS_W44_STS == B44ON) {
+			SPC2BAS_clear_underway();
+			SPC2BAS_update_report(B44ON);
+		} state watchman_44_released
+	}
+////////////////////////////////////////////////////////////////////////// 
+	state clearance_pending {
+ 
+		option -e;
+
+		entry {
+            resetVault();
+            SPC2BAS_update_report(WFVC);
+		} 
+
+		when (SPC2BAS_W44_STS != WFVC) {
+
+		} state watchman_44_pressed  		
+	}
+    
+ //////////////////////////////////////////////////////////
+	state watchman_44_released {
+		
+		when (SPC2BAS_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+			
+		when (SPC2BAS_W44_STS != B44ON) {
+
+		} state gate_G6_closed
+	}   
+//////////////////////////////////////////////////////////
+	state gate_G6_closed {
+        
+		option -e;
+
+		entry {
+   			SPC2BAS_update_report(G6OFF);
+		} 
+        
+		when (SPC2BAS_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+		
+		when (SPC2BAS_W45_STS != G6OFF) {
+
+		} state watchman_45_pressed
+
+	}
+
+///////////////////////////////////////////////////////////
+	state watchman_45_pressed {
+        
+		option -e;
+		entry {
+			SPC2BAS_update_report(B45OFF);
+		}
+		
+		when (SPC2BAS_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+        
+			
+		when (SPC2BAS_W45_STS ==  STOK) {
+
+			SPC2BAS_status();
+		} state vault_cleared
+        
+        
+		when (SPC2BAS_W45_STS != B45OFF) {
+            
+		} state gate_G6_closed     
+        
+	} 
+///////////////////////////////////////////////////////////////
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("%sSPC2 BASEMENT VAULT IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (SPC2BAS_VC != STOK) {
+
+		} state paniq_faillure
+	
+	}    
+///////////////////////////////////////////////////   
+  	state paniq_faillure {
+    
+      when (SPC2BAS_VC != SPC2BASPNK) {
+
+	  } state clearance_faillures	
+ 
+ 	  when () { // paniq button released?  
+		printf("SPC2 BASEMENT VAULT CLEARED FAILURE CONDITION: ");
+		SPC2BAS_update_failed(SPC2BASPNK); 
+
+	  } state recover_from_paniq	     
+	} 
+////////////////////////////////////////////////////////////    
+   	state recover_from_paniq {
+		option -e;
+		option -x;
+   
+		when (!SPC2BAS_PNK) { // paniq button released?
+		} state recover_from_faillure  
+
+		exit {
+            SPC2BAS_FAILED_RST = FALSE;
+		}
+	}  
+///////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("SPC2 BASEMENT CLEARANCE FAILURE CONDITION: ");
+            SPC2BAS_OLD_FAIL_COND = SPC2BAS_FAIL_COND;	
+			SPC2BAS_FAILED_RST = FALSE;
+		}
+
+		when () {
+            //printf("FAIL VALUE: %d\n ",SPC2BAS_FAIL_COND);
+			SPC2BAS_update_failed(SPC2BAS_FAIL_COND == FAIL? STOK : SPC2BAS_FAIL_COND); // we cannot index -1(FAIL)
+		} state recover_from_faillure			
+	}
+//////////////////////////////////////////////////////////
+	state recover_from_faillure {
+		
+		when (!SPC2BAS_FAIL_COND) {
+		//	if(!SPC2BAS_FAILED_RST) {
+				printf("%sSPC2 BASEMENT RECOVERING FROM FAILLURE : ENTERING W44 STATE%s\n",OK,DEF);
+		//		SPC2BAS_FAILED_RST = TRUE;
+		//	}
+		} state  watchman_44_pressed
+			
+		when (SPC2BAS_FAIL_COND != SPC2BAS_OLD_FAIL_COND) {
+            
+            
+		} state  clearance_faillures
+	}
+    
+}
+///////////////////////////////////////////////////////////////////////////////
+void initVault(){
+	SPC2BAS_OLD_FAIL_COND = SPC2BAS_FAIL_COND;
+    SPC2BAS_RST_OUTS  = TRUE;
+	not_cleared(SPC2BAS_CLR_STATS);
+	report_error(SPC2BAS_INTLCK_STATS, 0);
+    pvPut(SPC2BAS_RST_OUTS, SYNC);
+	pvPut(SPC2BAS_CLR_STATS, SYNC);
+	pvPut(SPC2BAS_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void resetVault(){
+	not_cleared(SPC2BAS_CLR_STATS);
+	pvPut(SPC2BAS_CLR_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SPC2BAS_update_failed(short report)
+{
+	clear_failed(SPC2BAS_CLR_STATS);
+	pvPut(SPC2BAS_CLR_STATS, SYNC);
+	report_error(SPC2BAS_INTLCK_STATS, report);
+	pvPut(SPC2BAS_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,SPC2BAS_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void SPC2BAS_update_report(short intlck) {
+	report_error(SPC2BAS_INTLCK_STATS, intlck);
+	pvPut(SPC2BAS_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SPC2BAS_status()
+{
+	cleared(SPC2BAS_CLR_STATS);
+	pvPut(SPC2BAS_CLR_STATS, SYNC); 		
+	report_error(SPC2BAS_INTLCK_STATS, 0);
+	pvPut(SPC2BAS_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void SPC2BAS_clear_underway()
+{  
+	clear_underway(SPC2BAS_CLR_STATS);
+	pvPut(SPC2BAS_CLR_STATS, SYNC); 		
+}
+
+//////////////////////////////////////////////////////////////////////////
+%{
+
+inline void cleared(string vault_status) {   
+    strcpy(vault_status, mes_array[1]); // Area cleared  
+}
+////////////////////////////////////////////////
+inline void not_cleared(string vault_status) {  
+   strcpy(vault_status, mes_array[2]); // Area not cleared    
+}
+///////////////////////////////////////////////
+inline void clear_underway(string vault_status) { 
+   strcpy(vault_status, mes_array[3]);  // Area clearance underway    
+}
+//////////////////////////////////////////////
+inline void clear_failed(string vault_status) { 
+   strcpy(vault_status, mes_array[5]); // Area clearance fail   
+}
+////////////////////////////////////////////////
+inline void report_error(string vault_interlock, short intlock)
+{
+   strcpy(vault_interlock, mes_array[intlock]);
+}
+	
+}%

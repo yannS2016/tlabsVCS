@@ -1,0 +1,5 @@
+file "db/vcs_vli.template" {
+pattern
+{  SYS    CLR    NCLR    PNK    TOUT    WFVC    FAIL    STOK    B32ON    B33OFF    G4ON    G4S1ON    G4S2ON    DA004ON    DA004S1OFF    DA004S2OFF    VLIPNK    ON    VLITOUT    SCAN    }
+{  VCS    1      2       3      6       55      -1      0       94       97        79      80        81        93         95            96            135       1     120        ".05 second"}
+}

@@ -1,0 +1,13 @@
+file "db/basement/vcs_ssccable.template" {
+pattern 
+{  SYS  CLR  NCLR  PNK  WFVC  TOUT  STOK   B16ON    B17OFF    DA001AON    DA001AS1ON 	DA001AS2ON    G5ON    G5S1OFF  G5S2OFF    SSCCABPNK   ON   SSCCABTOUT   SCAN }
+{  VCS  1    2     3	 55   6	    0      12	   	11     	  14		  7			 	8			  13	  9		   10		  15          1    120          ".1 second"}    
+}
+
+#file "db/basement/vcs_sscbas.template" {
+#pattern 
+#{ SYS CLR NCLR PNK  WFVC TOUT STOK A001AON  DA001ON DA001S1ON DA001S2ON  G1ON G1S1ON G1S2ON  G2ON G2OFF  B1ON  W1ON  B2OFF  B2ON  B3OFF  B3ON  B4OFF  B4ON  W4ON  B5OFF  B5ON  B6OFF  SSCPNK  ON SSCTOUT  SCAN }
+#{ VCS 1   2    3    55   6    0    16       17      23	      24         18   25     26	     19	  33	 38	   21	 22	    36    27     37    28     32    30    29     34    35     20      1  120 ".05 second"} 
+#}
+
+

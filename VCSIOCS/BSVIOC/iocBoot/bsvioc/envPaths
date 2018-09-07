@@ -1,0 +1,8 @@
+epicsEnvSet("ARCH","linux-x813_134")
+epicsEnvSet("IOC","bsvioc")
+epicsEnvSet("TOP","/home/vcs/VCS/VCSIOCS/BSVIOC")
+epicsEnvSet("EPICS_BASE","/epics/base")
+epicsEnvSet("ECASYN","/epics/ethercat-4-3")
+epicsEnvSet("ASYN","/epics/support/asyn4-21")
+epicsEnvSet("AUTOSAVE","/epics/support/autosave-5-13-1")
+epicsEnvSet("SNCSEQ","/epics/support/seq-2-2-1")

@@ -1,0 +1,104 @@
+## Load the master bus template file##
+file "db/MASTER.template" {
+
+	pattern {SYS	DEVICE		 PORT	    SCAN		}
+	        {VCS	MASTER	     MASTER0   "I/O Intr"	}
+}
+## Load the bus coupler template file###
+file "db/EK1100.template" {
+
+	pattern {SYS	DEVICE     PORT  	   SCAN		    }
+		    {VCS    COUPLER	   ERIO.0	   "I/O Intr"	}
+}
+##############################Load the bus Inputs template files #################################################################
+### Field Input Interface to Beckhoff Modules ###
+# The field output interface is done via 10  Beckhoff output modules(EL1862)
+# card 1:
+# Field input on CON 1 start on DIM19 and end on 4thOUTPUT of DIM20 
+# Field input on CON 2 start on DIM20 on 5thOUTPUT and end on 8thOUTPUT of DIM21 
+# Field input on CON 3 start on DIM21 on 9thOUTPUT and end on 12thOUTPUT of DIM22 
+# Field input on CON 4 start on DIM22 on 13thOUTPUTand end on 16thOUTPUT of DIM23 
+# card 2:
+# Field input on CON 14 start on DIM14 and end on 4thOUTPUT of DIM15 
+# Field input on CON 15 start on DIM15 on 5thOUTPUT and end on 8thOUTPUT of DIM16 
+# Field input on CON 16 start on DIM16 on 9thOUTPUT and end on 12thOUTPUT of DIM17 
+# Field input on CON 17 start on DIM22 on 13thOUTPUT and end on 16thOUTPUT of DIM23 
+file "db/EL1862.template" {
+pattern {
+#card 1
+ SYS     DEVICE	 SCAN       PORT	  INPUT1	       INPUT2		   INPUT3		   INPUT4	       INPUT5		    INPUT6 	         INPUT7	         INPUT8	          INPUT9	      INPUT10	      INPUT11	     INPUT12	     INPUT13	     INPUT14	    INPUT15        INPUT16     }
+#{"VCS"  DIM19	 "I/O Intr"	ERIO.19	  WS-BUT-SSC-13    WS-BUT-SSC-2    WS-BUT-SSC-16   WS-BUT-SSC-17   WS-BUT-SSC-1     WS-BUT-SSC-3     WS-BUT-SSC-14   WS-BUT-SSC-15    WS-BUT-SSC-4    WS-BUT-SSC-5    WS-BUT-SSC-6   WS-BUT-SSC-12   DIM19:INC-1     DIM19:INC-2    DIM19:INC-3    DIM19:INC-4   }
+#{"VCS"  DIM20   "I/O Intr"	ERIO.20	  DIM20:INC-1      SW-I-SSC-G5     SW-II-SSC-G5    SW-I-SSC-A001A  SW-II-SSC-A001A  SW-I-SSC-G1      SW-II-SSC-G1    SW-I-SSC-A1      SW-II-SSC-A1    SW-I-SSC-A001   SW-II-SSC-A001 SW-I-SSC-G2     SW-II-SSC-G2    DIM20:INC-2    DIM20:INC-3    WS-BUT-IBL-7  }
+#{"VCS"  DIM21  "I/O Intr"	ERIO.21	  WS-BUT-IBL-9     SW-SSC-G3       WS-BUT-VLI-32   WS-BUT-VLI-33   SW-I-SSC-A1A     SW-II-SSC-A1A    SW-I-IBL-A13    SW-II-IBL-A13    WS-BUT-HLI-30   WS-BUT-HLI-31   SW-I-HLI-A14   SW-II-HLI-A14   WS-BUT-EXP-28a  WS-BUT-EXP-26  WS-BUT-TRL-34a WS-BUT-TRL-35 }
+#{"VCS"  DIM22	"I/O Intr"	ERIO.22	  SW-I-VLI-G4      SW-II-VLI-G4    SW-I-VLI-A004   SW-II-VLI-A004  SW-I-TRL-A004A   SW-II-TRL-A004A  WS-BUT-SSC-11   WS-BUT-IBL-8     SW-III-SSC-A1A  SW-IV-SSC-A1A   WS-BUT-EXP-28b WS-BUT-TRL-34b  WS-BUT-EV1-18   WS-BUT-EV1-19  WS-BUT-EV2-20  WS-BUT-EV2-21 }
+#{"VCS"  DIM23	"I/O Intr"	ERIO.23	  WS-BUT-EV3-22    WS-BUT-EV3-23   WS-BUT-SPE-24   WS-BUT-SPE-25   WS-BUT-EXP-27    WS-BUT-EXP-29    WS-BUT-BSV-36   WS-BUT-BSV-37    WS-BUT-cnA-38   WS-BUT-cnA-39   SW-I-EV1-A6    SW-II-EV1-A6    SW-I-EV2-A7     SW-II-EV2-A7   SW-I-EV3-A8    SW-II-EV3-A8  }
+# card 2
+#{"VCS"  DIM14	"I/O Intr"  ERIO.14   SW-I-EXP-A12     SW-II-EXP-A12   SW-I-SPE-A9     SW-II-SPE-A9    SW-I-BSV-A15     SW-II-BSV-A15    SW-I-cnA-A12A   SW-II-cnA-A12A   WS-BUT-A13A-9a  WS-BUT-A13A-9b  SW-I-A13A-G5A  SW-II-A13A-G5A  SW-G9-EXP-A12   SW-G10-EXP-A12 SW-G7-A2       DIM14:INC-1    }
+#{"VCS"  DIM15  "I/O Intr"  ERIO.15   DIM15:INC-1      DIM15:INC-2     DIM15:INC-3     DIM15:INC-4     SW-I-SPC1-A005   SW-II-SPC1-A005  SW-I-SPC1-A005A SW-II-SPC1-A005A SW-I-SPC1-A2    SW-II-SPC1-A2   SW-I-SPC1-A001 SW-II-SPC1-A001 WS-BUT-SPC2-44  WS-BUT-SPC2-45 WS-BUT-SPC2-46 WS-BUT-SPC2-47 }
+#{"VCS"  DIM16  "I/O Intr"  ERIO.16   WS-BUT-SPC2-48   SW-I-SPC2-A007  SW-II-SPC2-A007 SW-I-SPC2-G6    WS-BUT-SPC1-40   WS-BUT-SPC1-41   WS-BUT-SPC1-42  WS-BUT-SPC1-43   SW-RF-A1        SW-RF-A13       SW-RF-A12      SW-RF-A6        SW-RF-A7        SW-RF-A8       SW-RF-A9       SW-RF-A15      }
+#{"VCS"  DIM17	"I/O Intr"  ERIO.17   SW-RF-A14        SW-RF-A3        SW-RF-A2        DIM17:INC-1     DIM17:INC-2      DIM17:INC-3      DIM17:INC-4     DIM17:INC-5      DIM17:INC-6     DIM17:INC-7     DIM17:INC-8    DIM17:INC-9     SW-II-SPC2-A3a  WS-BUT-LEA-49  WS-BUT-LEA-50  SW-I-LEA-A19   }
+#{"VCS"  DIM18	"I/O Intr"  ERIO.18   SW-II-LEA-A19    DIM18:INC-1     DIM18:INC-2     DIM18:INC-3     DIM18:INC-4      DIM18:INC-5      DIM18:INC-6     DIM18:INC-7      DIM18:INC-8     DIM18:INC-9     DIM18:INC-10   DIM18:INC-11    SW-II-SPC2-G6a  SW-I-SPC2-A3   SW-II-SPC2-A3  SW-I-SPC2-A3a  }
+#} 
+
+
+# card 2
+#{"VCS"  DIM14	"I/O Intr"  ERIO.14   WS-BUT-SPC2-44   WS-BUT-SPC2-45  WS-BUT-SPC2-46  WS-BUT-SPC2-47  WS-BUT-SPC2-48   SW-I-SPC2-A007   SW-II-SPC2-A007 SW-I-SPC2-G6     SW-I-SPC2-A3a   SW-II-SPC2-A3a  SW-II-SPC2-G6a SW-I-SPC2-A3   SW-II-SPC2-A3     SW-G7-A2       WS-BUT-SPC1-40  WS-BUT-SPC1-41 }
+#{"VCS"  DIM15  "I/O Intr"  ERIO.15   WS-BUT-SPC1-42   WS-BUT-SPC1-43  SW-I-SPC1-A005  SW-II-SPC1-A005 SW-I-SPC1-A005A  SW-II-SPC1-A005A SW-I-SPC1-A2    SW-II-SPC1-A2    SW-I-SPC1-A001  SW-II-SPC1-A001 SW-RF-A1       SW-RF-A13      SW-RF-A12         SW-RF-A6       SW-RF-A7        SW-RF-A8       }
+#{"VCS"  DIM16  "I/O Intr"  ERIO.16   HWDPB            SW-RF-A9        SW-RF-A15       SW-RF-A14       SW-RF-A3         SW-RF-A2         SW-II-TRL-A004A  WS-BUT-SSC-11   WS-BUT-IBL-8     SW-III-SSC-A1A  SW-IV-SSC-A1A   WS-BUT-EXP-28b WS-BUT-TRL-34b  WS-BUT-EV1-18   WS-BUT-EV1-19   WS-BUT-EV2-20 }
+#{"VCS"  DIM17	"I/O Intr"  ERIO.17   WS-BUT-EV3-22    WS-BUT-EV3-23   WS-BUT-SPE-24   WS-BUT-SPE-25   WS-BUT-EXP-27    WS-BUT-EXP-29    WS-BUT-BSV-36   WS-BUT-BSV-37    WS-BUT-cnA-38   WS-BUT-cnA-39   SW-I-EV1-A6    SW-II-EV1-A6    SW-I-EV2-A7     SW-II-EV2-A7   SW-I-EV3-A8    SW-II-EV3-A8 }
+#{"VCS"  DIM18	"I/O Intr"  ERIO.18   SW-II-LEA-A19    DIM18:INC-1     DIM18:INC-2     DIM18:INC-3     DIM18:INC-4      DIM18:INC-5      DIM18:INC-6     DIM18:INC-7      DIM18:INC-8     DIM18:INC-9     DIM18:INC-10   DIM18:INC-11    SW-I-A13A-G5A  SW-II-A13A-G5A   SW-G9-EXP-A12   WS-BUT-A13A-9a }
+#} 
+	
+#	# card 2
+#{"VCS"  DIM14	"I/O Intr"  ERIO.14   WS-BUT-SPC1-40   WS-BUT-SPC1-41  SW-G7-A2        SW-I-SPC1-A2    SW-II-SPC1-A2    WS-BUT-SPC1-42   WS-BUT-SPC1-43  SW-I-SPC1-A005   SW-II-SPC1-A005 SW-I-SPC1-A005A  SW-II-SPC1-A005A  SW-I-SPC1-A001  SW-II-SPC1-A001   WS-BUT-SSC-16   WS-BUT-SSC-17   WS-BUT-SSC-1   }
+#{"VCS"  DIM15  "I/O Intr"  ERIO.15   SW-RF-A1         SW-RF-A13       SW-RF-A12       SW-RF-A6        SW-RF-A7         SW-RF-A8         SW-RF-A9        SW-RF-A15        SW-RF-A14       SW-RF-A2         SW-RF-A3          WS-BUT-SPC2-44  WS-BUT-SPC2-45    WS-BUT-SPC2-46  WS-BUT-SPC2-47  WS-BUT-SPC2-48 }
+#{"VCS"  DIM16  	"I/O Intr"  ERIO.16   HWDPB            SW-I-SPC2-A007  SW-II-SPC2-A007 SW-I-SPC2-G6    SW-I-SPC2-A3a    SW-II-SPC2-A3a   SW-II-SPC2-G6a  SW-I-SPC2-A3     SW-II-TRL-A004A WS-BUT-SSC-11    WS-BUT-IBL-8      SW-III-SSC-A1A  SW-IV-SSC-A1A     WS-BUT-EXP-28b  WS-BUT-TRL-34b  WS-BUT-EV1-18  }
+#{"VCS"  DIM17	"I/O Intr"  ERIO.17   WS-BUT-EV3-22    WS-BUT-EV3-23   WS-BUT-SPE-24   WS-BUT-SPE-25   WS-BUT-EXP-27    WS-BUT-EXP-29    WS-BUT-BSV-36   WS-BUT-BSV-37    WS-BUT-cnA-38   WS-BUT-cnA-39    SW-I-EV1-A6       SW-II-EV1-A6    SW-I-EV2-A7       SW-II-EV2-A7    SW-I-EV3-A8     SW-II-EV3-A8   }
+#{"VCS"  DIM18	"I/O Intr"  ERIO.18   SW-II-LEA-A19    DIM18:INC-1     DIM18:INC-2     DIM18:INC-3     DIM18:INC-4      DIM18:INC-5      DIM18:INC-6     DIM18:INC-7      DIM18:INC-8     DIM18:INC-9      DIM18:INC-10      DIM18:INC-11    SW-I-A13A-G5A     SW-II-A13A-G5A  SW-G9-EXP-A12   WS-BUT-A13A-9a }
+#} 
+
+	# card 2
+{"VCS"  DIM14	"I/O Intr"  ERIO.14   WS-BUT-SSC-16    WS-BUT-SSC-17   SW-I-SSC-G5     SW-II-SSC-G5    SW-I-SSC-A001A   SW-II-SSC-A001A  WS-BUT-SSC-1    WS-BUT-SSC-2     WS-BUT-SSC-3    WS-BUT-SSC-4     WS-BUT-SSC-5      WS-BUT-SSC-6    WS-BUT-SSC-11     WS-BUT-SSC-12   WS-BUT-SSC-13   WS-BUT-SSC-14   }
+{"VCS"  DIM15  	"I/O Intr"  ERIO.15   WS-BUT-SSC-15    SW-I-SSC-A1A     SW-II-SSC-A1A SW-I-SSC-G1     SW-II-SSC-G1     SW-I-SSC-A1      SW-II-SSC-A1    SW-I-SSC-A001    SW-II-SSC-A001  SW-I-SSC-G2      SW-II-SSC-G2      SW-RF-A3        WS-BUT-SPC2-45    WS-BUT-SPC2-46  WS-BUT-SPC2-47  WS-BUT-SPC2-48 }
+{"VCS"  DIM16  	"I/O Intr"  ERIO.16   HWDPB            SW-I-SPC2-A007  SW-II-SPC2-A007 SW-I-SPC2-G6    SW-I-SPC2-A3a    SW-II-SPC2-A3a   SW-II-SPC2-G6a  SW-I-SPC2-A3     SW-II-TRL-A004A WS-BUT-SSC-11    WS-BUT-IBL-8      SW-III-SSC-A1A  SW-IV-SSC-A1A     WS-BUT-EXP-28b  WS-BUT-TRL-34b  WS-BUT-EV1-18  }
+{"VCS"  DIM17	"I/O Intr"  ERIO.17   WS-BUT-EV3-22    WS-BUT-EV3-23   WS-BUT-SPE-24   WS-BUT-SPE-25   WS-BUT-EXP-27    WS-BUT-EXP-29    WS-BUT-BSV-36   WS-BUT-BSV-37    WS-BUT-cnA-38   WS-BUT-cnA-39    SW-I-EV1-A6       SW-II-EV1-A6    SW-I-EV2-A7       SW-II-EV2-A7    SW-I-EV3-A8     SW-II-EV3-A8   }
+{"VCS"  DIM18	"I/O Intr"  ERIO.18   SW-II-LEA-A19    DIM18:INC-1     DIM18:INC-2     DIM18:INC-3     DIM18:INC-4      DIM18:INC-5      DIM18:INC-6     DIM18:INC-7      DIM18:INC-8     DIM18:INC-9      DIM18:INC-10      DIM18:INC-11    SW-I-A13A-G5A     SW-II-A13A-G5A  SW-G9-EXP-A12   WS-BUT-A13A-9a }
+}
+
+
+############################## Load the bus Outputs template files #################################################################
+### Field Output Interface to Beckhoff Modules ###
+# The field output interface is done via 8  Beckhoff output modules(EL2872)
+# Field outputs on CON 5 and 8 interface to card 4
+# Field outputs on CON 6 and 7 interface to card 3 
+# Field outputs on CON 9 and 10 interface to card 2
+# Field outputs on CON 11 and 12 interface to card 1 
+file "db/EL2872.template" {
+pattern {
+#card 1
+ SYS 	DEVICE	DEVSCAN     SCAN 		PORT	 OUTPUT1	    OUTPUT2	  OUTPUT3		  OUTPUT4	      OUTPUT5		   OUTPUT6 	    OUTPUT7	    OUTPUT8	     OUTPUT9	    OUTPUT10	   OUTPUT11	   OUTPUT12	   OUTPUT13	   OUTPUT14	   OUTPUT15      OUTPUT16     }
+{"VCS"  DOM6	"I/O Intr"  "Passive"   ERIO.6	  DOM6:ONC-1     DOM6:ONC-2    DOM6:ONC-3      DOM6:ONC-4      DOM6:ONC-5       DOM6:ONC-6       DOM6:ONC-7      DOM6:ONC-8       DOM6:ONC-9     DOM6:ONC-10    DOM6:ONC-11     DOM6:ONC-12     DOM6:ONC-13     DOM6:ONC-14     DOM6:ONC-15     DOM6:ONC-16   }
+{"VCS"  D0M7    "I/O Intr"  "Passive"   ERIO.7	  DOM7:ONC-1     DOM7:ONC-2    DOM7:ONC-3      DOM7:ONC-4      DOM7:ONC-5       DOM7:ONC-6       DOM7:ONC-7      DOM7:ONC-8       DOM7:ONC-9     CL16-LEA       CS16-LEA        CL15-SPC2       CS15-SPC2       CL14-SPC2       CS14-SPC2       LED-WS-LEA-50 }
+#card 2
+{"VCS" 	DOM8    "I/O Intr"  "Passive"   ERIO.8	  CL13-BSV       CS13-BSV      LED-WS-A13A-9a  LED-WS-A13A-9b  LED-WS-SPC1-40   LED-WS-SPC1-41   LED-WS-SPC1-42  LED-WS-SPC1-43   CS1-SPC1       CL1-SPC1       LED-WS-SPC2-44  LED-WS-SPC2-45  LED-WS-SPC2-46  LED-WS-SPC2-47  LED-WS-SPC2-48  LED-WS-LEA-49 }
+{"VCS" 	DOM9	"I/O Intr"  "Passive"   ERIO.9	  LED-WS-EXP-27  LED-WS-EXP-29 LED-WS-BSV-36   LED-WS-BSV-37   LED-WS-cnA-38    LED-WS-cnA-39    CS8-EXP         CL8-EXP          CS9-EV1        CL9-EV1        CS10-EV2        CL10-EV2        CS11-EV3        CL11-EV3        CS12-SPE        CL12-SPE      }
+#card 3  
+{"VCS"  DOM10   "I/O Intr"	"Passive"   ERIO.10	  CL4-SSC        CS3-SSC       CS4-SSC         LED-WS-IBL-7    LED-WS-IBL-9     LED-WS-SSC-11a   LED-WS-VLI-32   LED-WS-VLI-33    LED-WS-HLI-30  LED-WS-HLI-31  LED-WS-EXP-28a  LED-WS-EXP-26   LED-WS-TRL-34a  LED-WS-TRL-35   LED-WS-SSC-11   LED-WS-IBL-8  }
+{"VCS"  DOM11   "I/O Intr"	"Passive"   ERIO.11   CS5-IBL        CS6-HLI       CS7-VLI         CL5-IBL         CL6-HLI          CL7-VLI          LED-WS-EXP-28b  LED-WS-TRL-34b   LED-WS-EV1-18  LED-WS-EV1-19  LED-WS-EV2-20   LED-WS-EV2-21   LED-WS-EV3-22   LED-WS-EV3-23   LED-WS-SPE-24   LED-WS-SPE-25 }
+#card 4
+{"VCS"  DOM12   "I/O Intr"  "Passive"   ERIO.12   LED-WS-SSC-2   LED-WS-SSC-13 LED-WS-SSC-17   LED-WS-SSC-16   LED-WS-SSC-3     LED-WS-SSC-1     LED-WS-SSC-15   LED-WS-SSC-14    LED-WS-SSC-5   LED-WS-SSC-4   LED-WS-SSC-12   LED-WS-SSC-6    DOM12:ONC-1     DOM12:ONC-2     DOM12:ONC-3     CL3-SSC       }
+
+} 
+####################### Load relay modules Template for SIS interface ###################################################################
+##### Interface to Safety Interlock System ##########
+# The SIS interface is done via 5 relay output Module(EL2624).  
+# These output are availlable on output card 4 connector 8
+file "db/EL2624.template" {
+pattern {
+ SYS  	DEVICE  DEVSCAN     SCAN 		PORT	OUTPUT1	    OUTPUT2	    OUTPUT3	    OUTPUT4   }
+{VCS  	ROM1	"I/O Intr"  "Passive"   ERIO.1  SPC1-CLR    SPC2-CLR	SPC2L-CLR	cnA-CLR    }
+{VCS  	ROM2	"I/O Intr"  "Passive"   ERIO.2  BSV-CLR     TRL-CLR		VLI-CLR  	HLI-CLR    }
+{VCS  	ROM3	"I/O Intr"  "Passive"   ERIO.3  SPE-CLR     EV3-CLR		EV2-CLR    	EV1-CLR    }
+{VCS  	ROM4	"I/O Intr"  "Passive"   ERIO.4  EXP-CLR     IBL-CLR		SSC-CLR  	SSCL-CLR   }
+{VCS  	ROM5	"I/O Intr"  "Passive"   ERIO.5  SSCCAB-CLR	ROM5:ONC-1	ROM5:ONC-2 	ROM5:ONC-3 }
+}

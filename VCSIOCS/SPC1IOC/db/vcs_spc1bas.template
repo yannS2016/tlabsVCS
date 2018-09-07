@@ -1,0 +1,219 @@
+########################################
+# SELECT THE NEXT PROCESSING BRANCH #
+##IF BUTTON 42 IS STILL PRESSED PNK IS ACTIVE##
+record(calc, "$(SYS):SPC1BAS-SEL-STAGE") {
+  field(DESC, "Select processing branch")
+  field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
+  field(CALC, "!A?B?$(CLR):$(NCLR):$(PNK)")
+  field(INPA, "$(SYS):SPC1BAS-PNK") # we intend the state of this record when leaving cleared state: old state
+  field(INPB, "$(SYS):SPC1-CLR NPP")
+  field(FLNK, "$(SYS):SPC1BAS-PROC-STAGE")
+}
+## THIS RECORDS PROPAGATE PROCESSING ##
+record(fanout, "$(SYS):SPC1BAS-PROC-STAGE") {
+  field(SCAN, "Passive")
+  field(SELM, "Specified")
+  field(SELL, "$(SYS):SPC1BAS-SEL-STAGE")
+  field(LNK1, "$(SYS):SPC1BAS-VC PP")
+  field(LNK2, "$(SYS):SPC1BAS-VNC PP")
+  field(LNK3, "$(SYS):SPC1BAS-PNK PP")
+}
+################################################################
+# monitor status of inputs which may cause clearance faillure
+# SIGNAL TO SYS: SPC1BAS-VC?SPC1BAS-SNC-CLR && (HARDWARE STATUS RECORDS):FALSE
+record(calcout, "$(SYS):SPC1BAS-VC") { 
+  field(DESC, "SPC1BAS Vault clear stage")
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?B?$(SPC1BASPNK):$(STOK):A")
+  field(INPA, "$(SYS):SPC1BAS-FAIL-COND.VAL PP")
+  field(INPB, "$(SYS):SPC1BAS-PNK.VAL PP")
+  field(OUT,  "$(SYS):RST-SPC1BAS.PROC PP")
+  field(OOPT, "When Non-zero")
+}
+###################################################################################
+#CLEARANCE UNDERWAY FAIL CONDITIONS
+#IF VAULT IS CLEARED AND GATE G6 OPENED: FAILLURE
+#OTHERWISE CLEARANCE UNDERWAY DOOR WILL NEED TO CLOSE
+# AT BOOT INIT IS 0(VAULT NOT INIT): THUS WE TEST FOR !INIT AND SET IT TO ONE AFTER RESETTING OUTPUTS
+record(calcout, "$(SYS):SPC1BAS-FAIL-COND") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?B?!C?!D?E&&F?$(DA005ON):!G?$(STOK):$(TOUT):$(DA005AON):$(DA001ON):$(A005ON):$(RA2ON)")
+  field(INPA, "$(SYS):SW-RF-A2 NPP") 
+  field(INPB, "$(SYS):SPC1GF-CLR NPP")# SPC1 GROUND FLOOR MUST BE CLEARED
+  field(INPC, "$(SYS):SPC1-DA001-CLSD PP") 
+  field(INPD, "$(SYS):SPC1-DA005A-CLSD PP") 
+  field(INPE, "$(SYS):SPC1-CLR")
+  field(INPF, "$(SYS):SPC1-DA005-CLSD PP")
+  field(INPG, "$(SYS):SPC1BAS-TIMEOUT")
+  field(OUT,  "$(SYS):RST-SPC1BAS.PROC PP")
+  field(OOPT, "Transition To Non-zero") # STOP THIS RECORD TO KEEP RESETTING SHARED OUTPUT AFTER INIT 
+}
+########################################
+# RESET VAULT
+record(seq, "$(SYS):RST-SPC1BAS") { # HANDLE BY SEQ
+  field(SCAN, "Passive")
+  field(PINI, "YES") # init status of outputs
+  field(DOL1, "0")
+  field(DOL2, "0")
+  field(DOL3, "0")
+  field(DOL4, "0")
+  field(DOL5, "0")
+  field(DOL6, "0")
+  field(DOL7, "0")
+  field(LNK1, "$(SYS):SPC1-CLR PP")
+  field(LNK2, "$(SYS):LED-WS-SPC1-42 PP")
+  field(LNK3, "$(SYS):LED-WS-SPC1-43 PP")
+  field(LNK4, "$(SYS):CS1-SPC1 PP")
+  field(LNK5, "$(SYS):CL1-SPC1 PP")
+  field(LNK6, "$(SYS):SPC1BAS-COUNTER PP")
+  field(LNK7, "$(SYS):WATCHMAN-SPC1-42-ACT PP")
+  field(SELM, "All")
+}
+#######################################################################################
+record(calc, "$(SYS):SPC1BAS-VNC") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(STOK):A")
+  field(INPA, "$(SYS):SPC1-W42-STS PP")
+}
+###############################################################
+# ONLY CHNAGE OUTS STATE WHEN B42 IS PRESSED WHILE ROOF
+# A2 ARE CLOSED: THIS ENSURE WE DONT UNECCESSARLY WRITE TO OUTS
+# WHEN WFVC IS RETURNED THIS MEANS THAT NO VAULT CLEARANCE WAS STARTED AFTER INIT: VAULT WAITING FOR CLEARANCE
+# WHEN STOK IS RETURNED VAULT CLEARANCE STAGE 1 IS UNDERWAY
+
+record(calcout, "$(SYS):SPC1-W42-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?$(STOK):$(B42ON):!C?$(WFVC):D:A")
+  field(INPA, "$(SYS):SPC1BAS-FAIL-COND PP")
+  field(INPB, "$(SYS):WS-BUT-SPC1-42 NPP")
+  field(INPC, "$(SYS):WATCHMAN-SPC1-42-ACT NPP")
+  field(INPD, "$(SYS):SPC1-W43-STS PP")
+  field(OUT,  "$(SYS):SPC1W42-WRT-OUTS.PROC PP")
+  field(OOPT, "Transition To Zero") 
+}
+####################### STAGE 1 OUTPUTS STATUS  #################
+record(seq, "$(SYS):SPC1W42-WRT-OUTS") { # HANDLE BY SEQ
+  field(SCAN, "Passive")
+  field(SELM, "All")
+  field(DOL1, "1")
+  field(DOL2, "0")
+  field(DOL3, "1")
+  field(DOL4, "1")
+  field(DOL5, "1")
+  field(DOL6, "0")
+  field(LNK1, "$(SYS):LED-WS-SPC1-42.VAL PP")
+  field(LNK2, "$(SYS):SPC1BAS-COUNTER.VAL PP")
+  field(LNK3, "$(SYS):CS1-SPC1.VAL PP")
+  field(LNK4, "$(SYS):CL1-SPC1.VAL PP")
+  field(LNK5, "$(SYS):WATCHMAN-SPC1-42-ACT.VAL PP")
+  field(LNK6, "$(SYS):SPC1BAS-VC.VAL") # RESET ANY PREVIOUS FAIL CONDITIONS
+}
+###########################################################
+# monitor status of inputs and set output in stage 2
+# STAGE 2 CLERANCE EQUATIONS
+# IF WATCHMAN 42 RELEASE CONTINUE CLEARANCE
+# WE TEST IT IN "SPC1-WATCH-42-RLSD" RECORD
+record(calcout, "$(SYS):SPC1-W43-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?C&&!D?$(STOK):$(B43OFF):$(DA005OFF):A")
+  field(INPA, "$(SYS):SPC1BAS-FAIL-COND PP")
+  field(INPB, "$(SYS):SPC1-DA005-CLSD PP") 
+  field(INPC, "$(SYS):SPC1-WATCH-42-RLSD.VAL PP")
+  field(INPD, "$(SYS):WS-BUT-SPC1-43 NPP")
+  field(OUT,  "$(SYS):SPC1W43-WRT-OUTS.PROC PP")
+  field(OOPT, "Transition To Zero") 
+}
+###################################################### 
+# STAGE 2 OUTPUTS STATUS  
+# THIS RECORDS IS PROCESSED ONLY WHEN SPC1BAS-W43-STS RETRUN 0
+record(seq, "$(SYS):SPC1W43-WRT-OUTS") {
+  field(SELM, "All")
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DLY2, "0.02")
+  field(LNK1, "$(SYS):RST-SPC1BAS.PROC PP")
+  field(LNK2, "$(SYS):SPC1-CLR.VAL PP")
+  field(LNK3, "$(SYS):LED-WS-SPC1-43 PP")
+  field(SCAN, "Passive")
+}
+
+################################################
+# WATCHMAN 42 RELEASE #
+record(calc, "$(SYS):SPC1-WATCH-42-RLSD") {
+  field(CALC, "A&&B?$(ON):$(STOK)")
+  field(INPA, "$(SYS):WS-BUT-SPC1-42.VAL")
+  field(INPB, "$(SYS):WATCHMAN-SPC1-42-ACT.VAL")
+}
+####################################################
+# DOOR A001 CLOSED #
+record(calc, "$(SYS):SPC1-DA001-CLSD") {
+  field(SCAN, "Passive")
+  field(CALC, "!A&&!B?$(STOK):$(ON)")
+  field(INPA, "$(SYS):SW-I-SPC1-A001")
+  field(INPB, "$(SYS):SW-II-SPC1-A001")
+}
+####################################################
+# DOOR A005 CLOSED #
+record(calc, "$(SYS):SPC1-DA005-CLSD") {
+  field(CALC, "!A&&!B?$(STOK):$(ON)")
+  field(INPA, "$(SYS):SW-I-SPC1-A005 NPP")
+  field(INPB, "$(SYS):SW-II-SPC1-A005 NPP")
+}
+##########################################
+# DOOR A005A CLOSED #
+record(calc, "$(SYS):SPC1-DA005A-CLSD") {
+  field(SCAN, "Passive")
+  field(CALC, "!A&&!B?$(STOK):$(ON)")
+  field(INPA, "$(SYS):SW-I-SPC1-A005A NPP")
+  field(INPB, "$(SYS):SW-II-SPC1-A005A NPP")
+}
+
+##########################################
+# TIMER PROCEDURE #
+record(calc, "$(SYS):SPC1BAS-COUNTER") {
+  field(SCAN, "Passive")
+  field(CALC, "B?A+1:0")
+  field(INPA, "$(SYS):SPC1BAS-COUNTER.VAL")
+  field(INPB, "$(SYS):WATCHMAN-SPC1-42-ACT.VAL")
+}
+record(calc, "$(SYS):SPC1BAS-TIMEOUT") {
+  field(SCAN, "1 second")
+  field(CALC, "A>=$(SPC1BASTOUT)?$(ON):$(STOK)")
+  field(INPA, "$(SYS):SPC1BAS-COUNTER.VAL PP")
+}
+
+##########################################
+# RECOVER FROM PANIQUE #
+record(calc, "$(SYS):SPC1BAS-PNK") {
+  field(CALC, "!A?$(ON):$(STOK)")
+  field(INPA, "$(SYS):WS-BUT-SPC1-42 NPP")
+  field(VAL, "0")
+}
+
+#############################################
+# INPUTS #
+# INIT THIS RECORD TO FALSE #
+record(bo, "$(SYS):WATCHMAN-SPC1-42-ACT") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "0")
+}
+###########################################################
+# OUTPUTS #
+record(stringout, "$(SYS):SPC1BAS-CLR-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+
+record(stringout, "$(SYS):SPC1BAS-INTLCK-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}

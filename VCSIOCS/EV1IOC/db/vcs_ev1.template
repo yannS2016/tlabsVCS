@@ -1,0 +1,204 @@
+############ SELECT THE NEXT PROCESSING BRANCH ##################
+record(calc, "$(SYS):EV1-SEL-STAGE") {
+  field(DESC, "Select processing branch")
+  field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
+  field(CALC, "!A?B?$(CLR):$(NCLR):$(PNK)")
+##IF BUTTON 42 IS STILL PRESSED PNK IS ACTIVE##
+  field(INPA, "$(SYS):EV1-PNK.VAL") # we intend the state of this record when leaving cleared state: old state
+  field(INPB, "$(SYS):EV1-CLR NPP")
+  field(FLNK, "$(SYS):EV1-PROC-STAGE")
+}
+## THIS RECORDS PROPADOOR PROCESSING ##
+record(fanout, "$(SYS):EV1-PROC-STAGE") {
+  field(SCAN, "Passive")
+  field(SELM, "Specified")
+  field(SELL, "$(SYS):EV1-SEL-STAGE")
+  field(LNK1, "$(SYS):EV1-VC PP")
+  field(LNK2, "$(SYS):EV1-VNC PP")
+  field(LNK3, "$(SYS):EV1-PNK PP")
+}
+##################################################################################
+# monitor status of inputs which may cause clearance faillure
+# SIGNAL TO SYS: EV1-VC?EV1-SNC-CLR && (HARDWARE STATUS RECORDS):FALSE
+record(calcout, "$(SYS):EV1-VC") { 
+  field(DESC, "EV1 Vault clear stage")
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?B?$(EV1PNK):$(STOK):A")
+  field(INPA, "$(SYS):EV1-FAIL-COND.VAL PP")  
+  field(INPB, "$(SYS):EV1-PNK.VAL PP")
+  field(OUT,  "$(SYS):RST-EV1.PROC PP")  
+  field(OOPT, "When Non-zero")
+  #field(VAL, "1")# init to 1 : vault not cleared
+}
+####################### RESET VAULT #################
+record(seq, "$(SYS):RST-EV1") { # HANDLE BY SEQ
+  field(SCAN, "Passive")
+  field(DOL1, "0")
+  field(DOL2, "0")
+  field(DOL3, "0")
+  field(DOL4, "0")
+  field(DOL5, "0")
+  field(DOL6, "0")
+  field(DOL7, "0")
+  field(LNK1, "$(SYS):CS9-EV1 PP")
+  field(LNK2, "$(SYS):CL9-EV1 PP")
+  field(LNK3, "$(SYS):EV1-CLR PP")
+  field(LNK4, "$(SYS):LED-WS-EV1-18 PP")
+  field(LNK5, "$(SYS):LED-WS-EV1-19 PP")
+  field(LNK6, "$(SYS):EV1-COUNTER PP")
+  field(LNK7, "$(SYS):WATCHMAN-EV1-18-ACT PP")
+  field(SELM, "All")
+}
+###################################################################################
+#CLEARANCE UNDERWAY FAIL CONDITIONS
+record(calcout, "$(SYS):EV1-FAIL-COND") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?D&&E?$(DA6ON):$(STOK):$(TOUT):$(RA7ON):$(RA6ON)")
+  field(INPA, "$(SYS):SW-RF-A6.VAL NPP") 
+  field(INPB, "$(SYS):SW-RF-A7.VAL NPP")   
+  field(INPC, "$(SYS):EV1-TIMEOUT NPP") 
+  field(INPD, "$(SYS):EV1-CLR NPP")
+  field(INPE, "$(SYS):EV1-DA6-CLSD PP")
+  field(OUT,  "$(SYS):RST-EV1 PP")  
+  field(OOPT, "Transition To Non-zero")  
+}
+
+#######################################################################################
+record(calc, "$(SYS):EV1-VNC") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(STOK):A")
+  field(INPA, "$(SYS):EV1-W18-STS PP")  
+}
+###############################################################
+# ONLY CHNAGE OUTS STATE WHEN B18 IS PRESSED WHILE ROOF
+# A6 ARE CLOSED: THIS ENSURE WE DONT UNECCESSARLY WRITE TO OUTS
+# WHEN ON IS RETURNED THIS MEANS THAT NO VAULT CLEARANCE WAS STARTED AFTER INIT: VAULT WAITING FOR CLEARANCE
+# WHEN STOK IS RETURNED VAULT CLEARANCE STAGE 1 IS UNDERWAY
+
+record(calcout, "$(SYS):EV1-W18-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?$(STOK):$(B18ON):!C?$(WFVC):D:A")
+  field(INPA, "$(SYS):EV1-FAIL-COND PP")
+  field(INPB, "$(SYS):WS-BUT-EV1-18 NPP")
+  field(INPC, "$(SYS):WATCHMAN-EV1-18-ACT NPP")
+  field(INPD, "$(SYS):EV1-W19-STS PP")
+  field(OUT,  "$(SYS):EV1W18-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
+}
+####################### STAGE 1 OUTPUTS STATUS  #################
+record(seq, "$(SYS):EV1W18-WRT-OUTS") { # HANDLE BY SEQ
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DOL4, "0")
+  field(DOL5, "1")
+  field(DOL6, "0")
+  field(LNK1, "$(SYS):CS9-EV1 PP")
+  field(LNK2, "$(SYS):CL9-EV1 PP")
+  field(LNK3, "$(SYS):LED-WS-EV1-18 PP")
+  field(LNK4, "$(SYS):EV1-COUNTER PP")
+  field(LNK5, "$(SYS):WATCHMAN-EV1-18-ACT PP")
+  field(LNK6, "$(SYS):EV1-VC") # RESET ANY PREVIOUS FAIL CONDITIONS
+  field(SCAN, "Passive")
+  field(SELM, "All")
+}
+# monitor status of inputs and set output in stage 2
+####################################################################################################
+## IF WATCHMAN 18 RELEASE CONTINUE CLEARANCE
+## WE TEST THIS IN "EV1-WATCH-18-RLSD" RECORD
+record(calcout, "$(SYS):EV1-W19-STS") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?D&&!E?$(STOK):$(B19OFF):$(DA6S2OFF):$(DA6S1OFF):$(FAIL)")
+  field(INPA, "$(SYS):EV1-FAIL-COND PP")
+  field(INPB, "$(SYS):SW-I-EV1-A6.VAL")
+  field(INPC, "$(SYS):SW-II-EV1-A6.VAL")
+  field(INPD, "$(SYS):EV1-WATCH-18-RLSD.VAL PP")
+  field(INPE, "$(SYS):WS-BUT-EV1-19 NPP")
+  field(OUT,  "$(SYS):EV1W19-WRT-OUTS.PROC PP")  
+  field(OOPT, "Transition To Zero") 
+}
+####################### STAGE 2 OUTPUTS STATUS  ################# biancaf@phoenixcontact.co.za
+# THIS RECORDS IS PROCESSED ONLY WHEN EV1-VNCS2 RETRUN 0
+# THAT IS EV1 INTERLOCKS ARE CORRECT IN STAGE 2
+record(seq, "$(SYS):EV1W19-WRT-OUTS") {
+  field(SELM, "All")
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  #field(DOL4, "0")
+  field(DLY2, "0.02")
+  field(LNK1, "$(SYS):RST-EV1.PROC PP")
+  field(LNK2, "$(SYS):EV1-CLR.VAL PP")
+  field(LNK3, "$(SYS):LED-WS-EV1-19.VAL PP")
+  #field(LNK4, "$(SYS):EV1-VC") # RESET ANY PREVIOUS FAIL CONDITIONS
+  field(SCAN, "Passive")
+}
+#################### WATCHMAN 18 RELEASE ##############################
+record(calc, "$(SYS):EV1-WATCH-18-RLSD") {
+  field(CALC, "A&&B?$(ON):$(STOK)")
+  field(INPA, "$(SYS):WS-BUT-EV1-18.VAL")
+  field(INPB, "$(SYS):WATCHMAN-EV1-18-ACT.VAL")
+}
+########################## TIMER PROCEDURE #############################
+record(calc, "$(SYS):EV1-COUNTER") {
+  field(SCAN, "Passive")
+  field(CALC, "B?A+1:0")
+  field(INPA, "$(SYS):EV1-COUNTER.VAL")
+  field(INPB, "$(SYS):WATCHMAN-EV1-18-ACT.VAL")
+}
+record(calc, "$(SYS):EV1-TIMEOUT") {
+  field(SCAN, "1 second")
+  field(CALC, "A>=$(EV1TOUT)?$(ON):$(STOK)")
+  field(INPA, "$(SYS):EV1-COUNTER.VAL PP")
+}
+
+################# RECOVER FROM PANIQUE ################
+record(calc, "$(SYS):EV1-PNK") {
+
+  field(CALC, "!A?$(ON):$(STOK)")
+  field(INPA, "$(SYS):WS-BUT-EV1-18 NPP")
+  field(INPB, "$(SYS):EV1-CLR")
+  field(VAL, "0")  
+}
+
+#################### DOOR A6 CLOSED ##################################
+record(calc, "$(SYS):EV1-DA6-CLSD") {
+  field(CALC, "!A&&!B?$(STOK):$(ON)")
+  field(INPA, "$(SYS):SW-I-EV1-A6.VAL")
+  field(INPB, "$(SYS):SW-II-EV1-A6.VAL")
+}
+
+########################### OUTPUTS ##################################
+record(stringout, "$(SYS):EV1-CLR-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+
+record(stringout, "$(SYS):EV1-INTLCK-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+################ INPUTS ###############################
+########  INIT THIS RECORD TO FALSE ######
+record(bo, "$(SYS):WATCHMAN-EV1-18-ACT") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "0")
+}
+## THIS RECORDS MUST BE SET FROM THE SEQ ##
+record(bi, "$(SYS):EV1-INIT") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "0")
+}
+
+

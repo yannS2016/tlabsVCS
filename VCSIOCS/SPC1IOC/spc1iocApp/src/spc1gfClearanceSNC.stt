@@ -1,0 +1,244 @@
+program spc1gfClearanceSNC
+
+%{
+#include "vcs_var_mes.h" // define this here so C functions are seen
+	
+#define	STOK       	0
+#define FAIL		-1
+#define WFVC		55
+#define B40ON		173
+#define B41OFF		175
+#define G7OFF 		180
+#define SPC1GFPNK	183 
+}%
+/* Declare seq variables*/
+short SPC1GF_VC;   
+short SPC1GF_W40_STS;
+short SPC1GF_W41_STS;
+short SPC1GF_RST_OUTS;
+short SPC1GF_FAIL_COND;
+short SPC1GF_PNK;
+string SPC1GF_CLR_STATS; 
+string SPC1GF_INTLCK_STATS;
+
+// CONTROL FLAGS
+short SPC1GF_OLD_FAIL_COND;
+short SPC1GF_FAILED_RST = FALSE;
+
+/* Associate SNL variables with epics output pv's*/
+assign	SPC1GF_RST_OUTS		to	"{SYS}:RST-SPC1GF.PROC"; 
+assign	SPC1GF_CLR_STATS	to	"{SYS}:SPC1GF-CLR-STATS"; 
+assign	SPC1GF_INTLCK_STATS to	"{SYS}:SPC1GF-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	SPC1GF_VC 			to 	"{SYS}:SPC1GF-VC"; 
+assign 	SPC1GF_W40_STS 		to  "{SYS}:SPC1-W40-STS";   
+assign 	SPC1GF_W41_STS 		to  "{SYS}:SPC1-W41-STS";
+assign	SPC1GF_FAIL_COND	to	"{SYS}:SPC1GF-FAIL-COND";
+assign	SPC1GF_PNK			to	"{SYS}:SPC1GF-PNK";
+
+// monitor changes
+monitor	SPC1GF_VC;
+monitor SPC1GF_W40_STS;   
+monitor SPC1GF_W41_STS;
+monitor	SPC1GF_FAIL_COND;
+monitor	SPC1GF_PNK;
+
+ss SPC1GF_clearance_status {
+    state init {
+		  when (delay(1)) {
+			  initVault();
+			  printf("\n%sSPC1 GROUND-FLOOR VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+		  } state watchman_40_pressed	
+    }
+//////////////////////////////////////////////////////////
+
+	state watchman_40_pressed {
+
+		when (SPC1GF_FAIL_COND != STOK) {
+			SPC1GF_OLD_FAIL_COND = SPC1GF_FAIL_COND;
+		} state  clearance_faillures
+        
+		when (SPC1GF_W40_STS == WFVC) {
+
+		} state  clearance_pending       
+			
+		when (SPC1GF_W40_STS == B40ON) {
+			SPC1GF_clear_underway();
+			SPC1GF_update_report(B40ON);
+		} state watchman_40_released
+	}
+//////////////////////////////////////////////////////////
+	state clearance_pending {
+    option -e;
+		option -x;
+   
+		entry {
+            resetVault();
+            SPC1GF_update_report(WFVC);
+		}
+   
+		when (SPC1GF_W40_STS != WFVC) {
+
+		} state watchman_40_pressed  		
+
+	}
+//////////////////////////////////////////////////////////
+	state watchman_40_released {
+		
+		when (SPC1GF_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+			
+		when (SPC1GF_W40_STS != B40ON) {
+			
+		} state gate_g7_closed
+	}
+//////////////////////////////////////////////////////////
+	state gate_g7_closed {
+ 
+		option -e;
+
+		entry {
+		  SPC1GF_update_report(G7OFF);
+		}  
+		
+		when (SPC1GF_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+		
+		when (SPC1GF_W41_STS != G7OFF) {			
+
+		} state  watchman_41_pressed
+	}
+///////////////////////////////////////////////////////////
+	state watchman_41_pressed {
+
+		option -e;
+		entry {
+			SPC1GF_update_report(B41OFF);
+		}
+    		
+		when (SPC1GF_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+			
+		when (!SPC1GF_W41_STS) {
+
+			SPC1GF_status();
+		} state vault_cleared
+   
+		when (SPC1GF_W41_STS != B41OFF) {
+            
+		} state gate_g7_closed 
+	} 
+///////////////////////////////////////////////////////////////
+  state vault_cleared {
+		option -e;
+		entry {
+			printf("%sSPC1 GROUND-FLOOR VAULT IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (SPC1GF_VC != STOK) {
+
+		} state paniq_faillure
+	}
+///////////////////////////////////////////////////   
+  state paniq_faillure {
+
+		when (SPC1GF_VC != SPC1GFPNK) {
+
+		} state clearance_faillures	
+ 
+ 		when () { // paniq button released?
+            printf("SPC1GF VAULT CLEARED FAILURE CONDITION: ");
+            SPC1GF_update_failed(SPC1GFPNK); 
+
+		} state recover_from_paniq	     
+	}
+////////////////////////////////////////////////////////////    
+   	state recover_from_paniq {
+		option -e;
+		option -x;
+		when (!SPC1GF_PNK) { // paniq button released?
+        // we only go to this state so we enter watchman_147_pressed from one point(recover_from_faillure)
+		} state recover_from_faillure  
+
+		exit {
+            SPC1GF_FAILED_RST = FALSE;
+		}
+	}
+//////////////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+		    printf("SPC1 GROUND-FLOOR CLEARANCE FAILURE CONDITION: ");
+			SPC1GF_FAILED_RST = FALSE;
+			SPC1GF_OLD_FAIL_COND = SPC1GF_FAIL_COND;
+            SPC1GF_update_failed(SPC1GF_FAIL_COND == FAIL ? STOK : SPC1GF_FAIL_COND); // we cannot index -1(FAIL)
+		}
+   
+		when () {
+		
+		} state recover_from_faillure  	
+	}
+//////////////////////////////////////////////////////////
+	state recover_from_faillure {
+  
+		when (!SPC1GF_FAIL_COND) {
+            printf("%sSPC1 GROUND-FLOOR RECOVERING FROM FAILLURE : ENTERING W9 STATE%s\n",OK,DEF);
+		} state  watchman_40_pressed
+   
+		when (SPC1GF_FAIL_COND != SPC1GF_OLD_FAIL_COND) {
+
+		} state  clearance_faillures
+	} 
+}
+//////////////////////////////////////////////////////////////////////
+void initVault(){
+	//SPC1GF_INIT = TRUE;
+    SPC1GF_RST_OUTS  = TRUE;
+    SPC1GF_OLD_FAIL_COND = SPC1GF_FAIL_COND;
+	not_cleared(SPC1GF_CLR_STATS);
+	report_error(SPC1GF_INTLCK_STATS, 0);
+    pvPut(SPC1GF_RST_OUTS, SYNC);
+	//pvPut(SPC1GF_INIT, SYNC);
+	pvPut(SPC1GF_CLR_STATS, SYNC);
+	pvPut(SPC1GF_INTLCK_STATS, SYNC);
+}
+
+////////////////////////////////////////////////////////////////////////
+void resetVault(){
+	not_cleared(SPC1GF_CLR_STATS);
+	pvPut(SPC1GF_CLR_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SPC1GF_update_failed(short report)
+{
+	clear_failed(SPC1GF_CLR_STATS);
+	pvPut(SPC1GF_CLR_STATS, SYNC);
+	report_error(SPC1GF_INTLCK_STATS, report);
+	pvPut(SPC1GF_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,SPC1GF_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void SPC1GF_update_report(short intlck) {
+	report_error(SPC1GF_INTLCK_STATS, intlck);
+	pvPut(SPC1GF_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SPC1GF_status()
+{  
+	cleared(SPC1GF_CLR_STATS);
+	pvPut(SPC1GF_CLR_STATS, SYNC); 		
+	report_error(SPC1GF_INTLCK_STATS, 0);
+	pvPut(SPC1GF_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void SPC1GF_clear_underway()
+{  
+	clear_underway(SPC1GF_CLR_STATS);
+	pvPut(SPC1GF_CLR_STATS, SYNC); 		
+}
+/**********************************************************/
+

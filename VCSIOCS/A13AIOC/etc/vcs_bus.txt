@@ -1,0 +1,24 @@
+ 0  0:0   OP  +  EK1100 EtherCAT-Koppler (2A E-Bus)
+ 1  0:1   OP  +  EL2624 4K. Relais Ausgang, Schlieﬂer (125V AC / 30V DC)
+ 2  0:2   OP  +  EL2624 4K. Relais Ausgang, Schlieﬂer (125V AC / 30V DC)
+ 3  0:3   OP  +  EL2624 4K. Relais Ausgang, Schlieﬂer (125V AC / 30V DC)
+ 4  0:4   OP  +  EL2624 4K. Relais Ausgang, Schlieﬂer (125V AC / 30V DC)
+ 5  0:5   OP  +  EL2624 4K. Relais Ausgang, Schlieﬂer (125V AC / 30V DC)
+ 6  0:6   OP  +  EL2872 16K. Dig. Ausgang 24V, 0.5A
+ 7  0:7   OP  +  EL2872 16K. Dig. Ausgang 24V, 0.5A
+ 8  0:8   OP  +  EL2872 16K. Dig. Ausgang 24V, 0.5A
+ 9  0:9   OP  +  EL2872 16K. Dig. Ausgang 24V, 0.5A
+10  0:10  OP  +  EL2872 16K. Dig. Ausgang 24V, 0.5A
+11  0:11  OP  +  EL2872 16K. Dig. Ausgang 24V, 0.5A
+12  0:12  OP  +  EL2872 16K. Dig. Ausgang 24V, 0.5A
+13  0:13  OP  +  EL9410 E-Bus Netzteilklemme (Diagnose)
+14  0:14  OP  +  EL1862 16K. Dig. Eingang 24V, 3ms
+15  0:15  OP  +  EL1862 16K. Dig. Eingang 24V, 3ms
+16  0:16  OP  +  EL1862 16K. Dig. Eingang 24V, 3ms
+17  0:17  OP  +  EL1862 16K. Dig. Eingang 24V, 3ms
+18  0:18  OP  +  EL1862 16K. Dig. Eingang 24V, 3ms
+19  0:19  OP  +  EL1862 16K. Dig. Eingang 24V, 3ms
+20  0:20  OP  +  EL1862 16K. Dig. Eingang 24V, 3ms
+21  0:21  OP  +  EL1862 16K. Dig. Eingang 24V, 3ms
+22  0:22  OP  +  EL1862 16K. Dig. Eingang 24V, 3ms
+23  0:23  OP  +  EL1862 16K. Dig. Eingang 24V, 3ms
