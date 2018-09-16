@@ -201,3 +201,74 @@ record(stringout, "$(SYS):SSCCAB-INTLCK-STATS") {
   field(SCAN, "Passive")
   field(OMSL, "supervisory")
 }
+
+########################### Outputs ##################################
+record(bo, "$(SYS):SSCCAB-CLR") {
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-SSC-16") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bo, "$(SYS):LED-WS-SSC-17") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):WS-BUT-SSC-16") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+
+record(bi, "$(SYS):SW-I-SSC-A001A") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-II-SSC-A001A") {
+  field(SCAN, "Passive")
+  field(VAL, "0")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(bi, "$(SYS):SW-I-SSC-G5") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+record(bi, "$(SYS):SW-II-SSC-G5") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+record(bi, "$(SYS):WS-BUT-SSC-17") {
+  field(SCAN, "Passive")
+  field(VAL, "1")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}

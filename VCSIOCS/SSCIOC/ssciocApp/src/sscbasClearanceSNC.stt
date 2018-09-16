@@ -17,10 +17,10 @@ program sscbasClearanceSNC
 #define B3ON   37 
 #define B4OFF  28  
 #define B4ON   32 
-#define B5ON   31
+#define B5ON   34
 #define B4_5ON 31
 #define B5OFF  29  
-#define B6OFF	35
+#define B6OFF  35
 #define SSCBASPNK	20
 }%
 /* Declare seq variables*/
@@ -103,9 +103,13 @@ ss SSCBAS_clearance_status {
 		option -e;
 
 		entry {
-            resetVault();
-            SSCBAS_update_report(WFVC);
+           // resetVault();
+            //SSCBAS_update_report(WFVC);
 		} 
+		
+		//when (delay(2)) {
+
+		//} state watchman_1_pressed  
 
 		when (SSC_W1_STS != WFVC) {
 
@@ -202,41 +206,46 @@ ss SSCBAS_clearance_status {
 
 		} state  clearance_faillures
 		
-		when (SSC_W4_STS == B5ON) {		// B5 STLL PRESSED - B4 RELEASED: BLOCK HERE
+		when (SSC_W4_STS == B5ON) {		// B5 STLL PRESSED - B4 RELEASED
 
 		} state watchman_5_released
 		
 		
-		when (SSC_W5_STS == B4ON) {		// B5 RELEASED - B4 RELEASED: BLOCK HERE
+		when (SSC_W5_STS == B4ON) {		// B5 RELEASED - B4 STILL PRESSED
 
 		} state watchman_4_released
 	}
 /////////////////////////////////////////////////////////////////
 	state watchman_4_released {	
 
+		option -e;
+
+		entry {
+   			SSCBAS_update_report(B4ON);
+		} 
 		
 		when (SSCBAS_FAIL_COND != STOK) {
 
 		} state  clearance_faillures
 		
-		when (SSC_W4_STS == B5ON) {		// B5 STLL PRESSED - B4 RELEASED: BLOCK HERE
+		when (SSC_W4_STS == G2OFF) {		// B5 STLL PRESSED - B4 RELEASED: BLOCK HERE
 
-		} state watchman_5_released
-
+		} state gate_g2_closed
 	}
-
 ////////////////////////////////////////////////////////////////
 	state watchman_5_released {	
-	
+
+		option -e;
+
+		entry {
+   			SSCBAS_update_report(B5ON);
+		} 
+		
 		when (SSCBAS_FAIL_COND != STOK) {
 
 		} state  clearance_faillures
 		
-		when (SSC_W4_STS == B4ON) {		// B5 RELEASED - B4 RELEASED: BLOCK HERE
-
-		} state watchman_4_released
-		
-		when () {		// B5 RELEASED - B4 RELEASED: BLOCK HERE
+		when (SSC_W5_STS == B4ON) {		// B5 RELEASED - B4 RELEASED: BLOCK HERE
 
 		} state gate_g2_closed
 	}
@@ -380,6 +389,7 @@ void SSCBAS_update_report(short intlck) {
 void SSCBAS_status()
 {
 	cleared(SSCBAS_CLR_STATS);
+	//printf("CLEAR STATUS: %s\n", SSCBAS_CLR_STATS);
 	pvPut(SSCBAS_CLR_STATS, SYNC); 		
 	report_error(SSCBAS_INTLCK_STATS, 0);
 	pvPut(SSCBAS_INTLCK_STATS, SYNC);
@@ -390,7 +400,6 @@ void SSCBAS_clear_underway()
 	clear_underway(SSCBAS_CLR_STATS);
 	pvPut(SSCBAS_CLR_STATS, SYNC); 		
 }
-
 //////////////////////////////////////////////////////////////////////////
 %{
 
