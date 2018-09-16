@@ -235,6 +235,10 @@ ss SSCBAS_clearance_status {
 		when (SSC_W4_STS == B4ON) {		// B5 RELEASED - B4 RELEASED: BLOCK HERE
 
 		} state watchman_4_released
+		
+		when () {		// B5 RELEASED - B4 RELEASED: BLOCK HERE
+
+		} state gate_g2_closed
 	}
 //////////////////////////////////////////////////////////
 	state gate_g2_closed {
@@ -254,6 +258,7 @@ ss SSCBAS_clearance_status {
 		} state watchman_6_pressed
 
 	}
+
 //////////////////////////////////////////////////////////////////////
 	state watchman_6_pressed {
 		option -e;

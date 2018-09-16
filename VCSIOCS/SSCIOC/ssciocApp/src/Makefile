@@ -3,7 +3,7 @@ TOP=../..
 include $(TOP)/configure/CONFIG
 #----------------------------------------
 #  ADD MACRO DEFINITIONS BELOW HERE
-USR_SYS_LIBS += xml2
+#USR_SYS_LIBS += xml2
 # xxxRecord.h will be created from xxxRecord.dbd
 
 # Build an IOC support library
@@ -30,7 +30,7 @@ sscioc_SRCS_vxWorks += -nil-
 #sscioc_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
 # Link in the code from our support library
-sscioc_LIBS += ssciocSupport ecAsyn asyn 
+sscioc_LIBS += ssciocSupport asyn 
 
 # To build SNL programs, SNCSEQ must be defined
 # in the <top>/configure/RELEASE file
