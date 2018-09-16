@@ -1,76 +1,101 @@
 program sscbasClearanceSNC
 
 %{
+/*******************************************************************/
 #include "vcs_var_mes.h" // define this here so C functions are seen
+/*******************************************************************/
 	
-#define	STOK       	0
+#define STOK   	0
 #define FAIL		-1
 #define WFVC		55
-#define B42ON		176
-#define B43OFF		179
-#define DA005ON		172
-#define DA005OFF	178
-#define SPC1BASPNK	184
+#define FAIL		-1
+#define G2OFF  33
+#define B1ON   38
+#define B2OFF  22
+#define B2ON   36
+#define B3OFF  27  
+#define B3ON   37 
+#define B4OFF  28  
+#define B4ON   32 
+#define B5ON   31
+#define B4_5ON 31
+#define B5OFF  29  
+#define B6OFF	35
+#define SSCBASPNK	20
 }%
 /* Declare seq variables*/
 
-short SPC1BAS_VC;   
-short SPC1BAS_W42_STS;
-short SPC1BAS_W43_STS;
-short SPC1BAS_FAIL_COND;
-short SPC1BAS_RST_OUTS;
-short SPC1BAS_PNK;
+short SSCBAS_VC;   
+short SSC_W1_STS;
+short SSC_W2_STS;
+short SSC_W3_STS;
+short SSC_W4_STS;
+short SSC_W5_STS;
+short SSC_W6_STS;
+
+short SSCBAS_FAIL_COND;
+short SSCBAS_RST_OUTS;
+short SSCBAS_PNK;
 // OPI variable
-string SPC1BAS_CLR_STATS; 
-string SPC1BAS_INTLCK_STATS;
+string SSCBAS_CLR_STATS; 
+string SSCBAS_INTLCK_STATS;
 
 
 // CONTROL FLAGS
-short SPC1BAS_OLD_FAIL_COND;
-short SPC1BAS_FAILED_RST;
+short SSCBAS_OLD_FAIL_COND;
+short SSCBAS_FAILED_RST;
 /* Associate SNL variables with epics output pv's*/
-assign	SPC1BAS_RST_OUTS		to	"{SYS}:RST-SPC1BAS.PROC"; 
-assign	SPC1BAS_CLR_STATS		to	"{SYS}:SPC1BAS-CLR-STATS"; 
-assign	SPC1BAS_INTLCK_STATS	to	"{SYS}:SPC1BAS-INTLCK-STATS"; 
-
+assign	SSCBAS_RST_OUTS     to	"{SYS}:RST-SSCBAS.PROC"; 
+assign	SSCBAS_CLR_STATS	to	"{SYS}:SSCBAS-CLR-STATS"; 
+assign	SSCBAS_INTLCK_STATS	to	"{SYS}:SSCBAS-INTLCK-STATS"; 
 /* Associate SNL variables with epics input pv's*/
-assign 	SPC1BAS_VC 			   to 	"{SYS}:SPC1BAS-VC"; 
-assign 	SPC1BAS_W42_STS 		to 	"{SYS}:SPC1-W42-STS";   
-assign 	SPC1BAS_W43_STS 		to 	"{SYS}:SPC1-W43-STS";
-assign	SPC1BAS_FAIL_COND		to	"{SYS}:SPC1BAS-FAIL-COND";
-assign	SPC1BAS_PNK		        to	"{SYS}:SPC1BAS-PNK";
+assign 	SSCBAS_VC 			to 	"{SYS}:SSCBAS-VC"; 
+
+
+assign 	SSC_W1_STS 			to 	"{SYS}:SSC-W1-STS"; 
+assign 	SSC_W2_STS 			to  "{SYS}:SSC-W2-STS";   
+assign 	SSC_W3_STS 			to 	"{SYS}:SSC-W3-STS";
+assign 	SSC_W4_STS 			to 	"{SYS}:SSC-W4-STS";
+assign	SSC_W5_STS			to	"{SYS}:SSC-W5-STS";
+assign	SSC_W6_STS			to	"{SYS}:SSC-W6-STS";
+assign	SSCBAS_FAIL_COND	to	"{SYS}:SSCBAS-FAIL-COND";
+assign	SSCBAS_PNK		    to	"{SYS}:SSCBAS-PNK";
 
 // monitor changes
-monitor	SPC1BAS_VC;
-monitor SPC1BAS_W42_STS;  
-monitor SPC1BAS_W43_STS;
-monitor	SPC1BAS_FAIL_COND;
-monitor	SPC1BAS_PNK;
+monitor	SSCBAS_VC;
+monitor SSC_W1_STS; 
+monitor SSC_W2_STS;   
+monitor SSC_W3_STS;
+monitor SSC_W4_STS;
+monitor	SSC_W5_STS;
+monitor	SSC_W6_STS;
+monitor	SSCBAS_FAIL_COND;
+monitor	SSCBAS_PNK;
 
-ss SPC1BAS_clearance_status {
+ss SSCBAS_clearance_status {
     
     state init {
 		when (delay(2)) {
 			initVault();
-			printf("\n%sSPC1 BASEMENT VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
-		} state watchman_42_pressed	
+			printf("\n%sSSC BASEMENT VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_1_pressed	
     }
 //////////////////////////////////////////////////////////
-	state watchman_42_pressed {
+	state watchman_1_pressed {
 
-		when (SPC1BAS_FAIL_COND != STOK) {
-			SPC1BAS_OLD_FAIL_COND = SPC1BAS_FAIL_COND;
+		when (SSCBAS_FAIL_COND != STOK) {
+			SSCBAS_OLD_FAIL_COND = SSCBAS_FAIL_COND;
 		} state  clearance_faillures
         
         
-		when (SPC1BAS_W42_STS == WFVC) {
+		when (SSC_W1_STS == WFVC) {
 
 		} state clearance_pending   
 			
-		when (SPC1BAS_W42_STS == B42ON) {
-			SPC1BAS_clear_underway();
-			SPC1BAS_update_report(B42ON);
-		} state watchman_42_released
+		when (SSC_W1_STS == B2OFF) {
+			SSCBAS_update_report(B2OFF);
+			SSCBAS_clear_underway();
+		} state watchman_2_pressed
 	}
 ////////////////////////////////////////////////////////////////////////// 
 	state clearance_pending {
@@ -79,75 +104,182 @@ ss SPC1BAS_clearance_status {
 
 		entry {
             resetVault();
-            SPC1BAS_update_report(WFVC);
+            SSCBAS_update_report(WFVC);
 		} 
 
-		when (SPC1BAS_W42_STS != WFVC) {
+		when (SSC_W1_STS != WFVC) {
 
-		} state watchman_42_pressed  		
+		} state watchman_1_pressed  		
 	}
-    
+
+
  //////////////////////////////////////////////////////////
-	state watchman_42_released {
-		
-		when (SPC1BAS_FAIL_COND != STOK) {
+	state watchman_2_pressed {
+ 		
+		when (SSCBAS_FAIL_COND != STOK) {
 
 		} state  clearance_faillures
 			
-		when (SPC1BAS_W42_STS != B42ON) {
-
-		} state door_a005_closed
-	}   
+		when (SSC_W2_STS == B2ON) {
+			SSCBAS_update_report(B2ON);
+		} state watchman_2_released
+	}
 //////////////////////////////////////////////////////////
-	state door_a005_closed {
-        
-		option -e;
-
-		entry {
-   			SPC1BAS_update_report(DA005OFF);
-		} 
-        
-		when (SPC1BAS_FAIL_COND != STOK) {
+	state watchman_2_released {
+		
+		when (SSCBAS_FAIL_COND != STOK) {
 
 		} state  clearance_faillures
 		
-		when (SPC1BAS_W43_STS != DA005OFF) {
+		when (SSC_W2_STS != B2ON) {
+			SSCBAS_update_report(B3OFF);
+		} state watchman_3_pressed
+	}
+///////////////////////////////////////////////////////////
+	state watchman_3_pressed {
+		
+		when (SSCBAS_FAIL_COND != STOK) {
 
-		} state watchman_43_pressed
+		} state  clearance_faillures
+		
+		when (SSC_W3_STS == B3ON) {
+			SSCBAS_update_report(B3ON);
+		} state watchman_3_released
+	}
+
+////////////////////////////////////////////////////////////
+	state watchman_3_released {
+
+		when (SSCBAS_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+			
+		when (SSC_W3_STS != B3ON) {
+			SSCBAS_update_report(B4OFF);
+		} state watchman_4_pressed
+	}
+////////////////////////////////////////////////////////////
+	state watchman_4_pressed {
+
+		when (SSCBAS_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+		
+		when (!SSC_W4_STS) {
+			SSCBAS_update_report(B1ON);
+		} state  watchman_1_released
+	}
+/////////////////////////////////////////////////////////////
+	state watchman_1_released {
+
+		when (SSCBAS_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+		
+		when (SSC_W1_STS == B1ON) {
+			
+			SSCBAS_update_report(B5OFF);
+		} state watchman_5_pressed			
+	}
+/////////////////////////////////////////////////////////////
+	state watchman_5_pressed {
+		
+		when (SSCBAS_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+		
+
+		when (!SSC_W5_STS) {
+			
+			SSCBAS_update_report(B4_5ON);
+		} state watchman_4_5_pressed
+	}
+/////////////////////////////////////////////////////////////////
+	state watchman_4_5_pressed {	
+
+		
+		when (SSCBAS_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+		
+		when (SSC_W4_STS == B5ON) {		// B5 STLL PRESSED - B4 RELEASED: BLOCK HERE
+
+		} state watchman_5_released
+		
+		
+		when (SSC_W5_STS == B4ON) {		// B5 RELEASED - B4 RELEASED: BLOCK HERE
+
+		} state watchman_4_released
+	}
+/////////////////////////////////////////////////////////////////
+	state watchman_4_released {	
+
+		
+		when (SSCBAS_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+		
+		when (SSC_W4_STS == B5ON) {		// B5 STLL PRESSED - B4 RELEASED: BLOCK HERE
+
+		} state watchman_5_released
 
 	}
 
-///////////////////////////////////////////////////////////
-	state watchman_43_pressed {
-        
-		option -e;
-		entry {
-			SPC1BAS_update_report(B43OFF);
-		}
-		
-		when (SPC1BAS_FAIL_COND != STOK) {
+////////////////////////////////////////////////////////////////
+	state watchman_5_released {	
+	
+		when (SSCBAS_FAIL_COND != STOK) {
 
 		} state  clearance_faillures
-        
-			
-		when (SPC1BAS_W43_STS ==  STOK) {
+		
+		when (SSC_W4_STS == B4ON) {		// B5 RELEASED - B4 RELEASED: BLOCK HERE
 
-			SPC1BAS_status();
+		} state watchman_4_released
+	}
+//////////////////////////////////////////////////////////
+	state gate_g2_closed {
+        
+		option -e;
+
+		entry {
+   			SSCBAS_update_report(G2OFF);
+		} 
+        
+		when (SSCBAS_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+		
+		when (SSC_W6_STS != G2OFF) {
+
+		} state watchman_6_pressed
+
+	}
+//////////////////////////////////////////////////////////////////////
+	state watchman_6_pressed {
+		option -e;
+		entry {
+			SSCBAS_update_report(B6OFF);
+		}
+		when (SSCBAS_FAIL_COND != STOK) {
+
+		} state  clearance_faillures	
+		
+		when (!SSC_W6_STS) {
+			
+			SSCBAS_status();
 		} state vault_cleared
-        
-        
-		when (SPC1BAS_W43_STS != B43OFF) {
+		
+		when (SSC_W6_STS != B6OFF) {
             
-		} state door_a005_closed    
-        
+		} state gate_g2_closed 
 	} 
 ///////////////////////////////////////////////////////////////
     state vault_cleared {
 		option -e;
 		entry {
-			printf("%sSPC1 BASEMENT VAULT IN CLEARED STATE%s\n",CLR,DEF);
+			printf("%sSSC BASEMENT VAULT IN CLEARED STATE%s\n",CLR,DEF);
 		} 
-		when (SPC1BAS_VC != STOK) {
+		when (SSCBAS_VC != STOK) {
 
 		} state paniq_faillure
 	
@@ -155,13 +287,13 @@ ss SPC1BAS_clearance_status {
 ///////////////////////////////////////////////////   
   	state paniq_faillure {
     
-      when (SPC1BAS_VC != SPC1BASPNK) {
+      when (SSCBAS_VC != SSCBASPNK) {
 
 	  } state clearance_faillures	
  
  	  when () { // paniq button released?  
-		printf("SPC1 BASEMENT VAULT CLEARED FAILURE CONDITION: ");
-		SPC1BAS_update_failed(SPC1BASPNK); 
+		printf("SSC BASEMENT VAULT CLEARED FAILURE CONDITION: ");
+		SSCBAS_update_failed(SSCBASPNK); 
 
 	  } state recover_from_paniq	     
 	} 
@@ -170,11 +302,11 @@ ss SPC1BAS_clearance_status {
 		option -e;
 		option -x;
    
-		when (!SPC1BAS_PNK) { // paniq button released?
+		when (!SSCBAS_PNK) { // paniq button released?
 		} state recover_from_faillure  
 
 		exit {
-            SPC1BAS_FAILED_RST = FALSE;
+            SSCBAS_FAILED_RST = FALSE;
 		}
 	}  
 ///////////////////////////////////////////////////////////
@@ -183,27 +315,27 @@ ss SPC1BAS_clearance_status {
 		option -e;
 		option -x;
 		entry {
-			printf("SPC1 BASEMENT CLEARANCE FAILURE CONDITION: ");
-            SPC1BAS_OLD_FAIL_COND = SPC1BAS_FAIL_COND;	
-			SPC1BAS_FAILED_RST = FALSE;
+			printf("SSC BASEMENT CLEARANCE FAILURE CONDITION: ");
+            SSCBAS_OLD_FAIL_COND = SSCBAS_FAIL_COND;	
+			SSCBAS_FAILED_RST = FALSE;
 		}
 
 		when () {
-            //printf("FAIL VALUE: %d\n ",SPC1BAS_FAIL_COND);
-			SPC1BAS_update_failed(SPC1BAS_FAIL_COND == FAIL? STOK : SPC1BAS_FAIL_COND); // we cannot index -1(FAIL)
+            //printf("FAIL VALUE: %d\n ",SSCBAS_FAIL_COND);
+			SSCBAS_update_failed(SSCBAS_FAIL_COND == FAIL? STOK : SSCBAS_FAIL_COND); // we cannot index -1(FAIL)
 		} state recover_from_faillure			
 	}
 //////////////////////////////////////////////////////////
 	state recover_from_faillure {
 		
-		when (!SPC1BAS_FAIL_COND) {
-		//	if(!SPC1BAS_FAILED_RST) {
-				printf("%sSPC1 BASEMENT RECOVERING FROM FAILLURE : ENTERING W42 STATE%s\n",OK,DEF);
-		//		SPC1BAS_FAILED_RST = TRUE;
+		when (!SSCBAS_FAIL_COND) {
+		//	if(!SSCBAS_FAILED_RST) {
+				printf("%sSSC BASEMENT RECOVERING FROM FAILLURE : ENTERING W1 STATE%s\n",OK,DEF);
+		//		SSCBAS_FAILED_RST = TRUE;
 		//	}
-		} state  watchman_42_pressed
+		} state  watchman_1_pressed
 			
-		when (SPC1BAS_FAIL_COND != SPC1BAS_OLD_FAIL_COND) {
+		when (SSCBAS_FAIL_COND != SSCBAS_OLD_FAIL_COND) {
             
             
 		} state  clearance_faillures
@@ -212,46 +344,46 @@ ss SPC1BAS_clearance_status {
 }
 ///////////////////////////////////////////////////////////////////////////////
 void initVault(){
-	SPC1BAS_OLD_FAIL_COND = SPC1BAS_FAIL_COND;
-    SPC1BAS_RST_OUTS  = TRUE;
-	not_cleared(SPC1BAS_CLR_STATS);
-	report_error(SPC1BAS_INTLCK_STATS, 0);
-    pvPut(SPC1BAS_RST_OUTS, SYNC);
-	pvPut(SPC1BAS_CLR_STATS, SYNC);
-	pvPut(SPC1BAS_INTLCK_STATS, SYNC);
+	SSCBAS_OLD_FAIL_COND = SSCBAS_FAIL_COND;
+    SSCBAS_RST_OUTS  = TRUE;
+	not_cleared(SSCBAS_CLR_STATS);
+	report_error(SSCBAS_INTLCK_STATS, 0);
+    pvPut(SSCBAS_RST_OUTS, SYNC);
+	pvPut(SSCBAS_CLR_STATS, SYNC);
+	pvPut(SSCBAS_INTLCK_STATS, SYNC);
 }
 ////////////////////////////////////////////////////////////////////////
 void resetVault(){
-	not_cleared(SPC1BAS_CLR_STATS);
-	pvPut(SPC1BAS_CLR_STATS, SYNC);
+	not_cleared(SSCBAS_CLR_STATS);
+	pvPut(SSCBAS_CLR_STATS, SYNC);
 }
 ////////////////////////////////////////////////////////////////////////
-void SPC1BAS_update_failed(short report)
+void SSCBAS_update_failed(short report)
 {
-	clear_failed(SPC1BAS_CLR_STATS);
-	pvPut(SPC1BAS_CLR_STATS, SYNC);
-	report_error(SPC1BAS_INTLCK_STATS, report);
-	pvPut(SPC1BAS_INTLCK_STATS, SYNC);
-	printf("%s%s%s\n",ERROR,SPC1BAS_INTLCK_STATS,DEF);
+	clear_failed(SSCBAS_CLR_STATS);
+	pvPut(SSCBAS_CLR_STATS, SYNC);
+	report_error(SSCBAS_INTLCK_STATS, report);
+	pvPut(SSCBAS_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,SSCBAS_INTLCK_STATS,DEF);
 }
 /////////////////////////////////////////////////////////////////////////
-void SPC1BAS_update_report(short intlck) {
-	report_error(SPC1BAS_INTLCK_STATS, intlck);
-	pvPut(SPC1BAS_INTLCK_STATS, SYNC);
+void SSCBAS_update_report(short intlck) {
+	report_error(SSCBAS_INTLCK_STATS, intlck);
+	pvPut(SSCBAS_INTLCK_STATS, SYNC);
 }
 ////////////////////////////////////////////////////////////////////////
-void SPC1BAS_status()
+void SSCBAS_status()
 {
-	cleared(SPC1BAS_CLR_STATS);
-	pvPut(SPC1BAS_CLR_STATS, SYNC); 		
-	report_error(SPC1BAS_INTLCK_STATS, 0);
-	pvPut(SPC1BAS_INTLCK_STATS, SYNC);
+	cleared(SSCBAS_CLR_STATS);
+	pvPut(SSCBAS_CLR_STATS, SYNC); 		
+	report_error(SSCBAS_INTLCK_STATS, 0);
+	pvPut(SSCBAS_INTLCK_STATS, SYNC);
 }
 ///////////////////////////////////////////////////////////
-void SPC1BAS_clear_underway()
+void SSCBAS_clear_underway()
 {  
-	clear_underway(SPC1BAS_CLR_STATS);
-	pvPut(SPC1BAS_CLR_STATS, SYNC); 		
+	clear_underway(SSCBAS_CLR_STATS);
+	pvPut(SSCBAS_CLR_STATS, SYNC); 		
 }
 
 //////////////////////////////////////////////////////////////////////////
