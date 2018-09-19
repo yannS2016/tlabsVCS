@@ -1,8 +1,0 @@
-epicsEnvSet("ARCH","linux-x86")
-epicsEnvSet("IOC","expioc")
-epicsEnvSet("TOP","/epics/ethercat-4-3/iocs/VCSIOCS/EXPIOC")
-epicsEnvSet("EPICS_BASE","/epics/base")
-epicsEnvSet("ECASYN","/epics/ethercat-4-3")
-epicsEnvSet("ASYN","/epics/support/asyn4-21")
-epicsEnvSet("AUTOSAVE","/epics/support/autosave-5-6-1")
-epicsEnvSet("SNCSEQ","/epics/support/seq-2-2-1")

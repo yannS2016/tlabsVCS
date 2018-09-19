@@ -1,5 +1,0 @@
-file "db/vcs_a13a.template" {
-pattern 
-{ SYS    CLR    NCLR    PNK    TOUT     WFVC    FAIL    STOK    B9aON    B9bOFF    G5AON    G5AS1OFF    G5AS2OFF    A13APNK    ON    A13ATOUT     SCAN         }
-{ VCS  	 1      2       3	   6	 	55      -1	    0		138      139       137	    140         141      	136        1     120       	  ".1 second" } 
-}
