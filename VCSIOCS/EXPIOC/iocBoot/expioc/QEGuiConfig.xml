@@ -1,0 +1,20 @@
+<QEGuiConfig>
+ <Config Name="AutoSave">
+  <Component Name="QEGui">
+   <MainWindows>1</MainWindows>
+   <UserLevel>USERLEVEL_USER</UserLevel>
+  </Component>
+  <Component Name="QEGuiMainWindow_0">
+   <Identity id="0">
+    <Title>QEGui exp</Title>
+   </Identity>
+   <Geometry Width="1132" X="384" Height="692" Y="237"/>
+   <State Flags="0"/>
+   <Gui ID="QEGui_window_0_form_0" CurrentGui="1" Name="/tlabsVCS/epicsQtDisplays/exp.ui">
+    <Title>QEGui exp</Title>
+    <Presentation>Central</Presentation>
+   </Gui>
+  </Component>
+  <Component Name="QEGui_window_0_form_0_QEForm"/>
+ </Config>
+</QEGuiConfig>

@@ -1,0 +1,6 @@
+
+--This line, and those below, will be ignored--
+
+M    src/Makefile
+M    src/O.Common/sscioc.dbd
+M    src/ssc_snc.dbd

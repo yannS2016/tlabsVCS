@@ -1,0 +1,28 @@
+<components arch="linux-x86_64">
+  <ethercat.EthercatMaster name="ECATM" socket="/tmp/socket0" master_index="0"/>
+  <!-- slaves 30 link up 1 -->
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.0" position="0" type_rev="EK1100 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.1" position="1" type_rev="EL2630 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.2" position="2" type_rev="EL2630 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.3" position="3" type_rev="EL2630 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.4" position="4" type_rev="EL2630 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.5" position="5" type_rev="EL2630 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.6" position="6" type_rev="EL2872 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.7" position="7" type_rev="EL2872 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.8" position="8" type_rev="EL2872 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.9" position="9" type_rev="EL2872 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.10" position="10" type_rev="EL2872 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.11" position="11" type_rev="EL2872 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.6" position="6" type_rev="EL2872 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.13" position="13" type_rev="EL9410 rev 0x00110000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.14" position="14" type_rev="EL1862 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.15" position="15" type_rev="EL1862 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.16" position="16" type_rev="EL1862 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.17" position="17" type_rev="EL1862 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.18" position="18" type_rev="EL1862 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.19" position="19" type_rev="EL1862 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.20" position="20" type_rev="EL1862 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.21" position="21" type_rev="EL1862 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.22" position="22" type_rev="EL1862 rev 0x0060000"/>
+  <ethercat.EthercatSlave master="ECATM" name="ERIO.23" position="23" type_rev="EL1862 rev 0x0060000"/>
+</components>

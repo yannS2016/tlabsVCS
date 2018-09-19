@@ -1,0 +1,401 @@
+program ssclClearanceSNC
+
+%{
+/*******************************************************************/
+#include "vcs_var_mes.h" // define this here so C functions are seen
+/*******************************************************************/
+	
+#define STOK   	0
+#define FAIL	-1
+#define WFVC	194
+#define G2OFF  53
+#define B1ON   46
+#define B2OFF  41
+#define B2ON   42
+#define B3OFF  43  
+#define B3ON   44 
+#define B4OFF  45 
+#define B5OFF  47 
+#define B4_5ON 50
+#define B4ON   51 
+#define B5ON   52 
+#define B6OFF  57
+#define SSCLPNK	58
+}%
+/* Declare seq variables*/
+
+short SSCL_VC;   
+short SSC_W1_STS;
+short SSC_W2_STS;
+short SSC_W3_STS;
+short SSC_W4_STS;
+short SSC_W5_STS;
+short SSC_W6_STS;
+
+short SSCL_FAIL_COND;
+short SSCL_RST_OUTS;
+short SSCL_PNK;
+// OPI variable
+string SSCL_CLR_STATS; 
+string SSCL_INTLCK_STATS;
+
+
+// CONTROL FLAGS
+short SSCL_OLD_FAIL_COND;
+short SSCL_FAILED_RST;
+/* Associate SNL variables with epics output pv's*/
+assign	SSCL_RST_OUTS     to	"{SYS}:RST-SSCL.PROC"; 
+assign	SSCL_CLR_STATS	to	"{SYS}:SSCL-CLR-STATS"; 
+assign	SSCL_INTLCK_STATS	to	"{SYS}:SSCL-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	SSCL_VC 			to 	"{SYS}:SSCL-VC"; 
+
+
+assign 	SSC_W1_STS 			to 	"{SYS}:SSC-W1-STS"; 
+assign 	SSC_W2_STS 			to  "{SYS}:SSC-W2-STS";   
+assign 	SSC_W3_STS 			to 	"{SYS}:SSC-W3-STS";
+assign 	SSC_W4_STS 			to 	"{SYS}:SSC-W4-STS";
+assign	SSC_W5_STS			to	"{SYS}:SSC-W5-STS";
+assign	SSC_W6_STS			to	"{SYS}:SSC-W6-STS";
+assign	SSCL_FAIL_COND	to	"{SYS}:SSCL-FAIL-COND";
+assign	SSCL_PNK		    to	"{SYS}:SSCL-PNK";
+
+// monitor changes
+monitor	SSCL_VC;
+monitor SSC_W1_STS; 
+monitor SSC_W2_STS;   
+monitor SSC_W3_STS;
+monitor SSC_W4_STS;
+monitor	SSC_W5_STS;
+monitor	SSC_W6_STS;
+monitor	SSCL_FAIL_COND;
+monitor	SSCL_PNK;
+
+ss SSCL_clearance_status {
+    
+    state init {
+		when (delay(2)) {
+			initVault();
+			printf("\n%sSSC BASEMENT VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_1_pressed	
+    }
+//////////////////////////////////////////////////////////
+	state watchman_1_pressed {
+
+		when (SSCL_FAIL_COND != STOK) {
+			SSCL_OLD_FAIL_COND = SSCL_FAIL_COND;
+		} state  clearance_faillures
+        
+        
+		when (SSC_W1_STS == WFVC) {
+
+		} state clearance_pending   
+			
+		when (SSC_W1_STS == B2OFF) {
+			SSCL_update_report(B2OFF);
+			SSCL_clear_underway();
+		} state watchman_2_pressed
+	}
+////////////////////////////////////////////////////////////////////////// 
+	state clearance_pending {
+ 
+		option -e;
+
+		entry {
+           // resetVault();
+            //SSCL_update_report(WFVC);
+		} 
+		
+		//when (delay(2)) {
+
+		//} state watchman_1_pressed  
+
+		when (SSC_W1_STS != WFVC) {
+
+		} state watchman_1_pressed  		
+	}
+
+
+ //////////////////////////////////////////////////////////
+	state watchman_2_pressed {
+ 		
+		when (SSCL_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+			
+		when (SSC_W2_STS == B2ON) {
+			SSCL_update_report(B2ON);
+		} state watchman_2_released
+	}
+//////////////////////////////////////////////////////////
+	state watchman_2_released {
+		
+		when (SSCL_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+		
+		when (SSC_W2_STS != B2ON) {
+			SSCL_update_report(B3OFF);
+		} state watchman_3_pressed
+	}
+///////////////////////////////////////////////////////////
+	state watchman_3_pressed {
+		
+		when (SSCL_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+		
+		when (SSC_W3_STS == B3ON) {
+			SSCL_update_report(B3ON);
+		} state watchman_3_released
+	}
+
+////////////////////////////////////////////////////////////
+	state watchman_3_released {
+
+		when (SSCL_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+			
+		when (SSC_W3_STS != B3ON) {
+			SSCL_update_report(B4OFF);
+		} state watchman_4_pressed
+	}
+////////////////////////////////////////////////////////////
+	state watchman_4_pressed {
+
+		when (SSCL_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+		
+		when (!SSC_W4_STS) {
+			SSCL_update_report(B1ON);
+		} state  watchman_1_released
+	}
+/////////////////////////////////////////////////////////////
+	state watchman_1_released {
+
+		when (SSCL_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+		
+		when (SSC_W1_STS == B1ON) {
+			
+			SSCL_update_report(B5OFF);
+		} state watchman_5_pressed			
+	}
+/////////////////////////////////////////////////////////////
+	state watchman_5_pressed {
+		
+		when (SSCL_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+		
+
+		when (!SSC_W5_STS) {
+			
+			SSCL_update_report(B4_5ON);
+		} state watchman_4_5_pressed
+	}
+/////////////////////////////////////////////////////////////////
+	state watchman_4_5_pressed {	
+
+		
+		when (SSCL_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+		
+		when (SSC_W4_STS == B5ON) {		// B5 STLL PRESSED - B4 RELEASED
+
+		} state watchman_5_released
+		
+		
+		when (SSC_W5_STS == B4ON) {		// B5 RELEASED - B4 STILL PRESSED
+
+		} state watchman_4_released
+	}
+/////////////////////////////////////////////////////////////////
+	state watchman_4_released {	
+
+		option -e;
+
+		entry {
+   			SSCL_update_report(B4ON);
+		} 
+		
+		when (SSCL_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+		
+		when (SSC_W4_STS == G2OFF) {		// B5 STLL PRESSED - B4 RELEASED: BLOCK HERE
+
+		} state gate_g2_closed
+	}
+////////////////////////////////////////////////////////////////
+	state watchman_5_released {	
+
+		option -e;
+
+		entry {
+   			SSCL_update_report(B5ON);
+		} 
+		
+		when (SSCL_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+		
+		when (SSC_W5_STS == B4ON) {		// B5 RELEASED - B4 RELEASED: BLOCK HERE
+
+		} state gate_g2_closed
+	}
+//////////////////////////////////////////////////////////
+	state gate_g2_closed {
+        
+		option -e;
+
+		entry {
+   			SSCL_update_report(G2OFF);
+		} 
+        
+		when (SSCL_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+		
+		when (SSC_W6_STS != G2OFF) {
+
+		} state watchman_6_pressed
+
+	}
+
+//////////////////////////////////////////////////////////////////////
+	state watchman_6_pressed {
+		option -e;
+		entry {
+			SSCL_update_report(B6OFF);
+		}
+		when (SSCL_FAIL_COND != STOK) {
+
+		} state  clearance_faillures	
+		
+		when (!SSC_W6_STS) {
+			
+			SSCL_status();
+		} state vault_cleared
+		
+		when (SSC_W6_STS != B6OFF) {
+            
+		} state gate_g2_closed 
+	} 
+///////////////////////////////////////////////////////////////
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("%sSSC BASEMENT VAULT IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (SSCL_VC != STOK) {
+
+		} state paniq_faillure
+	
+	}    
+///////////////////////////////////////////////////   
+  	state paniq_faillure {
+    
+      when (SSCL_VC != SSCLPNK) {
+
+	  } state clearance_faillures	
+ 
+ 	  when () { // paniq button released?  
+		printf("SSC BASEMENT VAULT CLEARED FAILURE CONDITION: ");
+		SSCL_update_failed(SSCLPNK); 
+
+	  } state recover_from_paniq	     
+	} 
+////////////////////////////////////////////////////////////    
+   	state recover_from_paniq {
+		option -e;
+		option -x;
+   
+		when (!SSCL_PNK) { // paniq button released?
+		} state recover_from_faillure  
+
+		exit {
+            SSCL_FAILED_RST = FALSE;
+		}
+	}  
+///////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("SSC BASEMENT CLEARANCE FAILURE CONDITION: ");
+            SSCL_OLD_FAIL_COND = SSCL_FAIL_COND;	
+			SSCL_FAILED_RST = FALSE;
+		}
+
+		when () {
+            //printf("FAIL VALUE: %d\n ",SSCL_FAIL_COND);
+			SSCL_update_failed(SSCL_FAIL_COND == FAIL? STOK : SSCL_FAIL_COND); // we cannot index -1(FAIL)
+		} state recover_from_faillure			
+	}
+//////////////////////////////////////////////////////////
+	state recover_from_faillure {
+		
+		when (!SSCL_FAIL_COND) {
+		//	if(!SSCL_FAILED_RST) {
+				printf("%sSSC BASEMENT RECOVERING FROM FAILLURE : ENTERING W1 STATE%s\n",OK,DEF);
+		//		SSCL_FAILED_RST = TRUE;
+		//	}
+		} state  watchman_1_pressed
+			
+		when (SSCL_FAIL_COND != SSCL_OLD_FAIL_COND) {
+            
+            
+		} state  clearance_faillures
+	}
+    
+}
+///////////////////////////////////////////////////////////////////////////////
+void initVault(){
+	SSCL_OLD_FAIL_COND = SSCL_FAIL_COND;
+    SSCL_RST_OUTS  = TRUE;
+	not_cleared(SSCL_CLR_STATS);
+	report_error(SSCL_INTLCK_STATS, 0);
+    pvPut(SSCL_RST_OUTS, SYNC);
+	pvPut(SSCL_CLR_STATS, SYNC);
+	pvPut(SSCL_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void resetVault(){
+	not_cleared(SSCL_CLR_STATS);
+	pvPut(SSCL_CLR_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SSCL_update_failed(short report)
+{
+	clear_failed(SSCL_CLR_STATS);
+	pvPut(SSCL_CLR_STATS, SYNC);
+	report_error(SSCL_INTLCK_STATS, report);
+	pvPut(SSCL_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,SSCL_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void SSCL_update_report(short intlck) {
+	report_error(SSCL_INTLCK_STATS, intlck);
+	pvPut(SSCL_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void SSCL_status()
+{
+	cleared(SSCL_CLR_STATS);
+	//printf("CLEAR STATUS: %s\n", SSCL_CLR_STATS);
+	pvPut(SSCL_CLR_STATS, SYNC); 		
+	report_error(SSCL_INTLCK_STATS, 0);
+	pvPut(SSCL_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void SSCL_clear_underway()
+{  
+	clear_underway(SSCL_CLR_STATS);
+	pvPut(SSCL_CLR_STATS, SYNC); 		
+}

@@ -1,0 +1,5 @@
+file "db/vcs_exp.template" {
+pattern
+{  SYS    CLR    NCLR    PNK    TOUT    WFVC    STOK    RA12ON    B26ON    B28bOFF    B28bON    B28aOFF    B28aON    B27OFF    B27ON    B29OFF    G9ON   G10ON    G10OFF    DA12ON    DA12S1OFF    DA12S2OFF    EXPPNK    ON    EXPTOUT    SCAN    }
+{  VCS    1      2       3      6       55      0       144       66       71         77        70         76        69        75       74        148    149      151       65        72           73           20        1     120       ".05 second"}
+}

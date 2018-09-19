@@ -1,0 +1,303 @@
+program a13aClearanceSNC
+
+%{
+#include "vcs_var_mes.h" // define this here so C functions are seen
+	
+#define	STOK       	0
+#define FAIL		-1
+#define	B9aON       80
+#define	G5AS1OFF    82
+#define	G5AS2OFF    83
+#define	B9bOFF      84
+#define A13APNK		85 
+#define WFVC		193
+}%
+/* Declare seq variables*/
+/* Declare seq variables*/
+
+short A13A_VC;   
+short A13A_W9a_STS;
+short A13A_W9b_STS;
+short A13A_FAIL_COND;
+short A13A_RST_OUTS;
+short A13A_PNK;
+string A13A_CLR_STATS; 
+string A13A_INTLCK_STATS;
+
+// CONTROL FLAGS
+short A13A_OLD_FAIL_COND;
+short A13A_FAILED_RST = FALSE;
+
+/* Associate SNL variables with epics output pv's*/
+assign	A13A_RST_OUTS		to	"{SYS}:RST-A13A.PROC"; 
+assign	A13A_CLR_STATS		to	"{SYS}:A13A-CLR-STATS"; 
+assign	A13A_INTLCK_STATS	to	"{SYS}:A13A-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	A13A_VC 			to 	"{SYS}:A13A-VC"; 
+assign 	A13A_W9a_STS 		to 	"{SYS}:A13A-W9a-STS";   
+assign 	A13A_W9b_STS 		to 	"{SYS}:A13A-W9b-STS";
+assign	A13A_FAIL_COND		to	"{SYS}:A13A-FAIL-COND";
+assign	A13A_PNK		    to	    "{SYS}:A13A-PNK";
+
+// monitor changes
+monitor	A13A_VC;
+monitor  A13A_W9a_STS;  
+monitor  A13A_W9b_STS;
+monitor	A13A_FAIL_COND;
+monitor	A13A_PNK;
+
+ss A13A_clearance_status {
+    
+    state init {
+		when (delay(0.5)) {
+			initVault();
+			printf("\n%sI-LINE AREA INITIALISATION COMPLETED%s\n",OK,DEF);
+		} state watchman_9a_pressed	
+    }
+//////////////////////////////////////////////////////////
+	state watchman_9a_pressed {
+
+		when (A13A_FAIL_COND != STOK) {
+			A13A_OLD_FAIL_COND = A13A_FAIL_COND;
+		} state  clearance_faillures
+        
+        
+		when (A13A_W9a_STS == WFVC) {
+
+		} state clearance_pending   
+			
+		when (A13A_W9a_STS == B9aON) {
+			A13A_clear_underway();
+			A13A_update_report(B9aON);
+		} state watchman_9a_released
+	}
+////////////////////////////////////////////////////////////////////////// 
+	state clearance_pending {
+ 
+		option -e;
+
+		entry {
+            /*resetVault();
+            A13A_update_report(WFVC);*/
+        } 
+
+		when (A13A_W9a_STS != WFVC) {
+
+		} state watchman_9a_pressed  		
+	}
+    
+ //////////////////////////////////////////////////////////
+	state watchman_9a_released {
+		
+		when (A13A_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+			
+		when (A13A_W9a_STS != B9aON) {
+
+		} state g5a_switch_I_closed
+	}   
+//////////////////////////////////////////////////////////
+	state g5a_switch_I_closed {
+        
+		option -e;
+
+		entry {
+   			A13A_update_report(G5AS1OFF);
+		} 
+        
+		when (A13A_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+		
+		when (A13A_W9b_STS != G5AS1OFF) {
+
+		} state g5a_switch_II_closed
+
+	}
+//////////////////////////////////////////////////////////
+	state g5a_switch_II_closed {
+        
+        
+		option -e;
+		entry {
+   			A13A_update_report(G5AS2OFF);
+		}
+        
+		when (A13A_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+       // previous switch might have opened up
+		when (A13A_W9b_STS == G5AS1OFF) {
+
+		} state g5a_switch_I_closed
+        
+        
+		when (A13A_W9b_STS != G5AS2OFF) {
+
+		} state watchman_9b_pressed
+        
+
+	} 
+///////////////////////////////////////////////////////////
+	state watchman_9b_pressed {
+        
+		option -e;
+		entry {
+			A13A_update_report(B9bOFF);
+		}
+		
+		when (A13A_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+
+		/*when (A13A_W9b_STS == G5AS2OFF) {
+
+		} state g5a_switch_II_closed*/
+        
+			
+		when (A13A_W9b_STS ==  STOK) {
+
+			A13A_status();
+		} state vault_cleared
+        
+        
+		when (A13A_W9b_STS != B9bOFF) {
+            
+		} state g5a_switch_I_closed      
+        
+	} 
+///////////////////////////////////////////////////////////////
+    state vault_cleared {
+		option -e;
+		entry {
+			printf("%sI-LINE AREA IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (A13A_VC != STOK) {
+
+		} state paniq_faillure
+	
+	}    
+///////////////////////////////////////////////////   
+  	state paniq_faillure {
+    
+      when (A13A_VC != A13APNK) {
+
+		  } state clearance_faillures	
+ 
+ 		  when () { // paniq button released?  
+				printf("A13A VAULT CLEARED FAILURE CONDITION: ");
+				A13A_update_failed(A13APNK); 
+		} state recover_from_paniq	     
+	} 
+////////////////////////////////////////////////////////////    
+   	state recover_from_paniq {
+		option -e;
+		option -x;
+   
+		when (!A13A_PNK) { // paniq button released?
+		} state recover_from_faillure  
+
+		exit {
+            A13A_FAILED_RST = FALSE;
+		}
+	}  
+///////////////////////////////////////////////////////////
+	state clearance_faillures { 			/* FAIL CONDITIONS*/
+		
+		option -e;
+		option -x;
+		entry {
+			printf("A13A CLEARANCE FAILURE CONDITION: ");
+			A13A_FAILED_RST = FALSE;
+            A13A_OLD_FAIL_COND = A13A_FAIL_COND;
+			A13A_update_failed(A13A_FAIL_COND == FAIL? STOK : A13A_FAIL_COND); // we cannot index -1(FAIL)			
+		}
+
+		when () {
+			
+		} state recover_from_faillure			
+	}
+//////////////////////////////////////////////////////////
+	state recover_from_faillure {
+		
+		when (!A13A_FAIL_COND) {
+			printf("%sA13A RECOVERING FROM FAILLURE : ENTERING W9a STATE%s\n",OK,DEF);
+		} state  watchman_9a_pressed
+			
+		when (A13A_FAIL_COND != A13A_OLD_FAIL_COND) {
+            
+            
+		} state  clearance_faillures
+	}
+    
+}
+///////////////////////////////////////////////////////////////////////////////
+void initVault(){
+	A13A_OLD_FAIL_COND = A13A_FAIL_COND;
+    A13A_RST_OUTS  = TRUE;
+	not_cleared(A13A_CLR_STATS);
+	report_error(A13A_INTLCK_STATS, 0);
+    pvPut(A13A_RST_OUTS, SYNC);
+	pvPut(A13A_CLR_STATS, SYNC);
+	pvPut(A13A_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void resetVault(){
+	not_cleared(A13A_CLR_STATS);
+	pvPut(A13A_CLR_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void A13A_update_failed(short report)
+{
+	clear_failed(A13A_CLR_STATS);
+	pvPut(A13A_CLR_STATS, SYNC);
+	report_error(A13A_INTLCK_STATS, report);
+	pvPut(A13A_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,A13A_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void A13A_update_report(short intlck) {
+	report_error(A13A_INTLCK_STATS, intlck);
+	pvPut(A13A_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void A13A_status()
+{
+	cleared(A13A_CLR_STATS);
+	pvPut(A13A_CLR_STATS, SYNC); 		
+	report_error(A13A_INTLCK_STATS, 0);
+	pvPut(A13A_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void A13A_clear_underway()
+{  
+	clear_underway(A13A_CLR_STATS);
+	pvPut(A13A_CLR_STATS, SYNC); 		
+}
+
+//////////////////////////////////////////////////////////////////////////
+%{
+
+inline void cleared(string vault_status) {   
+    strcpy(vault_status, mes_array[1]); // Area cleared  
+}
+////////////////////////////////////////////////
+inline void not_cleared(string vault_status) {  
+   strcpy(vault_status, mes_array[2]); // Area not cleared    
+}
+///////////////////////////////////////////////
+inline void clear_underway(string vault_status) { 
+   strcpy(vault_status, mes_array[3]);  // Area clearance underway    
+}
+//////////////////////////////////////////////
+inline void clear_failed(string vault_status) { 
+   strcpy(vault_status, mes_array[5]); // Area clearance fail   
+}
+////////////////////////////////////////////////
+inline void report_error(string vault_interlock, short intlock)
+{
+   strcpy(vault_interlock, mes_array[intlock]);
+}
+	
+}%

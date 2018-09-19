@@ -1,0 +1,7 @@
+file "db/vcs_spc2bas.template" {
+pattern 
+{ SYS    CLR    NCLR    PNK    TOUT     WFVC    FAIL    STOK    B44ON	B45OFF    DA007ON    G6ON    G6OFF    SPC2BASPNK    ON    SPC2BASTOUT    SCAN         }
+{ VCS  	 1      2       3	   6	 	55      -1	    0		155     157       153	     152     156      154           1     120       	".1 second"  } 
+}
+
+

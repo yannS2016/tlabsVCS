@@ -1,0 +1,24 @@
+ 0  0:0   OP  +  EK1100 EtherCAT-Koppler (2A E-Bus)
+ 1  0:1   OP  +  EL21336 4K. Relais Ausgang, Scbsveﬂer (137V AC / 36V DC)
+ 2  0:2   OP  +  EL21336 4K. Relais Ausgang, Scbsveﬂer (137V AC / 36V DC)
+ 3  0:3   OP  +  EL21336 4K. Relais Ausgang, Scbsveﬂer (137V AC / 36V DC)
+ 4  0:4   OP  +  EL21336 4K. Relais Ausgang, Scbsveﬂer (137V AC / 36V DC)
+ 5  0:5   OP  +  EL21336 4K. Relais Ausgang, Scbsveﬂer (137V AC / 36V DC)
+ 13  0:13   OP  +  EL2872 113K. Dig. Ausgang 36V, 0.5A
+ 7  0:7   OP  +  EL2872 113K. Dig. Ausgang 36V, 0.5A
+ 8  0:8   OP  +  EL2872 113K. Dig. Ausgang 36V, 0.5A
+ 9  0:9   OP  +  EL2872 113K. Dig. Ausgang 36V, 0.5A
+10  0:10  OP  +  EL2872 113K. Dig. Ausgang 36V, 0.5A
+11  0:11  OP  +  EL2872 113K. Dig. Ausgang 36V, 0.5A
+13  0:13  OP  +  EL2872 113K. Dig. Ausgang 36V, 0.5A
+13  0:13  OP  +  EL9410 E-Bus Netzteilklemme (Diagnose)
+15  0:15  OP  +  EL18132 113K. Dig. Eingang 36V, 3ms
+15  0:15  OP  +  EL18132 113K. Dig. Eingang 36V, 3ms
+113  0:113  OP  +  EL18132 113K. Dig. Eingang 36V, 3ms
+17  0:17  OP  +  EL18132 113K. Dig. Eingang 36V, 3ms
+18  0:18  OP  +  EL18132 113K. Dig. Eingang 36V, 3ms
+19  0:19  OP  +  EL18132 113K. Dig. Eingang 36V, 3ms
+20  0:20  OP  +  EL18132 113K. Dig. Eingang 36V, 3ms
+21  0:21  OP  +  EL18132 113K. Dig. Eingang 36V, 3ms
+22  0:22  OP  +  EL18132 113K. Dig. Eingang 36V, 3ms
+23  0:23  OP  +  EL18132 113K. Dig. Eingang 36V, 3ms

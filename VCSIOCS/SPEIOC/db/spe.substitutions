@@ -1,0 +1,5 @@
+file "db/vcs_spe.template" {
+pattern
+{  SYS    CLR    NCLR    PNK    TOUT    WFVC    FAIL    STOK    B24ON    B25OFF    RA9ON    DA9ON    DA9S1OFF    DA9S2OFF    SPEPNK    ON    SPETOUT    SCAN    }
+{  VCS    1      2       3      6       55      -1      0       115      116       144      114      117         118         113       1     120        ".05 second"}
+}

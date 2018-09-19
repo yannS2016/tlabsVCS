@@ -1,0 +1,294 @@
+program ev2ClearanceSNC
+
+%{
+#include "vcs_var_mes.h" // define this here so C functions are seen
+#define STOK          0
+#define FAIL          -1
+#define WFVC          55
+#define	B21OFF        107
+#define	B20ON         104
+#define DA7S1OFF      105
+#define DA7S2OFF      106
+#define RA7ON		      145
+#define EV2PNK        136 
+}%
+
+/* Declare seq variables*/
+/* Declare seq variables*/
+short EV2_INIT; 
+short EV2_VC;   
+short EV2_W20_STS;
+short EV2_W21_STS;
+short EV2_FAIL_COND;
+short EV2_PNK;
+short EV2_RST_OUTS;
+string EV2_CLR_STATS; 
+string EV2_INTLCK_STATS;
+
+// CONTROL FLAGS
+short EV2_failed_rst;
+short EV2_OLD_FAIL_COND;
+short EV2_not_cleared = FALSE;
+
+/* Associate SNL variables with epics output pv's*/
+assign	EV2_RST_OUTS        to	"{SYS}:RST-EV2.PROC"; 
+assign	EV2_CLR_STATS       to	"{SYS}:EV2-CLR-STATS"; 
+assign	EV2_INTLCK_STATS	  to  "{SYS}:EV2-INTLCK-STATS"; 
+/* Associate SNL variables with epics input pv's*/
+assign 	EV2_VC 		          to 	"{SYS}:EV2-VC"; 
+assign 	EV2_W20_STS 		    to 	"{SYS}:EV2-W20-STS";   
+assign 	EV2_W21_STS 		    to 	"{SYS}:EV2-W21-STS";
+assign	EV2_FAIL_COND		    to  "{SYS}:EV2-FAIL-COND";
+assign	EV2_PNK		          to  "{SYS}:EV2-PNK";
+
+monitor	EV2_VC;
+monitor EV2_W20_STS;  
+monitor EV2_W21_STS;
+monitor	EV2_FAIL_COND;
+monitor	EV2_PNK;
+
+ss EV2_clearance_status {
+    
+    state init {
+		  when (delay(1)) {
+			  initVault();
+			  printf("\n%sEXPERIMENTAL VAULT 2 INITIALISATION COMPLETED%s\n",OK,DEF);
+		  }   state watchman_20_pressed	
+    }
+//////////////////////////////////////////////////////////
+	state watchman_20_pressed {
+ 
+    when (EV2_FAIL_COND != STOK) {
+      EV2_OLD_FAIL_COND = EV2_FAIL_COND;
+    } state  clearance_faillures
+     
+    
+		when (EV2_W20_STS == WFVC) {
+
+		} state clearance_pending  
+			
+		when (EV2_W20_STS == B20ON) {
+			EV2_clear_underway();
+			EV2_update_report(B20ON);
+		} state watchman_20_released
+	}
+ ////////////////////////////////////////////////////////////////
+	state clearance_pending {
+		option -e;
+		option -x;
+		entry {
+      resetVault();
+      EV2_update_report(WFVC);
+      EV2_not_cleared = TRUE; // we use this to tell user to start or restart vault clearance
+		}
+		when (EV2_W20_STS != WFVC) {
+
+		} state watchman_20_pressed  		
+	}
+ //////////////////////////////////////////////////////////
+	state watchman_20_released {
+		
+		when (EV2_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+			
+		when (EV2_W20_STS != B20ON) {
+   
+		} state A7_switch_I_closed
+	}   
+//////////////////////////////////////////////////////////
+	state A7_switch_I_closed {
+        
+		option -e;
+
+		entry {
+      EV2_update_report(DA7S1OFF);
+		} 
+
+		when (EV2_FAIL_COND != STOK) {
+
+		} state   clearance_faillures
+		
+		when (EV2_W21_STS != DA7S1OFF) {
+            
+		} state A7_switch_II_closed
+        
+	}
+ //////////////////////////////////////////////////////////
+	state A7_switch_II_closed {
+ 
+		option -e;
+
+		entry {
+      EV2_update_report(DA7S2OFF);
+		} 
+
+		when (EV2_FAIL_COND != STOK) {
+
+		} state   clearance_faillures
+   
+   // previous switch might have opened up
+		when (EV2_W21_STS == DA7S1OFF) {
+
+		} state A7_switch_I_closed
+		
+		when (EV2_W21_STS != DA7S2OFF) {
+
+		} state watchman_21_pressed
+	}
+///////////////////////////////////////////////////////////
+	state watchman_21_pressed {
+ 
+		option -e;
+
+		entry {
+      EV2_update_report(B21OFF);
+		} 
+		
+		when (EV2_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+			
+			
+		when (EV2_W21_STS == STOK) {
+		} state vault_cleared
+   
+   /// must be last
+		when (EV2_W21_STS != B21OFF) {
+            
+		} state A7_switch_I_closed 
+	} 
+///////////////////////////////////////////////////////////////
+  state vault_cleared {
+		option -e;
+		entry {
+      EV2_status();
+			printf("%sEXPERIMENTAL VAULT 2 IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (EV2_VC != STOK) {
+
+		} state paniq_faillure
+	
+	} 
+ ///////////////////////////////////////////////////   
+  state paniq_faillure {
+
+    when (EV2_VC != EV2PNK) {
+
+		} state clearance_faillures	
+ 
+    when () { // paniq button released?
+      printf("EV2 VAULT CLEARED FAILURE CONDITION: ");
+      EV2_update_failed(EV2PNK); 
+		} state recover_from_paniq	     
+	} 
+////////////////////////////////////////////////////////////    
+  state recover_from_paniq {
+		option -e;
+		option -x;
+		when (!EV2_PNK) { // paniq button released?
+        // we only go to this state so we enter watchman_20_pressed from one point(recover_from_faillure)
+		} state recover_from_faillure  
+
+		exit {
+      EV2_failed_rst = FALSE;
+      EV2_not_cleared = FALSE;
+      //printf("%sEV2 RECOVERING FROM PANIQ FAILLURE : ENTERING W20 STATE%s\n",OK,DEF);
+		}
+	} 
+ ///////////////////////////////////////////////////   
+  state clearance_faillures {
+		option -e;
+		option -x;
+		entry {
+      printf("EV2 CLEARANCE FAILURE CONDITION: ");
+      EV2_failed_rst = FALSE;
+      EV2_not_cleared = FALSE;
+      EV2_OLD_FAIL_COND = EV2_FAIL_COND;
+      EV2_update_failed(EV2_FAIL_COND == FAIL ? STOK : EV2_FAIL_COND); // we cannot index -1(FAIL)
+		}
+   
+		when () { // seq excute faster than recor logi
+		} state recover_from_faillure	   
+	} 
+//////////////////////////////////////////////////////////
+	state recover_from_faillure {
+		
+		when (EV2_FAIL_COND ==  STOK) {
+      printf("%sEV2 RECOVERING FROM CLEARANCE  FAILLURE : ENTERING W20 STATE%s\n",OK,DEF);
+		} state  watchman_20_pressed
+			
+		when (EV2_FAIL_COND != EV2_OLD_FAIL_COND) {
+           
+		} state  clearance_faillures
+	}   
+}
+///////////////////////////////////////////////////////////////////////////////
+void initVault(){
+	EV2_OLD_FAIL_COND = EV2_FAIL_COND;
+    EV2_RST_OUTS  = TRUE;
+	not_cleared(EV2_CLR_STATS);
+	report_error(EV2_INTLCK_STATS, 0);
+    pvPut(EV2_RST_OUTS, SYNC);
+	pvPut(EV2_CLR_STATS, SYNC);
+	pvPut(EV2_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void resetVault(){
+	not_cleared(EV2_CLR_STATS);
+	pvPut(EV2_CLR_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void EV2_update_failed(short report)
+{
+	clear_failed(EV2_CLR_STATS);
+	pvPut(EV2_CLR_STATS, SYNC);
+	report_error(EV2_INTLCK_STATS, report);
+	pvPut(EV2_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,EV2_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void EV2_update_report(short intlck) {
+	report_error(EV2_INTLCK_STATS, intlck);
+	pvPut(EV2_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void EV2_status()
+{
+	cleared(EV2_CLR_STATS);
+	pvPut(EV2_CLR_STATS, SYNC); 		
+	report_error(EV2_INTLCK_STATS, 0);
+	pvPut(EV2_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void EV2_clear_underway()
+{  
+	clear_underway(EV2_CLR_STATS);
+	pvPut(EV2_CLR_STATS, SYNC); 		
+}
+
+//////////////////////////////////////////////////////////////////////////
+%{
+
+inline void cleared(string vault_status) {   
+    strcpy(vault_status, mes_array[1]); // Area cleared  
+}
+////////////////////////////////////////////////
+inline void not_cleared(string vault_status) {  
+   strcpy(vault_status, mes_array[2]); // Area not cleared    
+}
+///////////////////////////////////////////////
+inline void clear_underway(string vault_status) { 
+   strcpy(vault_status, mes_array[3]);  // Area clearance underway    
+}
+//////////////////////////////////////////////
+inline void clear_failed(string vault_status) { 
+   strcpy(vault_status, mes_array[5]); // Area clearance fail   
+}
+////////////////////////////////////////////////
+inline void report_error(string vault_interlock, short intlock)
+{
+   strcpy(vault_interlock, mes_array[intlock]);
+}
+	
+}%

@@ -1,0 +1,330 @@
+program trlClearanceSNC
+
+%{
+#include "vcs_var_mes.h" // define this here so C functions are seen
+#define STOK        0
+#define WFVC        55
+#define	B34aON      82
+#define	B34bOFF     84
+#define B34bON		83 
+#define B35OFF		87	
+#define DA004AS1OFF	85 
+#define DA004AS2OFF	86
+#define TRLPNK      20
+}%
+
+/* Declare seq variables*/
+/* Declare seq variables*/
+short TRL_INIT; 
+short TRL_VC;   
+short TRL_W34a_STS;
+short TRL_W34b_STS;
+short TRL_W35_STS;
+short TRL_FAIL_COND;
+short TRL_PNK;
+short TRL_RST_OUTS;
+string TRL_CLR_STATS; 
+string TRL_INTLCK_STATS;
+// CONTROL FLAGS
+short TRL_failed_rst;
+short TRL_OLD_FAIL_COND;
+short TRL_not_cleared = FALSE;
+
+/* Associate SNL variables with epics output pv's*/
+assign	TRL_RST_OUTS        to	"{SYS}:RST-TRL.PROC"; 
+assign	TRL_CLR_STATS       to	"{SYS}:TRL-CLR-STATS"; 
+assign	TRL_INTLCK_STATS	to  "{SYS}:TRL-INTLCK-STATS"; 
+
+/* Associate SNL variables with epics input pv's*/
+assign 	TRL_VC 		        to 	"{SYS}:TRL-VC"; 
+assign 	TRL_W34a_STS 		to 	"{SYS}:TRL-W34a-STS";   
+assign 	TRL_W34b_STS 		to 	"{SYS}:TRL-W34b-STS";
+assign 	TRL_W35_STS 		to 	"{SYS}:TRL-W35-STS";
+assign	TRL_FAIL_COND		to  "{SYS}:TRL-FAIL-COND";
+assign	TRL_PNK		        to  "{SYS}:TRL-PNK";
+
+monitor	TRL_VC;
+monitor TRL_W34a_STS;  
+monitor TRL_W34b_STS;
+monitor TRL_W35_STS;
+monitor	TRL_FAIL_COND;
+monitor	TRL_PNK;
+
+ss TRL_clearance_status {
+    
+    state init {
+		  when (delay(1)) {
+			  initVault();
+			  printf("\n%sTROLLEY PASSAGEWAY VAULT INITIALISATION COMPLETED%s\n",OK,DEF);
+		  }   state watchman_34a_pressed	
+    }
+//////////////////////////////////////////////////////////
+	state watchman_34a_pressed {
+ 
+    when (TRL_FAIL_COND != STOK) {
+      TRL_OLD_FAIL_COND = TRL_FAIL_COND;
+    } state  clearance_faillures
+     
+    
+		when (TRL_W34a_STS == WFVC) {
+
+		} state clearance_pending  
+			
+		when (TRL_W34a_STS == B34aON) {
+			TRL_clear_underway();
+			TRL_update_report(B34aON);
+		} state watchman_34a_released
+	}
+ ////////////////////////////////////////////////////////////////
+	state clearance_pending {
+		option -e;
+		option -x;
+		entry {
+            resetVault();
+            TRL_update_report(WFVC);
+            TRL_not_cleared = TRUE; // we use this to tell user to start or restart vault clearance
+		}
+		when (TRL_W34a_STS != WFVC) {
+
+		} state watchman_34a_pressed  		
+	}
+ //////////////////////////////////////////////////////////
+	state watchman_34a_released {
+		
+		when (TRL_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+			
+		when (TRL_W34a_STS != B34aON) {
+   
+		} state watchman_34b_pressed
+	}  
+//////////////////////////////////////////////////////////
+
+	state watchman_34b_pressed {
+		option -e;
+
+		entry {
+            TRL_update_report(B34bOFF);
+		} 
+        
+		when (TRL_FAIL_COND != STOK) {
+			TRL_OLD_FAIL_COND = TRL_FAIL_COND;
+		} state  clearance_faillures
+			
+		when (TRL_W34b_STS == B34bON) {
+		} state watchman_34b_released
+	}
+
+//////////////////////////////////////////////////////////
+	state watchman_34b_released {
+        
+ 		option -e;       
+		entry {
+            TRL_update_report(B34bON);
+		} 
+		
+		when (TRL_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+			
+		when (TRL_W34b_STS != B34bON) {
+		} state A004A_switch_I_closed
+	}
+    
+//////////////////////////////////////////////////////////
+	state A004A_switch_I_closed {
+        
+		option -e;
+
+		entry {
+            TRL_update_report(DA004AS1OFF);
+		} 
+
+		when (TRL_FAIL_COND != STOK) {
+
+		} state   clearance_faillures
+		
+		when (TRL_W34b_STS != DA004AS1OFF) {
+            
+		} state A004A_switch_II_closed
+        
+	}
+ //////////////////////////////////////////////////////////
+	state A004A_switch_II_closed {
+ 
+		option -e;
+
+		entry {
+            TRL_update_report(DA004AS2OFF);
+		} 
+
+		when (TRL_FAIL_COND != STOK) {
+
+		} state   clearance_faillures
+   
+   // previous switch might have opened up
+		when (TRL_W34b_STS == DA004AS1OFF) {
+
+		} state A004A_switch_I_closed
+		
+		when (TRL_W34b_STS != DA004AS2OFF) {
+
+		} state watchman_35_pressed
+	}
+///////////////////////////////////////////////////////////
+	state watchman_35_pressed {
+ 
+		option -e;
+
+		entry {
+            TRL_update_report(B35OFF);
+		} 
+		
+		when (TRL_FAIL_COND != STOK) {
+
+		} state  clearance_faillures
+			
+			
+		when (TRL_W35_STS == STOK) {
+		} state vault_cleared
+   
+        /// must be last
+		when (TRL_W35_STS != B35OFF) {
+            
+		} state A004A_switch_I_closed 
+	} 
+///////////////////////////////////////////////////////////////
+  state vault_cleared {
+		option -e;
+		entry {
+      TRL_status();
+			printf("%sTROLLEY PASSAGEWAY VAULT IN CLEARED STATE%s\n",CLR,DEF);
+		} 
+		when (TRL_VC != STOK) {
+
+		} state paniq_faillure
+	
+	} 
+ ///////////////////////////////////////////////////   
+  state paniq_faillure {
+
+    when (TRL_VC != TRLPNK) {
+
+		} state clearance_faillures	
+ 
+    when () { // paniq button released?
+      printf("TRL VAULT CLEARED FAILURE CONDITION: ");
+      TRL_update_failed(TRLPNK); 
+		} state recover_from_paniq	     
+	} 
+////////////////////////////////////////////////////////////    
+  state recover_from_paniq {
+		option -e;
+		option -x;
+		when (!TRL_PNK) { // paniq button released?
+        // we only go to this state so we enter watchman_34a_pressed from one point(recover_from_faillure)
+		} state recover_from_faillure  
+
+		exit {
+            TRL_failed_rst = FALSE;
+            TRL_not_cleared = FALSE;
+            //printf("%sTRL RECOVERING FROM PANIQ FAILLURE : ENTERING W34a STATE%s\n",OK,DEF);
+		}
+	} 
+ ///////////////////////////////////////////////////   
+  state clearance_faillures {
+		option -e;
+		option -x;
+		entry {
+            printf("TRL CLEARANCE FAILURE CONDITION: ");
+            TRL_failed_rst = FALSE;
+            TRL_not_cleared = FALSE;
+            TRL_OLD_FAIL_COND = TRL_FAIL_COND;
+            TRL_update_failed(TRL_FAIL_COND); // we cannot index -1(FAIL)
+		}
+   
+		when () { // seq excute faster than recor logi
+		} state recover_from_faillure	   
+	} 
+//////////////////////////////////////////////////////////
+	state recover_from_faillure {
+		
+		when (TRL_FAIL_COND ==  STOK) {
+            printf("%sTRL RECOVERING FROM CLEARANCE  FAILLURE : ENTERING W34a STATE%s\n",OK,DEF);
+		} state  watchman_34a_pressed
+			
+		when (TRL_FAIL_COND != TRL_OLD_FAIL_COND) {
+           
+		} state  clearance_faillures
+	}   
+}
+///////////////////////////////////////////////////////////////////////////////
+void initVault(){
+    TRL_OLD_FAIL_COND = TRL_FAIL_COND;
+    TRL_RST_OUTS  = TRUE;
+	not_cleared(TRL_CLR_STATS);
+	report_error(TRL_INTLCK_STATS, 0);
+    pvPut(TRL_RST_OUTS, SYNC);
+	pvPut(TRL_CLR_STATS, SYNC);
+	pvPut(TRL_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void resetVault(){
+	not_cleared(TRL_CLR_STATS);
+	pvPut(TRL_CLR_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void TRL_update_failed(short report)
+{
+	clear_failed(TRL_CLR_STATS);
+	pvPut(TRL_CLR_STATS, SYNC);
+	report_error(TRL_INTLCK_STATS, report);
+	pvPut(TRL_INTLCK_STATS, SYNC);
+	printf("%s%s%s\n",ERROR,TRL_INTLCK_STATS,DEF);
+}
+/////////////////////////////////////////////////////////////////////////
+void TRL_update_report(short intlck) {
+	report_error(TRL_INTLCK_STATS, intlck);
+	pvPut(TRL_INTLCK_STATS, SYNC);
+}
+////////////////////////////////////////////////////////////////////////
+void TRL_status()
+{
+	cleared(TRL_CLR_STATS);
+	pvPut(TRL_CLR_STATS, SYNC); 		
+	report_error(TRL_INTLCK_STATS, 0);
+	pvPut(TRL_INTLCK_STATS, SYNC);
+}
+///////////////////////////////////////////////////////////
+void TRL_clear_underway()
+{  
+	clear_underway(TRL_CLR_STATS);
+	pvPut(TRL_CLR_STATS, SYNC); 		
+}
+
+//////////////////////////////////////////////////////////////////////////
+%{
+
+inline void cleared(string vault_status) {   
+    strcpy(vault_status, mes_array[1]); // Area cleared  
+}
+////////////////////////////////////////////////
+inline void not_cleared(string vault_status) {  
+   strcpy(vault_status, mes_array[2]); // Area not cleared    
+}
+///////////////////////////////////////////////
+inline void clear_underway(string vault_status) { 
+   strcpy(vault_status, mes_array[3]);  // Area clearance underway    
+}
+//////////////////////////////////////////////
+inline void clear_failed(string vault_status) { 
+   strcpy(vault_status, mes_array[5]); // Area clearance fail   
+}
+////////////////////////////////////////////////
+inline void report_error(string vault_interlock, short intlock)
+{
+   strcpy(vault_interlock, mes_array[intlock]);
+}
+	
+}%

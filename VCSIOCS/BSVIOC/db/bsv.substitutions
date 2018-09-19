@@ -1,0 +1,5 @@
+file "db/vcs_bsv.template" {
+pattern
+{  SYS    CLR    NCLR    PNK    TOUT    WFVC    FAIL    STOK    B36ON    B37OFF    RA15ON    DA15ON    DA15S1OFF    DA15S2OFF    BSVPNK    ON    BSVTOUT    SCAN    }
+{  VCS    1      2       3      13      55      -1      0       127      128       144       126       129          130          125       1     120        ".05 second"}
+}

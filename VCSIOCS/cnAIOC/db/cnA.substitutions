@@ -1,0 +1,5 @@
+file "db/vcs_cnA.template" {
+pattern
+{  SYS    CLR    NCLR    PNK    TOUT    WFVC    FAIL    STOK    cnAON    B38ON    B39OFF    DA12AON    DA12AS1OFF    DA12AS2OFF    cnAPNK    ON    cnATOUT    SCAN    }
+{  VCS    1      2       3      6       55      -1      0       147      121      122       120        123           124           119       1     120        ".05 second"}
+}

@@ -1,0 +1,195 @@
+################################################################
+## SELECT THE NEXT PROCESSING BRANCH
+record(calc, "$(SYS):SSCA1-SEL-STAGE") {
+  field(DESC, "Select processing branch")
+  field(SCAN, "$(SCAN)") # THIS RECORD INIT PROCESSING
+  field(CALC, "!A?B?$(CLR):$(NCLR):$(PNK)")
+  field(INPA, "$(SYS):SSCA1-PNK")
+  field(INPB, "$(SYS):SSCA1-CLR")
+  field(FLNK, "$(SYS):SSCA1-PROC-STAGE")
+}
+## THIS RECORDS PROPAGATE PROCESSING ##
+record(fanout, "$(SYS):SSCA1-PROC-STAGE") {
+  field(SCAN, "Passive")
+  field(SELM, "Specified")
+  field(SELL, "$(SYS):SSCA1-SEL-STAGE")
+  field(LNK1, "$(SYS):SSCA1-VC")
+  field(LNK2, "$(SYS):SSCA1-VNC")
+  field(LNK3, "$(SYS):SSCA1-PNK")
+}
+##################################################################################
+# monitor status of inputs which may cause clearance faillure
+# SIGNAL TO SYS: SSCA1-VC?SSCA1-CLR && (HARDWARE STATUS RECORDS):FALSE
+record(calcout, "$(SYS):SSCA1-VC") { 
+  field(DESC, "SSCA1 Vault clear stage")
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?B?$(SSCA1PNK):$(STOK):A")
+  field(INPA, "$(SYS):SSCA1-FAIL-COND PP") 
+  field(INPB, "$(SYS):SSCA1-PNK PP")
+  field(OUT,  "$(SYS):RST-SSCA1.PROC PP")
+  field(OOPT, "When Non-zero")
+}
+
+###################################################################################
+#CLEARANCE UNDERWAY FAIL CONDITIONS
+record(calcout, "$(SYS):SSCA1-FAIL-COND") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?B?!C?D&&E?$(G3ON):!F?$(STOK):$(TOUT):$(GA1AON):$(A001ON):$(RA1ON)")
+  field(INPA, "$(SYS):SW-RF-A1 NPP") 
+  field(INPB, "$(SYS):SSCL-CLR NPP")
+  field(INPC, "$(SYS):SSC-GA1A-CLSD PP") # define in IBL template
+  field(INPD, "$(SYS):SSCA1-CLR NPP")
+  field(INPE, "$(SYS):SW-SSC-G3 NPP")
+  field(INPF, "$(SYS):SSCA1-TIMEOUT NPP") 
+  field(OUT,  "$(SYS):RST-SSCA1 PP")
+  field(OOPT, "Transition To Non-zero")
+}
+
+########################################
+## RESET VAULT
+record(seq, "$(SYS):RST-SSCA1") { # HANDLE BY SEQ
+  field(SCAN, "Passive")
+  field(PINI, "YES") # init status of outputs
+  field(DOL1, "0")
+  field(DOL2, "0")
+  field(DOL3, "0")
+  field(DOL4, "0")
+  field(DOL5, "0")
+  field(DOL6, "0")
+  field(DOL7, "0")
+  field(DOL8, "0")
+  field(LNK1, "$(SYS):CS3-SSC PP")
+  field(LNK2, "$(SYS):CL3-SSC PP")
+  field(LNK3, "$(SYS):SSCA1-CLR PP")
+  field(LNK4, "$(SYS):LED-WS-SSC-11 PP")
+  field(LNK5, "$(SYS):LED-WS-SSC-12 PP")
+  field(LNK6, "$(SYS):SSCA1-COUNTER PP")
+  field(LNK7, "$(SYS):WATCHMAN-SSC-11-ACT PP")
+  field(SELM, "All")
+}
+
+#######################################################################################
+record(calc, "$(SYS):SSCA1-VNC") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(STOK):A")
+  field(INPA, "$(SYS):SSC-W11-STS PP")
+}
+
+########################################################################
+# ONLY CHNAGE OUTS STATE WHEN B11 IS PRESSED WHILE ROOF
+# A1 AND DOOR A1 ARE CLOSED: THIS ENSURE WE DONT UNECCESSARLY WRITE TO OUTS
+record(calcout, "$(SYS):SSC-W11-STS") {
+  field(DESC, "Vault clearance stage 1")
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?!C?$(STOK):$(B11ON):!C?$(WFVC):D:A")
+  field(INPA, "$(SYS):SSCA1-FAIL-COND PP") 
+  field(INPB, "$(SYS):WS-BUT-SSC-11")
+  field(INPC, "$(SYS):WATCHMAN-SSC-11-ACT")
+  field(INPD, "$(SYS):SSC-W12-STS PP")
+  field(OUT,  "$(SYS):SSCW11-WRT-OUTS.PROC PP")
+  field(OOPT, "Transition To Zero")
+}
+########################################################################
+record(seq, "$(SYS):SSCW11-WRT-OUTS") { # MAY BE HANDLED BY SEQ
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DOL4, "0")
+  field(DOL5, "1")
+  field(DOL6, "0")
+  field(LNK1, "$(SYS):CS3-SSC PP")
+  field(LNK2, "$(SYS):CL3-SSC PP")
+  field(LNK3, "$(SYS):LED-WS-SSC-11 PP")
+  field(LNK4, "$(SYS):SSCA1-COUNTER PP")
+  field(LNK5, "$(SYS):WATCHMAN-SSC-11-ACT PP")
+  field(LNK6, "$(SYS):SSCA1-VC") # RESET ANY PREVIOUS FAIL CONDITIONS
+  field(SCAN, "Passive")
+  field(SELM, "All")
+}
+
+##########################################################################
+
+record(calcout, "$(SYS):SSC-W12-STS") {
+  field(DESC, "Vault clearance stage 3")
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?!B?C&&!D?$(STOK):$(B12OFF):$(G3OFF):A")
+  field(INPA, "$(SYS):SSCA1-FAIL-COND PP")
+  field(INPB, "$(SYS):SW-SSC-G3 NPP")
+  field(INPC, "$(SYS):SSC-WATCH-11-RLSD PP")	
+  field(INPD, "$(SYS):WS-BUT-SSC-12")
+  field(OUT,  "$(SYS):SSCW12-WRT-OUTS.PROC PP")
+  field(OOPT, "Transition To Zero") 
+}
+# THIS RECORDS IS PROCESSED ONLY WHEN SSC-W12-STS RETRUN 0
+# THAT IS SSCA1 INTERLOCKS ARE CORRECT IN SSC-W12-STS
+record(seq, "$(SYS):SSCW12-WRT-OUTS") {
+  field(SELM, "All")
+  field(DOL1, "1")
+  field(DOL2, "1")
+  field(DOL3, "1")
+  field(DLY2, "0.02")
+  field(LNK1, "$(SYS):RST-SSCA1 PP")
+  field(LNK2, "$(SYS):SSCA1-CLR PP")
+  field(LNK3, "$(SYS):LED-WS-SSC-12 PP")
+  field(SCAN, "Passive")
+}
+##########################################################################
+# WATCHMAN 11 RELEASED
+record(calc, "$(SYS):SSC-WATCH-11-RLSD") {
+  field(CALC, "A&&B?$(ON):$(STOK)")
+  field(INPA, "$(SYS):WS-BUT-SSC-11")
+  field(INPB, "$(SYS):WATCHMAN-SSC-11-ACT")
+}
+
+#######################################################################
+#  RECOVER FROM PANIQUE 
+record(calc, "$(SYS):SSCA1-PNK") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(CALC, "!A?$(ON):$(STOK)")
+  field(INPA, "$(SYS):WS-BUT-SSC-11")
+  field(VAL, "0")
+}
+##################################################################
+# TIMER PROCEDURE
+record(calc, "$(SYS):SSCA1-COUNTER") {
+  field(SCAN, "Passive")
+  field(CALC, "B?A+1:0")
+  field(INPA, "$(SYS):SSCA1-COUNTER")
+  field(INPB, "$(SYS):WATCHMAN-SSC-11-ACT")
+}
+record(calc, "$(SYS):SSCA1-TIMEOUT") {
+  field(SCAN, "1 second")
+  field(CALC, "A>=$(SSCA1TOUT)?$(ON):$(STOK)")
+  field(INPA, "$(SYS):SSCA1-COUNTER PP")
+}
+########################### Outputs ##################################
+record(bo, "$(SYS):SSCA1-CLR") {
+  field(SCAN, "Passive")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+record(stringout, "$(SYS):SSCA1-CLR-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+
+record(stringout, "$(SYS):SSCA1-INTLCK-STATS") {
+  field(SCAN, "Passive")
+  field(OMSL, "supervisory")
+}
+################ INPUTS ###############################
+########  INIT THIS RECORD TO FALSE ######
+record(bo, "$(SYS):WATCHMAN-SSC-11-ACT") {
+  field(SCAN, "Passive")
+  field(PINI, "YES")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "0")
+}

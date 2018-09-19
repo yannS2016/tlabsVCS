@@ -1,0 +1,5 @@
+file "db/vcs_ev1.template" {
+pattern 
+{ SYS    CLR    NCLR    PNK    TOUT    WFVC    FAIL    STOK    RA6ON    RA7ON    B18ON    B19OFF    DA6ON    DA6S1OFF    DA6S2OFF     EV1PNK    ON    EV1TOUT    SCAN         }
+{ VCS  	 1      2       3	     6	     55      -1	     0		   144      145      99       102       98	     100         101      	  131       1     120        ".5 second"  } 
+}
