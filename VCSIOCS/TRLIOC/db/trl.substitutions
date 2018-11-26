@@ -1,5 +1,0 @@
-file "db/vcs_trl.template" {
-pattern
-{  SYS    CLR    NCLR    PNK    TOUT    WFVC    FAIL    STOK    B34aON    B34bOFF    B34bON    B35OFF    G4ON    G4S1ON    G4S2ON    DA004AON    DA004AS1OFF    DA004AS2OFF    TRLPNK    ON    TRLTOUT    SCAN    }
-{  VCS    1      2       3      6       55      -1      0       82        84         83        87        79      80        81        78          85             86             20        1     120       ".05 second"}
-}

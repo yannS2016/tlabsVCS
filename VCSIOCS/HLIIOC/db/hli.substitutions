@@ -1,5 +1,0 @@
-file "db/vcs_hli.template" {
-pattern
-{  SYS    CLR    NCLR    PNK    TOUT    WFVC    FAIL    STOK    B30ON    B31OFF    RA14ON    DA14ON    DA14S1OFF    DA14S2OFF    HLIPNK    ON    HLITOUT    SCAN    }
-{  VCS    1      2       3      6       55      -1      0       89       92        144       88        90           91           134       1     120        ".05 second"}
-}

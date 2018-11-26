@@ -1,5 +1,0 @@
-file "db/vcs_ev2.template" {
-pattern 
-{ SYS    CLR    NCLR    PNK    TOUT    WFVC    FAIL    STOK    RA7ON    B20ON     B21OFF    DA7ON    DA7S1OFF    DA7S2OFF    EV2PNK    ON    EV2TOUT    SCAN         }
-{ VCS    1      2       3	   6	   55      -1	   0	   145      104       107       103	     105         106      	 132       1     120        ".1 second"  } 
-}

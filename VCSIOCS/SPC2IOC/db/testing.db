@@ -1,8 +1,0 @@
-####################################################
-# DOOR A001 CLOSED #
-record(calc, "$(SYS):SPC1-DA001-CLSD") {
-  field(SCAN, "Passive")
-  field(CALC, "!A&&!B?$(STOK):$(ON)")
-  field(INPA, "$(SYS):SW-I-SPC1-A001.VAL")
-  field(INPB, "$(SYS):SW-II-SPC1-A001.VAL")
-}

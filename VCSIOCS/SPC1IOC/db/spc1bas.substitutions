@@ -1,7 +1,0 @@
-file "db/vcs_spc1bas.template" {
-pattern 
-{  SYS  CLR  NCLR  PNK   WFVC  TOUT  STOK  	A005ON    B42ON    B43OFF    RA2ON    DA001ON    DA005AON    DA005ON    DA005OFF    SPC1BASPNK    ON    SPC1BASTOUT    SCAN}
-{  VCS  1    2     3	 55	   6     0	 	182       176	   179       185      170        171         172        178         184           1     120            ".1 second"}    
-}
-
-
