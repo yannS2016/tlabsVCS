@@ -22,6 +22,7 @@ import java.util.List;
 import fragment.LoadFragment;
 import fragment.LoadListFragment;
 import model.Appliance;
+import util.Util;
 
 public class MainActivity extends ParentFragmentActivity
         implements NavigationView.OnNavigationItemSelectedListener, LoadListFragment.Callbacks {

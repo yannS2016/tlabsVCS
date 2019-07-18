@@ -58,11 +58,13 @@ public class LoadFragment extends Fragment {
     private Appliance load;
     private List<Appliance> appliances;
     ParseQuery<ParseObject> parseQuery;
-    float samples = 0;
+    private volatile float loadPower = 0;
 
     // Graphics
-    PieChart loadsChart;
-    LineChart loadHistory;
+    PieChart loadsChart = null;
+    LineChart loadHistory = null;
+    PieDataSet pieDataSet = null;
+    PieData pieData = null;
     private Thread thread;
 
     @Override
@@ -86,9 +88,150 @@ public class LoadFragment extends Fragment {
         aname = (TextView)v.findViewById(R.id.aname);
         athumbnail.setImageResource(load.getThumbnail());
         aState.setChecked(load.getState());
-        apower.setText("Power: " + load.getPower() / 10000.0f + " KW");
+        float power = load.getPower() / 10000.0f;
+        apower.setText("Power: " + power + " KW");
         aname.setText(load.getName());
+
+        // handle Pie chart of appliances consumption
+        loadsChart = (PieChart)v.findViewById(R.id.loadsChart);
+        loadsChart.setUsePercentValues(true);
+
+        loadsChart.getDescription().setEnabled(false);
+        loadsChart.setExtraOffsets(1, 5, 1,1);
+        loadsChart.setDragDecelerationFrictionCoef(0.95f);
+        loadsChart.setDrawHoleEnabled(true);
+        loadsChart.setHoleColor(Color.WHITE);
+        loadsChart.setHoleRadius(25f);
+        loadsChart.setTransparentCircleRadius(30f);
+        initPie();
+        ///////////////////////////////////////////////
+        // Line chart for historical data
+        loadHistory = (LineChart) v.findViewById(R.id.loadHistory);
+        loadHistory.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+
+            }
+
+            @Override
+            public void onNothingSelected() {
+
+            }
+        });
+        // enable description text
+        loadHistory.getDescription().setEnabled(true);
+
+        // enable touch gestures
+        loadHistory.setTouchEnabled(true);
+
+        // enable scaling and dragging
+
+        loadHistory.setScaleEnabled(true);
+
+        // if disabled, scaling can be done on x- and y-axis separately
+        loadHistory.setPinchZoom(true);
+
+        // set an alternative background color
+        loadHistory.setBackgroundColor(Color.WHITE);
+
+        // get the legend (only possible after setting data)
+        Legend l = loadHistory.getLegend();
+
+        // modify the legend ...
+        l.setForm(Legend.LegendForm.LINE);
+        //l.setTypeface(tfLight);
+        l.setTextColor(Color.WHITE);
+
+        XAxis xl = loadHistory.getXAxis();
+        {
+            // vertical grid lines
+            xl.enableGridDashedLine(10f, 10f, 0f);
+            xl.setTextColor(Color.WHITE);
+            xl.setDrawGridLines(true);
+            xl.setAvoidFirstLastClipping(true);
+            xl.setEnabled(false);
+        }
+        YAxis leftAxis = loadHistory.getAxisLeft();
+        {
+            // horizontal grid lines
+            leftAxis.enableGridDashedLine(10f, 10f, 0f);
+
+            // disable dual axis (only use LEFT axis)
+            loadHistory.getAxisRight().setEnabled(false);
+            // horizontal grid lines
+            leftAxis.enableGridDashedLine(10f, 10f, 0f);
+            leftAxis.setTextColor(Color.BLACK);
+            leftAxis.setAxisMaximum(100f);
+            leftAxis.setAxisMinimum(0f);
+            leftAxis.setDrawGridLines(true);
+        }
+        LineData ldata = new LineData();
+        // add empty data
+        loadHistory.setData(ldata);
+        // int historigram
+        loadPower = power;
+        addEntry();
         return v;
+    }
+    private void addEntry() {
+
+        LineData data = loadHistory.getData();
+
+        if (data != null) {
+
+            ILineDataSet set = data.getDataSetByIndex(0);
+            // set.addEntry(...); // can be called as well
+
+            if (set == null) {
+                set = createSet();
+                data.addDataSet(set);
+            }
+
+            data.addEntry(new Entry(set.getEntryCount(), loadPower), 0);
+            data.notifyDataChanged();
+
+            // let the chart know it's data has changed
+            loadHistory.notifyDataSetChanged();
+
+            // limit the number of visible entries
+            loadHistory.setVisibleXRangeMaximum(120);
+            // chart.setVisibleYRange(30, AxisDependency.LEFT);
+
+            // move to the latest entry
+            loadHistory.moveViewToX(data.getEntryCount());
+
+            // this automatically refreshes the chart (calls invalidate())
+            // chart.moveViewTo(data.getXValCount()-7, 55f,
+            // AxisDependency.LEFT);
+        }
+    }
+    private LineDataSet createSet() {
+
+        LineDataSet set = new LineDataSet(null, "Dynamic Data");
+        set.setAxisDependency(YAxis.AxisDependency.LEFT);
+        set.setColor(ColorTemplate.getHoloBlue());
+        set.setCircleColor(Color.WHITE);
+        set.setLineWidth(2f);
+        set.setCircleRadius(4f);
+        set.setFillAlpha(65);
+        //set.setFillColor(ColorTemplate.getHoloBlue());
+        set.setHighLightColor(Color.rgb(244, 117, 117));
+        //set.setValueTextColor(Color.WHITE);
+        set.setValueTextSize(9f);
+        set.setDrawCircles(false);
+
+        // set the filled area
+        set.setDrawFilled(true);
+        set.setFillFormatter(new IFillFormatter() {
+            @Override
+            public float getFillLinePosition(ILineDataSet dataSet, LineDataProvider dataProvider) {
+                return loadHistory.getAxisLeft().getAxisMinimum();
+            }
+        });
+        // drawables only supported on api level 18 and above
+        Drawable drawable = ContextCompat.getDrawable(getActivity(), R.drawable.fade_red);
+        set.setFillDrawable(drawable);
+        return set;
     }
 
     @Override
@@ -109,22 +252,31 @@ public class LoadFragment extends Fragment {
 
     @Override
     public void onPause() {
-        super.onPause();
-        /*if (thread != null) {
+
+        if (thread != null) {
             thread.interrupt();
-        }*/
+            Log.i(TAG, "onPause: interrupting thread object");
+        }
         Util.parseLiveQueryClient.unsubscribe(parseQuery);
+        // stop history thread
+        Util.histRunning = false;
+        super.onPause();
     }
 
     @Override
     public void onDestroy() {
-        //thread.interrupt();
+        thread.interrupt();
+        // stop history thread
+        Util.histRunning = false;
+        Log.i(TAG, "onDetroy: interrupting thread object");
         super.onDestroy();
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        // stop history thread
+        Util.histRunning = true;
         if (Util.parseLiveQueryClient != null) {
             parseQuery = new ParseQuery("Appliances");
             parseQuery.whereEqualTo("applianceId", load.getApplianceId());
@@ -147,10 +299,12 @@ public class LoadFragment extends Fragment {
                     Handler handler = new Handler(Looper.getMainLooper());
                     handler.post(new Runnable() {
                         public void run() {
-
-                            aState.setChecked(load.getBoolean("state"));
+                            Boolean state = load.getBoolean("state");
+                            int power = load.getInt("power");
+                            String applianceId = load.getString("applianceId");
+                            aState.setChecked(state);
                             apower.setText("Power: " + load.getInt("power") / 10000.0f + " KW");
-                            samples = load.getInt("power") / 10000.0f;
+                            loadPower = load.getInt("power") / 10000.0f;
 
                             /*for (int i = 0; i < appliances.size(); i++) {
                                 Appliance  appliance = appliances.get(i);
@@ -165,5 +319,66 @@ public class LoadFragment extends Fragment {
                 }
             });
         }
+        feedMultiple();
+    }
+
+    private void initPie(){
+
+        ArrayList<PieEntry> yValues = new ArrayList<>();
+        for(int i =0; i < appliances.size(); i++){
+            Appliance load = appliances.get(i);
+            if(load != null) {
+                yValues.add(new PieEntry(load.getPower(), load.getName()));
+            }
+        }
+        pieDataSet = new PieDataSet(yValues, "");
+        pieDataSet.setSliceSpace(2f);
+        pieDataSet.setSelectionShift(2f);
+        pieDataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+
+
+        pieData = new PieData(pieDataSet);
+        pieData.setValueTextSize(10f);
+        pieData.setValueTextColor(Color.YELLOW);
+        loadsChart.setData(pieData);
+
+    }
+
+    private void feedMultiple() {
+
+        if (thread != null)
+            thread.interrupt();
+
+        final Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+                addEntry();
+            }
+        };
+
+        thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                while(true) {
+
+                    // Don't generate garbage runnables inside the loop.
+
+                    Log.i(TAG, "Running load thread");
+                    if(!Util.histRunning) {
+                        Log.i(TAG, "Exiting load thread");
+                        return;
+                    }
+                    getActivity().runOnUiThread(runnable);
+                    try {
+                        Thread.sleep(25);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        thread.start();
     }
 }

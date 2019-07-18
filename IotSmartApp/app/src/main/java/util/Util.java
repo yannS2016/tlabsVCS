@@ -16,4 +16,5 @@ public class Util {
     // Init Live Query Client
     public static ParseLiveQueryClient parseLiveQueryClient = null;
     public static final String EXTRA_APPLIANCES = "com.example.iotsmartapp.appliances";
+    public static volatile boolean histRunning = true;
 }
