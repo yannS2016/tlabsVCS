@@ -2,7 +2,7 @@
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/tools">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <android.support.v7.widget.CardView
         android:id="@+id/card_view"
@@ -71,7 +71,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="80dp"
                 android:layout_below="@+id/aname"
-                android:layout_marginLeft="30dp"
+                android:layout_marginLeft="50dp"
                 android:layout_marginTop="2dp"
                 android:layout_toRightOf="@+id/astate"
                 android:orientation="horizontal">
@@ -86,28 +86,30 @@
                     android:text="Scheduled priority: "
                     android:textColor="@android:color/black" />
 
+
+
                 <it.beppi.knoblibrary.Knob
                     android:id="@+id/priority"
-                    android:layout_width="60dp"
-                    android:layout_height="96dp"
-                    app:kAnimationBounciness="3"
-                    app:kAnimationSpeed="1"
-                    app:kBorderColor="@color/grey_800"
-                    app:kFreeRotation="false"
-                    app:kIndicatorColor="@color/grey_800"
-                    app:kIndicatorRelativeLength="0.35"
-                    app:kIndicatorWidth="1dp"
-                    app:kKnobDrawable="@drawable/knob"
-                    app:kKnobDrawableRotates="false"
-                    app:kMaxAngle="120.0"
-                    app:kMinAngle="-120.0"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    app:kClickBehaviour="menu"
+                    app:kAnimationBounciness="1"
+                    app:kAnimationSpeed="0"
+                    app:kBalloonValuesAnimation="scale"
+                    app:kBalloonValuesRelativePosition="0"
+                    app:kBalloonValuesSlightlyTransparent="false"
+                    app:kBalloonValuesTextSize="6sp"
+                    app:kBalloonValuesTimeToLive="0"
+                    app:kBorderWidth="0dp"
+                    app:kFreeRotation="true"
+                    app:kIndicatorWidth="0dp"
+                    app:kKnobDrawable="@drawable/knob2"
+                    app:kKnobDrawableRotates="true"
                     app:kNumberOfStates="5"
+                    app:kSelectedStateMarkerColor="@color/transparent_500"
                     app:kShowBalloonValues="true"
-                    app:kStateMarkersAccentPeriodicity="5"
-                    app:kStateMarkersAccentWidth="0.5dp"
-                    app:kStateMarkersWidth="0.5dp"
-                    app:kSwipe="vertical_horizontal"
-                    app:kSwipeSensitivityPixels="7" />
+                    app:kSwipe="circular"
+                    android:layout_marginTop="4dp"/>
 
             </LinearLayout>
 

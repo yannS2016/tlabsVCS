@@ -43,6 +43,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.beppi.knoblibrary.Knob;
 import model.Appliance;
 import util.Util;
 
@@ -91,7 +92,16 @@ public class LoadFragment extends Fragment {
         float power = load.getPower() / 10000.0f;
         apower.setText("Power: " + power + " KW");
         aname.setText(load.getName());
-
+        // listens to priority changed events
+        Knob apriority = (Knob) v.findViewById(R.id.priority);
+        apriority.setState(1, true);
+        apriority.setOnStateChanged(new Knob.OnStateChanged() {
+            @Override
+            public void onState(int i) {
+                // update local object object
+                // update parse object: use cloud functions
+            }
+        });
         // handle Pie chart of appliances consumption
         loadsChart = (PieChart)v.findViewById(R.id.loadsChart);
         loadsChart.setUsePercentValues(true);
@@ -210,14 +220,14 @@ public class LoadFragment extends Fragment {
         LineDataSet set = new LineDataSet(null, "Dynamic Data");
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
         set.setColor(ColorTemplate.getHoloBlue());
-        set.setCircleColor(Color.WHITE);
+
         set.setLineWidth(2f);
-        set.setCircleRadius(4f);
         set.setFillAlpha(65);
-        //set.setFillColor(ColorTemplate.getHoloBlue());
+        set.setFillColor(ColorTemplate.getHoloBlue());
         set.setHighLightColor(Color.rgb(244, 117, 117));
         //set.setValueTextColor(Color.WHITE);
         set.setValueTextSize(9f);
+        set.setDrawValues(false);
         set.setDrawCircles(false);
 
         // set the filled area
@@ -372,7 +382,7 @@ public class LoadFragment extends Fragment {
                     }
                     getActivity().runOnUiThread(runnable);
                     try {
-                        Thread.sleep(25);
+                        Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
