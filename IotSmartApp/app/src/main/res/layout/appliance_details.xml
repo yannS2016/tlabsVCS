@@ -1,0 +1,126 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/tools">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/card_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/card_margin"
+        android:elevation="3dp"
+        card_view:cardCornerRadius="@dimen/card_appliance_radius">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+            <ImageView
+                android:id="@+id/athumbnail"
+                android:layout_width="@dimen/appliance_cover_height"
+                android:layout_height="@dimen/appliance_cover_height"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:scaleType="centerCrop"
+                android:src="@drawable/oven"
+                android:layout_marginLeft="10dp"
+
+                android:layout_marginTop="30dp"/>
+
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/loadsChart"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_toRightOf="@+id/athumbnail">
+            </com.github.mikephil.charting.charts.PieChart>
+            <TextView
+                android:id="@+id/aname"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/athumbnail"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/appliance_name"
+                android:paddingLeft="@dimen/appliance_name_padding"
+                android:paddingTop="@dimen/appliance_name_padding"
+                android:text="Oven"/>
+
+
+            <Switch
+                android:id="@+id/astate"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/aname"
+                android:checked="true"
+                android:paddingLeft="@dimen/appliance_name_padding"
+                android:text="State"
+                android:textOff="No"
+                android:textOn="Yes"/><!-- text to be displayed whenever current state is checked-->
+            <TextView
+                android:id="@+id/apower"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Power: W"
+                android:layout_below="@+id/astate"
+                android:paddingLeft="@dimen/appliance_name_padding"
+                android:textColor="@android:color/black"/>
+            <LinearLayout
+                android:id="@+id/holder"
+                android:layout_width="wrap_content"
+                android:layout_height="80dp"
+                android:layout_below="@+id/aname"
+                android:layout_marginLeft="30dp"
+                android:layout_marginTop="2dp"
+                android:layout_toRightOf="@+id/astate"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/priority_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/appliance_name_padding"
+                    android:paddingTop="38dp"
+                    android:layout_marginRight="@dimen/appliance_name_padding"
+                    android:text="Scheduled priority: "
+                    android:textColor="@android:color/black" />
+
+                <it.beppi.knoblibrary.Knob
+                    android:id="@+id/priority"
+                    android:layout_width="60dp"
+                    android:layout_height="96dp"
+                    app:kAnimationBounciness="3"
+                    app:kAnimationSpeed="1"
+                    app:kBorderColor="@color/grey_800"
+                    app:kFreeRotation="false"
+                    app:kIndicatorColor="@color/grey_800"
+                    app:kIndicatorRelativeLength="0.35"
+                    app:kIndicatorWidth="1dp"
+                    app:kKnobDrawable="@drawable/knob"
+                    app:kKnobDrawableRotates="false"
+                    app:kMaxAngle="120.0"
+                    app:kMinAngle="-120.0"
+                    app:kNumberOfStates="5"
+                    app:kShowBalloonValues="true"
+                    app:kStateMarkersAccentPeriodicity="5"
+                    app:kStateMarkersAccentWidth="0.5dp"
+                    app:kStateMarkersWidth="0.5dp"
+                    app:kSwipe="vertical_horizontal"
+                    app:kSwipeSensitivityPixels="7" />
+
+            </LinearLayout>
+
+           <com.github.mikephil.charting.charts.LineChart
+               android:layout_width="match_parent"
+               android:layout_height="200dp"
+               android:layout_below="@+id/holder"
+               android:layout_margin="5dp"
+               android:id="@+id/loadHistory">
+
+           </com.github.mikephil.charting.charts.LineChart>e
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>

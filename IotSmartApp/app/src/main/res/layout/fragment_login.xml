@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".UserActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:background="@color/colorPrimary"/>
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="130dp"
+            android:layout_height="130dp"
+            android:padding="10dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="155dp"
+            android:background="@drawable/image_background"
+            android:src="@drawable/avatar" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="30dp">
+
+
+        <EditText
+            android:id="@+id/edEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textEmailAddress"
+            android:hint="Email"
+            android:background="@drawable/edittext_background"
+            android:layout_marginBottom="10dp"
+            android:padding="10dp"/>
+
+        <EditText
+            android:id="@+id/edPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPassword"
+            android:hint="Password"
+            android:background="@drawable/edittext_background"
+            android:layout_marginBottom="10dp"
+            android:padding="10dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp">
+            <Button
+                android:id="@+id/login"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_background"
+                android:textColor="@color/colorWhite"
+                android:textStyle="bold"
+                android:layout_marginBottom="15dp"
+                android:text="Login"
+                android:layout_weight="1"
+                android:layout_marginRight="16dp"
+                android:layout_marginLeft="16dp"/>
+            <Button
+                android:id="@+id/facebook_login"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_background"
+                android:textColor="@color/colorWhite"
+                android:textStyle="bold"
+                android:layout_marginBottom="15dp"
+                android:text="Facebook"
+                android:onClick="login"
+                android:layout_weight="1"
+                android:layout_marginRight="16dp"/>
+        </LinearLayout>
+
+
+        <TextView
+            android:id="@+id/rguser"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="You haven't an account yet?"
+            android:textStyle="bold"
+            android:layout_marginBottom="10dp"
+            android:onClick="signup"/>
+
+        <TextView
+            android:id="@+id/rspassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Forgot your password?"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+
+</LinearLayout>
