@@ -1,0 +1,12 @@
+EPICS_BASE_SET=y
+EPICS_BASE=/epics/base
+EPICS_BASE_RELEASE_SET=y
+EPICS_BASE_RELEASE=Release_3_15
+EPICS_SUPPORT_SET=y
+EPICS_SUPPORT=/epics/support
+ETHERCAT_DRIVERS_SET=y
+ETHERCAT_DRIVERS=/epics/drivers/ethercat/etherlabmaster-code
+NETWORK_DRIVERS=generic
+EPICS_ETHERCAT_SET=y
+EPICS_ETHERCAT=/epics/ethercat-4-3
+
