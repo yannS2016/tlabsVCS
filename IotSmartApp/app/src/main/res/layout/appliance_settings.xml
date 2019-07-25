@@ -6,25 +6,28 @@
     android:layout_marginTop="10dp">
 
     <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/detSetThumbnail"
+        android:id="@+id/asThumbnail"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:src="@drawable/smarthome" />
+        android:src="@drawable/smarthome"
+        android:layout_centerHorizontal="true"/>
 
     <TextView
         android:id="@+id/thresholdTag"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Load limit "
-        android:layout_marginTop="50dp"
-        android:layout_marginLeft="100dp"
         android:textStyle="bold"
-        android:layout_toRightOf="@+id/detSetThumbnail" />
+        android:textColor="@color/Black"
+        android:layout_below="@+id/asThumbnail"
+        android:layout_marginRight="190dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginLeft="15dp"/>
     <it.beppi.knoblibrary.Knob
         android:id="@+id/threshold"
         android:layout_width="94dp"
         android:layout_height="94dp"
-        android:layout_marginTop="10dp"
+        android:layout_below="@id/asThumbnail"
         android:layout_toRightOf="@id/thresholdTag"
         app:kAnimationBounciness="1"
         app:kAnimationSpeed="0"
@@ -39,35 +42,36 @@
         app:kIndicatorWidth="0dp"
         app:kKnobDrawable="@drawable/knob2"
         app:kKnobDrawableRotates="true"
-        app:kNumberOfStates="3"
+        app:kNumberOfStates="5"
         app:kSelectedStateMarkerColor="@color/transparent_500"
         app:kShowBalloonValues="false"
         app:kSwipe="circular" />
 
     <Switch
-        android:id="@+id/detDsm"
-        android:layout_width="150dp"
+        android:id="@+id/dsm"
+        android:layout_width="340dp"
         android:layout_height="wrap_content"
-        android:checked="true"
+        android:checked="false"
         android:paddingLeft="@dimen/appliance_name_padding"
         android:tag="dsmState"
         android:text="Enable DSM"
         android:textOff="No"
         android:textOn="Yes"
-        android:layout_marginTop="5dp"
-        android:layout_below="@+id/detSetThumbnail"/>
+        android:textColor="@color/Black"
+        android:textStyle="bold"
+        android:layout_below="@+id/threshold"/>
 
     <Switch
-        android:id="@+id/detUpdateIds"
-        android:layout_width="150dp"
+        android:id="@+id/updateIds"
+        android:layout_width="340dp"
         android:layout_height="wrap_content"
-        android:checked="true"
+        android:checked="false"
         android:paddingLeft="@dimen/appliance_name_padding"
         android:tag="updateId"
         android:text="Update Ids"
         android:textOff="No"
         android:textOn="Yes"
-        android:layout_below="@+id/detDsm"/>
-
-
+        android:textStyle="bold"
+        android:textColor="@color/Black"
+        android:layout_below="@+id/dsm"/>
 </RelativeLayout>

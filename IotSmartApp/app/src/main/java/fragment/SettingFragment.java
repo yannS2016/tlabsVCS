@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -41,35 +42,46 @@ public class SettingFragment extends DialogFragment {
 
         // Create the Calendar to get the Year, month, and  day
 
-        View v = getActivity().getLayoutInflater()
+        final View v = getActivity().getLayoutInflater()
                 .inflate(R.layout.appliance_settings, null); // build the fragment view out of XML
-        Switch dsmState = (Switch)v.findViewById(R.id.detDsm);
+        Switch dsmState = (Switch)v.findViewById(R.id.dsm);
+        dsmState.setChecked(mDsm.isDsmEnable());
         dsmState.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Log.i(TAG, "New dsm id " + isChecked);
+                if(isChecked){
+                    Snackbar.make(v, "Demand side management activated", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }else {
+                    Snackbar.make(v, "Demand side management deactivated", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
                 mDsm.setDsmEnable(isChecked);
             }
         });
-        Switch updateIds = (Switch)v.findViewById(R.id.detUpdateIds);
-        dsmState.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        Switch updateIds = (Switch)v.findViewById(R.id.updateIds);
+        updateIds.setChecked(mDsm.isUpdateIds());
+        updateIds.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Log.i(TAG, "New update id " + isChecked);
+                if(isChecked) {
+                    Snackbar.make(v, "Reset appliance Ids", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
                 mDsm.setUpdateIds(isChecked);
             }
         });
         // listens to priority changed events
         Knob threshold = (Knob) v.findViewById(R.id.threshold);
-        threshold.setState(1, true);
+        threshold.setState((int) (mDsm.getLoadLimit() / 1000.0), true);
         threshold.setOnStateChanged(new Knob.OnStateChanged() {
             @Override
             public void onState(final int state) {
                 // update local object object
                 // update parse object: use cloud functions
-                Log.i(TAG, "New Load Limit value " + state);
+                Snackbar.make(v, "Power limit set to: " + (state * 1000.0f) + " Watts", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
                 mDsm.setLoadLimit(state * 1000.0f);
-
             }
         });
         // intent and argument communication is ahdled by OS, thus
@@ -98,14 +110,13 @@ public class SettingFragment extends DialogFragment {
     }
 
     private void sendResult(int resultCode){
-        // get an anchor to the targeted fragment( CrimeFragment)
         if(getTargetFragment() == null)
             return;
         Intent i = new Intent();
         i.putExtra(EXTRA_DSM, mDsm);
-        // call the targetted fragment onActivityResult method to catch the return fragment results
+        // call the targeted fragment onActivityResult method to catch the return fragment results
         // the corresponding target fragment is identified by the target request code
-        // which thus identifies the parent fragment: we need to override the onctivityResult
+        // which thus identifies the parent fragment: we need to override the onActivityResult
         // of the target fragment to catch this result
         getTargetFragment().onActivityResult(getTargetRequestCode(), resultCode, i);
     }

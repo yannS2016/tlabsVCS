@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
@@ -27,6 +28,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.iotsmartapp.R;
 import com.github.mikephil.charting.charts.LineChart;
@@ -44,7 +46,10 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.parse.FindCallback;
+import com.parse.FunctionCallback;
 import com.parse.GetCallback;
+import com.parse.Parse;
+import com.parse.ParseCloud;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -57,14 +62,18 @@ import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import data.ApplianceAdapter;
 import model.Appliance;
 import model.Dsm;
 import util.Util;
+
+import static com.parse.Parse.getApplicationContext;
 
 
 public class LoadListFragment extends Fragment {
@@ -79,6 +88,7 @@ public class LoadListFragment extends Fragment {
     private Callbacks mCallbacks;
     ParseQuery<ParseObject> parseQuery = null;
     private Thread thread;
+    private Dsm dsm;
     /*
      * Require interface for hosting activities
      * */
@@ -119,110 +129,14 @@ public class LoadListFragment extends Fragment {
         Log.i("LoadListFragment", "onCreate running");
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        inflater.inflate(R.menu.main, menu);
-
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-
-        switch(item.getItemId()){
-            case R.id.action_settings:
-                // create a dialog fragment here( DatePickerFragment)
-                FragmentManager fm = getActivity().getSupportFragmentManager();
-                SettingFragment settingFragment = SettingFragment.newInstance(new Dsm());
-                // contact back the calling fragment( CrimeFragment when done)
-                settingFragment.setTargetFragment(LoadListFragment.this, REQUEST_DSM);
-                settingFragment.show(fm, DIALOG_DSM);
-                return true;
-            case R.id.action_add:
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // make sure the child fragment did not return an error msg
-        if(resultCode != Activity.RESULT_OK) return;
-        // this how the child activity that sent the result is identified
-        // we know we are ending the com with the DatePickerFragment
-        if(requestCode == REQUEST_DSM) {
-            final Dsm dsm =  (Dsm)(data.getSerializableExtra(SettingFragment.EXTRA_DSM));
-            Log.i(TAG, "Settings from dialog " + dsm.getLoadLimit());
-            // Get appliances from parse
-            ParseQuery<ParseObject> smartControlsQuery = ParseQuery.getQuery("smartControls");
-            smartControlsQuery.findInBackground(new FindCallback<ParseObject>() {
-                @Override
-                public void done(List<ParseObject> objects, ParseException e) {
-                    if (e == null) {
-                        for(ParseObject control : objects)
-                            if (control.getString("name").equals("updateId")) {
-                                Log.i(TAG, "Control " + control.getString("name") + " " + dsm.isUpdateIds());
-                                control.put("state", dsm.isUpdateIds());
-                                control.saveInBackground();
-                            } else {
-                                control.put("state", dsm.isDsmEnable());
-                                Log.i(TAG, "Control " + control.getString("name") + " " + dsm.isDsmEnable());
-                                control.saveInBackground();
-                            }
-                    } else {
-                        Log.d("score", "Error: " + e.getMessage());
-                    }
-                }
-            });
-        }
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        if(adapter != null) {
-            Log.i(TAG, "Getting the interface");
-            adapter.setInterface(mCallbacks);
-        }
-        // Message - Live Query
-        if (Util.parseLiveQueryClient != null) {
-            parseQuery = new ParseQuery("Appliances");
-            SubscriptionHandling<ParseObject> subscriptionHandling = Util.parseLiveQueryClient.subscribe(parseQuery);
-            subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
-                @Override
-                public void onEvent(ParseQuery<ParseObject> query, final ParseObject load) {
-                    Handler handler = new Handler(Looper.getMainLooper());
-                    handler.post(new Runnable() {
-                        public void run() {
-                            Log.i("CREATE EVENT", load.getString("name"));
-                            for(int i = 0; i < appliances.size(); i++){
-                                Appliance app = appliances.get(i);
-                                if(app.getApplianceId().equals(load.getString("applianceId"))){
-                                    app.setState(load.getBoolean("state"));
-                                    app.setPower(load.getInt("power"));
-                                    adapter.notifyDataSetChanged();
-                                }
-                            }
-                        }
-                    });
-                }
-            });
-        }
-        feedMultiple();
-    }
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.appliances_fragment, container, false);
-        recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
+        recyclerView = (RecyclerView)v.findViewById(R.id.recycler_view);
         RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getActivity(), 2);
         recyclerView.setLayoutManager(mLayoutManager);
-        recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
+        recyclerView.addItemDecoration(new Util.GridSpacingItemDecoration(2, Util.dpToPx(10, getActivity()), true));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(adapter);
 
@@ -304,7 +218,6 @@ public class LoadListFragment extends Fragment {
 
         return v;
     }
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -339,50 +252,129 @@ public class LoadListFragment extends Fragment {
         });
     }
 
-    /**
-     * RecyclerView item decoration - give equal margin around grid item
-     */
-    public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
-
-        private int spanCount;
-        private int spacing;
-        private boolean includeEdge;
-
-        public GridSpacingItemDecoration(int spanCount, int spacing, boolean includeEdge) {
-            this.spanCount = spanCount;
-            this.spacing = spacing;
-            this.includeEdge = includeEdge;
+    @Override
+    public void onStart() {
+        super.onStart();
+        if(adapter != null) {
+            Log.i(TAG, "Getting the interface");
+            adapter.setInterface(mCallbacks);
         }
-
-        @Override
-        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-            int position = parent.getChildAdapterPosition(view); // item position
-            int column = position % spanCount; // item column
-
-            if (includeEdge) {
-                outRect.left = spacing - column * spacing / spanCount; // spacing - column * ((1f / spanCount) * spacing)
-                outRect.right = (column + 1) * spacing / spanCount; // (column + 1) * ((1f / spanCount) * spacing)
-
-                if (position < spanCount) { // top edge
-                    outRect.top = spacing;
+        Util.CONSUMPTIONHISTORY = true;
+        // Message - Live Query
+        if (Util.parseLiveQueryClient != null) {
+            parseQuery = new ParseQuery("Appliances");
+            SubscriptionHandling<ParseObject> subscriptionHandling = Util.parseLiveQueryClient.subscribe(parseQuery);
+            subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
+                @Override
+                public void onEvent(ParseQuery<ParseObject> query, final ParseObject load) {
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    handler.post(new Runnable() {
+                        public void run() {
+                            Log.i("CREATE EVENT", load.getString("name"));
+                            for(int i = 0; i < appliances.size(); i++){
+                                Appliance app = appliances.get(i);
+                                if(app.getApplianceId().equals(load.getString("applianceId"))){
+                                    app.setState(load.getBoolean("state"));
+                                    app.setPower(load.getInt("power"));
+                                    adapter.notifyDataSetChanged();
+                                }
+                            }
+                        }
+                    });
                 }
-                outRect.bottom = spacing; // item bottom
-            } else {
-                outRect.left = column * spacing / spanCount; // column * ((1f / spanCount) * spacing)
-                outRect.right = spacing - (column + 1) * spacing / spanCount; // spacing - (column + 1) * ((1f /    spanCount) * spacing)
-                if (position >= spanCount) {
-                    outRect.top = spacing; // item top
+            });
+        }
+        // Run parse cloud code to create a dsm object
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("ids", "updateId");
+        params.put("dsm", "dsmState");
+        params.put("threshold", "threshold");
+        ParseCloud.callFunctionInBackground("dsm_configs", params, new FunctionCallback<Map<String, Object>>() {
+            public void done(Map<String, Object> dsmConfigs, ParseException e) {
+                if (e == null) {
+                    dsm = new Dsm((int) dsmConfigs.get("threshold"), (boolean)dsmConfigs.get("dsmState"), (boolean)dsmConfigs.get("updateId"));
+                    Toast.makeText(getActivity(), "DSM Enable: " + dsm.isDsmEnable(), Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_LONG).show();
                 }
             }
-        }
+        });
+        feedMultiple();
+    }
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        inflater.inflate(R.menu.main, menu);
+
     }
 
-    /**
-     * Converting dp to pixel
-     */
-    private int dpToPx(int dp) {
-        Resources r = getResources();
-        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+
+        switch(item.getItemId()){
+            case R.id.action_settings:
+                // create a dialog fragment here( DatePickerFragment)
+                FragmentManager fm = getActivity().getSupportFragmentManager();
+                SettingFragment settingFragment = SettingFragment.newInstance(dsm);
+                // contact back the calling fragment( CrimeFragment when done)
+                settingFragment.setTargetFragment(LoadListFragment.this, REQUEST_DSM);
+                settingFragment.show(fm, DIALOG_DSM);
+                return true;
+            case R.id.action_add:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // make sure the child fragment did not return an error msg
+        if(resultCode != Activity.RESULT_OK) return;
+        // this how the child activity that sent the result is identified
+        // we know we are ending the com with the DatePickerFragment
+        if(requestCode == REQUEST_DSM) {
+            final Dsm dsm =  (Dsm)(data.getSerializableExtra(SettingFragment.EXTRA_DSM));
+            Log.i(TAG, "Settings: Load " + dsm.getLoadLimit() +" updateIds " + dsm.isUpdateIds() + " dsm " + dsm.isDsmEnable());
+            // Get appliances from parse
+            ParseQuery<ParseObject> smartControlsQuery = ParseQuery.getQuery("smartControls");
+            smartControlsQuery.findInBackground(new FindCallback<ParseObject>() {
+                @Override
+                public void done(List<ParseObject> objects, ParseException e) {
+                    if (e == null) {
+                        for(ParseObject control : objects)
+                            if (control.getString("name").equals("updateId")) {
+                                Log.i(TAG, "Control " + control.getString("name") + " " + dsm.isUpdateIds());
+                                control.put("state", dsm.isUpdateIds());
+                                control.saveInBackground();
+                            } else {
+                                control.put("state", dsm.isDsmEnable());
+                                Log.i(TAG, "Control " + control.getString("name") + " " + dsm.isDsmEnable());
+                                control.saveInBackground();
+                            }
+                    } else {
+                        Log.d("score", "Error: " + e.getMessage());
+                    }
+                }
+            });
+
+            // Get appliances from parse
+            ParseQuery<ParseObject> loadQuery = ParseQuery.getQuery("DsmConfigs");
+            loadQuery.whereEqualTo("name", "threshold");
+            loadQuery.getFirstInBackground(new GetCallback<ParseObject>() {
+                @Override
+                public void done(ParseObject object, ParseException e) {
+                    if(e == null) {
+                        object.put("value", dsm.getLoadLimit());
+                        object.saveInBackground();
+                    } else {
+                        Toast.makeText(getActivity(), "Power limit set to: ", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        }
     }
 
     private void prepareAppliances() {
@@ -429,6 +421,7 @@ public class LoadListFragment extends Fragment {
         super.onPause();
         if (thread != null) {
             thread.interrupt();
+            Util.CONSUMPTIONHISTORY = false;
             Log.i(TAG, "onPause: interrupting thread object");
         }
         Util.parseLiveQueryClient.unsubscribe(parseQuery);
@@ -436,9 +429,11 @@ public class LoadListFragment extends Fragment {
 
     @Override
     public void onDestroy() {
-        thread.interrupt();
-        // stop history thread
-        Util.CONSUMPTIONHISTORY = false;
+        if (thread != null) {
+            thread.interrupt();
+            Util.CONSUMPTIONHISTORY = false;
+            Log.i(TAG, "onDestroy: interrupting thread object");
+        }
         super.onDestroy();
     }
 
@@ -525,7 +520,7 @@ public class LoadListFragment extends Fragment {
             public void run() {
                 while(true) {
                     // Don't generate garbage runnables inside the loop.
-                    Log.i(TAG, "Running load thread");
+                    //Log.i(TAG, "Running load thread");
                     if(!Util.CONSUMPTIONHISTORY) {
                         Log.i(TAG, "Exiting load thread");
                         return;

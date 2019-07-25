@@ -14,7 +14,7 @@
     <string name="menu_share">Share</string>
     <string name="menu_send">Send</string>
     <string name="menu_add">New Appliance</string>
-    <string name="setting_name">Load Balancing configs</string>
+    <string name="setting_name">Configurations</string>
 		
 		<string name="back4app_server_url">https://parseapi.back4app.com/</string>
     <string name="back4app_livequery_url">wss://yannsmarthome.back4app.io/</string>

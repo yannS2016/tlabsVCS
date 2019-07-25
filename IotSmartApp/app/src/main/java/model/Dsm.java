@@ -7,6 +7,12 @@ public class Dsm implements Serializable {
     private boolean dsmEnable;
     private boolean updateIds;
 
+    public Dsm(float loadLimit, boolean dsmEnable, boolean updateIds) {
+        this.loadLimit = loadLimit;
+        this.dsmEnable = dsmEnable;
+        this.updateIds = updateIds;
+    }
+
     public boolean isUpdateIds() {
         return updateIds;
     }

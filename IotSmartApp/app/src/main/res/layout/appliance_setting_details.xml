@@ -18,18 +18,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/setThumbnail"
+            android:id="@+id/asdThumbnail"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:src="@drawable/oven"
             android:layout_margin="5dp"/>
         <TextView
-            android:id="@+id/sloadName"
+            android:id="@+id/asdName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="oven"
             android:textColor="@android:color/black"
-            android:layout_toRightOf="@id/setThumbnail"
+            android:layout_toRightOf="@id/asdThumbnail"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="18dp"
             android:layout_marginRight="150dp"
@@ -37,14 +37,14 @@
             />
 
         <Switch
-            android:id="@+id/astate"
+            android:id="@+id/asdState"
             android:layout_width="140dp"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/aname"
+            android:layout_below="@+id/asdName"
             android:checked="true"
             android:paddingLeft="@dimen/appliance_name_padding"
-            android:layout_toRightOf="@id/sloadName"
-            android:layout_alignBaseline="@id/sloadName"/>
+            android:layout_toRightOf="@id/asdName"
+            android:layout_alignBaseline="@id/asdName"/>
     </RelativeLayout>
 </android.support.v7.widget.CardView>
 </LinearLayout>
