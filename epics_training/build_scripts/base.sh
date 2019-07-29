@@ -33,7 +33,7 @@ get_epics_base()
 	sudo mkdir /epics
 	sudo chmod -R 777 /epics
   	RELEASE=$(cat $BUILD_ROOT/CONFIG | grep -e "BASE_RELEASE=" | cut -d "=" -f 2)
-  	cd  /home/$EPICSECAT_USER/Downloads
+  	cd  $BUILD_ROOT
   	case "$RELEASE" in
   		EPICS_7.0)
 			wget https://epics.anl.gov/download/base/base-7.0.2.2.tar.gz

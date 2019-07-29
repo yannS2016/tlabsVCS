@@ -28,11 +28,11 @@ export PATH=\$PATH:\$EPICS_BASE_BIN" >> /home/$EPICSECAT_USER/.bashrc
 
 get_support()
 {
-  	echo -----------------------------------------------
-  	printf '%b  Downloading EPICS support .. %b\n' "$HEADING" "$DEF_OUT"
-  	echo -----------------------------------------------
-  	# create base <top>
-  	cd  /home/$EPICSECAT_USER/Downloads
+  echo -----------------------------------------------
+  printf '%b  Downloading EPICS support .. %b\n' "$HEADING" "$DEF_OUT"
+  echo -----------------------------------------------
+  # create base <top>
+  cd  $BUILD_ROOT
 	#wget https://epics.anl.gov/bcda/synApps/tar/synApps_6_0.tar.gz
 	#tar -xzvf synApps_6_0.tar.gz
 	#mv synApps/support /epics	
@@ -47,7 +47,7 @@ configure_support()
   	# two arguments:
   	# $1: path to file to edit
   	# $2: README file
-  	cd  $BUILD_ROOT/build_scripts
+  	cd  $ROOT/build_scripts
   	source editing_interface.sh "$SUPPORT/configure/RELEASE" "../README"
 }
 export SUPPORT="$2"

@@ -20,7 +20,7 @@ query_base()
   		  update_build_configs "EPICS_BASE_SET" 'y'
   		  update_build_configs "EPICS_BASE" "$EPICS_BASE"
         update_build_configs "EPICS_BASE_RELEASE_SET" "y"
-        update_build_configs "EPICS_BASE_RELEASE" "$(cat /epics/base/configure/CONFIG_BASE_VERSION | grep YES | cut -d "=" -f 1 | sed 's/BASE/Release/')"
+        update_build_configs "EPICS_BASE_RELEASE" "$(cat /epics/base/configure/$ROOT/CONFIG_BASE_VERSION | grep YES | cut -d "=" -f 1 | sed 's/BASE/Release/')"
         ./base.sh "y" "$EPICS_BASE"
       else
           echo "User selected Cancel."
@@ -61,7 +61,7 @@ query_base()
 update_build_configs()
 {
   ### check if the user supplied a location for EPICS base ##
-  sed -i 's|^\('$1'=\)\(.*$\)|\1'$2'|'  $BUILD_ROOT/CONFIG
+  sed -i 's|^\('$1'=\)\(.*$\)|\1'$2'|'  $ROOT/CONFIG
 
 }
 
@@ -110,79 +110,104 @@ your enviroment has been update as below:
 }
 
 query_drivers(){
-  if(whiptail --title "EtherCAT Drivers" --yesno "is IgH EtherCAT Master installed on your system?" 8 78); then
-    ETHERCAT_DRIVERS=$(whiptail --inputbox "Enter the EtherCAT master drivers location" 8 78 /epics/drivers/ethercat/etherlabmaster-code --title "EtherCAT drivers Location" 3>&1 1>&2 2>&3)
-    exitstatus=$?
-    echo $ETHERCAT_DRIVERS
-    if [[ $exitstatus = 0 ]]; then
-      while [ -z $ETHERCAT_DRIVERS ]; do
-        ETHERCAT_DRIVERS=$(whiptail --inputbox "Enter IgH EtherCAT Master location" 8 78 /epics/drivers/ethercat/etherlabmaster-code --title "EtherCAT drivers Location" 3>&1 1>&2 2>&3)
-        exitstatus=$?
-        if [[ $exitstatus = 0 ]]; then
-          echo "User selected Ok and entered " $ETHERCAT_DRIVERS
-        else
-          echo "User selected Cancel."
-          break
-        fi
-      done
-      update_build_configs "ETHERCAT_DRIVERS_SET" 'y'
-      update_build_configs "ETHERCAT_DRIVERS" "$ETHERCAT_DRIVERS" 
-      update_build_configs "NETWORK_DRIVERS" "generic" 
-      # maybe call install script
-    fi
-  else 
-    whiptail --title "EtherCAT Master Drivers"  --msgbox "IgH EtherCAT Master will be downloaded and installed under
-               /epics/drivers/ethercat/etherlabmaster-code\n\nNote: IgH EtherCAT Master for Linux is an Etherlab open source bundle enabling
-      EtherCAT fieldbus control system under Linux distributions\nMore info: https://etherlab.org/en/ethercat/" 12 78
-    if [[ $exitstatus = 0 ]]; then
-      update_build_configs "ETHERCAT_DRIVERS_SET" 'y'
-      update_build_configs "ETHERCAT_DRIVERS" "/epics/drivers/ethercat/etherlabmaster-code"
+  	INSTALLED=""
+  	ETHERCAT_HOME=""
+  	DRIVERS=""
+  	PREEMPT_RT=""
+  	if(whiptail --title "EtherCAT Drivers" --yesno "is IgH EtherCAT Master installed on your system?" 8 78); then
+    	ETHERCAT_HOME=$(whiptail --inputbox "Enter the EtherCAT master drivers location" 8 78 /epics/drivers/ethercat/etherlabmaster-code --title "EtherCAT drivers Location" 3>&1 1>&2 2>&3)
+    	exitstatus=$?
+    	echo $ETHERCAT_HOME
+    	if [[ $exitstatus = 0 ]]; then
+      		while [ -z $ETHERCAT_HOME ]; do
+        		ETHERCAT_HOME=$(whiptail --inputbox "Enter IgH EtherCAT Master location" 8 78 /epics/drivers/ethercat/etherlabmaster-code --title "EtherCAT drivers Location" 3>&1 1>&2 2>&3)
+        		exitstatus=$?
+        		if [[ $exitstatus = 0 ]]; then
+          			echo "User selected Ok and entered " $ETHERCAT_HOME
+        		else
+          			echo "User selected Cancel."
+          			break
+        		fi
+      		done
+      	DRIVERS=$(cat $ROOT/CONFIG | grep -e "NETWORK_DRIVERS" | cut -d "=" -f 2)
+      	update_build_configs "ETHERCAT_HOME_SET" 'y'
+      	update_build_configs "ETHERCAT_HOME" "$ETHERCAT_HOME" 
+      	update_build_configs "NETWORK_DRIVERS" "$DRIVERS" 
+      	INSTALLED="y"
+      	# call install script
+      	source $ROOT/build_scripts/drivers.sh "$INSTALLED" "$ETHERCAT_HOME" "$DRIVERS"
+      	sleep 4
+    	fi
+  	else 
+  		INSTALLED="n"
+    	whiptail \
+    		--title "EtherCAT Master Drivers" \
+     		--msgbox "IgH EtherCAT Master will be downloaded and installed under
+     	/epics/drivers/ethercat/etherlabmaster-code\n\nNote: IgH EtherCAT Master for Linux is an Etherlab open source bundle enabling EtherCAT fieldbus control system under Linux distributions 
+     	\nMore info: https://etherlab.org/en/ethercat/" 14 78
+    	if [[ $exitstatus = 0 ]]; then
+      		ETHERCAT_HOME="/epics/drivers/ethercat/etherlabmaster-code"
+      		update_build_configs "ETHERCAT_HOME_SET" 'y'
+      		update_build_configs "ETHERCAT_HOME" "$ETHERCAT_HOME"
 
-      if(whiptail --title "Network Drivers" --yesno "Are you running a PREEMPT_RT kernel?"  8 78); then 
-        DRIVERS=$(whiptail --title "Native Ethernet Drivers" --radiolist \
-        "\nSpecify the Master driver's network?\n\nHint:Natively supported drivers(these are lastly patched on kernel 3.2)\nFor more info: https://www.etherlab.org/en/ethercat/hardware.php" 18 85 7 \
-        "8139too" "RealTek 8139C (or compatible)" OFF \
-        "e1000" "Intel PRO/1000 Gigabit-Ethernet" OFF \
-        "e100" "Intel PRO/100 Fast-Ethernet chipsets" ON \
-        "r8169" "RealTek 8169/8168/8101 Gigabit-Ethernet chipsets" OFF \
-        "e1000e" "Intel PRO/1000 Gigabit-Ethernet chipsets (PCI Express)" OFF \
-        3>&1 1>&2 2>&3)
-        exitstatus=$?
-        if [[ $exitstatus = 0 ]]; then
-           update_build_configs "NETWORK_DRIVERS" "$DRIVERS" 
-        fi
-      else
-        DRIVERS=$(whiptail --title "Native Ethernet Drivers" --radiolist \
-        "\nSpecify the Master Network Driver's ?\n\nNote:Since version 1.5, there is a generic Ethernet driver among the native ones,\nthat spans all Ethernet devices supported by the Linux kernel. Although it is not usable with realtime patches like RTAI (because it uses the lower network stack layers), it runs perfectly with realtime preemption\nFor more info: https://www.etherlab.org/en/ethercat/hardware.php" 20 85 6 \
-        "r8169" "RealTek 8169/8168/8101 Gigabit-Ethernet chipsets" OFF \
-        "e1000e" "Intel PRO/1000 Gigabit-Ethernet chipsets (PCI Express)" OFF \
-        "generic" "Default drivers for all Ethernet devices" ON \
-        3>&1 1>&2 2>&3) 
-        exitstatus=$? 
-        if [[ $exitstatus = 0 ]]; then
-           update_build_configs "NETWORK_DRIVERS" "$DRIVERS" 
-           
-        fi  
-      fi
-      # call install script
-      whiptail --title "Master Module configuration"  --msgbox "Configure ethercat master\n
-      1) Create 99-EtherCAT.rules file for udev
-      2) Add EtherCAT Master binary to /usr/bin
-      3) Add EtherCAT Master startup script to /etc/init.d
-      4) Add EtherCAT Master configs to /etc/sysconfig
-      5) Add EtherCAT Master Libraries to /usr/lib" 12 78
-    fi
-  fi
+      		if(whiptail --title "Network Drivers" --yesno "Are you running a PREEMPT_RT kernel?"  8 78); then 
+        		DRIVERS=$(whiptail --title "Native Ethernet Drivers" --radiolist \
+        		"\nSpecify the Master driver's network?\n\nHint:Natively supported drivers(these are lastly patched on kernel 3.2)\nFor more info: https://www.etherlab.org/en/ethercat/hardware.php" 18 85 7 \
+        		"8139too" "RealTek 8139C (or compatible)" OFF \
+        		"e1000" "Intel PRO/1000 Gigabit-Ethernet" OFF \
+        		"e100" "Intel PRO/100 Fast-Ethernet chipsets" ON \
+        		"r8169" "RealTek 8169/8168/8101 Gigabit-Ethernet chipsets" OFF \
+        		"e1000e" "Intel PRO/1000 Gigabit-Ethernet chipsets (PCI Express)" OFF \
+        		3>&1 1>&2 2>&3)
+        		exitstatus=$?
+        		if [[ $exitstatus = 0 ]]; then
+           			update_build_configs "NETWORK_DRIVERS" "$DRIVERS" 
+           			PREEMPT_RT="y"
+           			update_build_configs "PREEMPT_RT" "$PREEMPT_RT"
+        		fi
+      		else
+        		DRIVERS=$(whiptail --title "Native Ethernet Drivers" --radiolist \
+        		"\nSpecify the Master Network Driver's ?\n\nNote:Since version 1.5, there is a generic Ethernet driver among the native ones,\nthat spans all Ethernet devices supported by the Linux kernel. Although it is not usable with realtime patches like RTAI (because it uses the lower network stack layers), it runs perfectly with realtime preemption\nFor more info: https://www.etherlab.org/en/ethercat/hardware.php" 20 85 6 \
+        		"r8169" "RealTek 8169/8168/8101 Gigabit-Ethernet chipsets" OFF \
+        		"e1000e" "Intel PRO/1000 Gigabit-Ethernet chipsets (PCI Express)" OFF \
+        		"generic" "Default drivers for all Ethernet devices" ON \
+        		3>&1 1>&2 2>&3) 
+        		exitstatus=$? 
+        		if [[ $exitstatus = 0 ]]; then
+           			update_build_configs "NETWORK_DRIVERS" "$DRIVERS" 
+           			PREEMPT_RT="n"
+           			update_build_configs "PREEMPT_RT" "$PREEMPT_RT"
+        		fi  
+      		fi
+      		# call install script
+      		source $ROOT/build_scripts/drivers.sh "$INSTALLED" "$ETHERCAT_HOME" "$DRIVERS"
+      		sleep 4
+      		whiptail \
+      		--title "Master Module configuration" \
+       		--msgbox "Configure ethercat master\n
+      			1) Create 99-EtherCAT.rules file for udev 
+      			2) Add EtherCAT Master binary to /usr/bin
+      			3) Add EtherCAT Master startup script to /etc/init.d
+      			4) Add EtherCAT Master configs to /etc/sysconfig
+      			5) Add EtherCAT Master Libraries to /usr/lib" 12 80
+      		source $ROOT/build_scripts/editing_interface.sh "/etc/udev/rules.d/99-EtherCAT.rules" "README"
+    	fi
+		depmod
+  		printf '%bYou have successfully installed Epics and ethercat in your system%b\n' "$HEADING" "$DEF_OUT"
+  		printf '%bRun this command to get started : sudo /bin/ethercat help%b\n' "$HEADING" "$DEF_OUT"
+  		printf '%bRun any of this to start, stop, or get the status of the master: sudo /etc/init.d/ethercat [start|stop|status]%b\n' "$HEADING" "$DEF_OUT"
+  		sleep  5
+  	fi
 }
 
 query_epics_ethercat(){
   if(whiptail --title "EPICS EtherCAT Module" --yesno "Is Diamond EtherCAT-EPICS Module installed on your system?" 8 78); then
-    EPICS_ETHERCAT=$(whiptail --inputbox "Enter EPICS EtherCAT Module location" 8 78 /epics/ethercat-4-3 --title "EPICS EtherCAT Module location" 3>&1 1>&2 2>&3)
+    EPICS_ETHERCAT=$(whiptail --inputbox "Enter EPICS EtherCAT Module location" 8 78 /epics/ethercat-4-7 --title "EPICS EtherCAT Module location" 3>&1 1>&2 2>&3)
     exitstatus=$?
     echo $EPICS_ETHERCAT
     if [[ $exitstatus = 0 ]]; then
       while [ -z $EPICS_ETHERCAT ]; do
-        EPICS_ETHERCAT=$(whiptail --inputbox "Enter EPICS EtherCAT Module location" 8 78 /epics/ethercat-4-3 --title "EPICS EtherCAT Module location" 3>&1 1>&2 2>&3)
+        EPICS_ETHERCAT=$(whiptail --inputbox "Enter EPICS EtherCAT Module location" 8 78 /epics/ethercat-4-7 --title "EPICS EtherCAT Module location" 3>&1 1>&2 2>&3)
         exitstatus=$?
         if [[ $exitstatus = 0 ]]; then
           echo "User selected Ok and entered " $EPICS_ETHERCAT
@@ -202,64 +227,76 @@ http://controls.diamond.ac.uk/downloads/support/ethercat/4-7/documentation\nPrer
     exitstatus=$?
     if [[ $exitstatus = 0 ]]; then
       whiptail --title "Beckhoff xml files" --msgbox "EtherCAT-EPICS modules require device configuration xml files.\n
-These will be downloaded and install under /epics/ethercat-4-3/xml Hint:\nwget https://download.beckhoff.com/download/Config/EtherCAT/XML_Device_Description/Beckhoff_EtherCAT_XML.zip" 10 115
+These will be downloaded and install under /epics/ethercat-4-7/etc/xml Hint:\nwget https://download.beckhoff.com/download/Config/EtherCAT/XML_Device_Description/Beckhoff_EtherCAT_XML.zip" 10 115
     fi
+
     exitstatus=$?
     if [[ $exitstatus = 0 ]]; then
-      whiptail --title "update config scripts" --msgbox "EPICS-EtherCAT module  expand device xml as well create device tempalte for EPICS databases via a collection of python scripts under /epics/ethercat-4-3/scripts
+      # Get Diamond EtherCAT EPICS modules
+      # Get Beckhoff xml
+      source $ROOT/build_scripts/ethercat_epics.sh
+
+      whiptail --title "update config scripts" --msgbox "EPICS-EtherCAT module  expand device xml as well create device tempalte for EPICS databases via a collection of python scripts under /epics/ethercat-4-7/scripts
 you are require to update those scripts with your python installation details.\nyour system python binary is at: $(which python)
-file 1: /epics/ethercat-4-3/etc/scripts/expandChain.py
-file 2: /epics/ethercat-4-3/etc/scripts/maketemplate.py" 12 90
+file 1: /epics/ethercat-4-7/etc/scripts/expandChain.py
+file 2: /epics/ethercat-4-7/etc/scripts/maketemplate.py" 12 90
       # call interactive scripts
+      source $ROOT/build_scripts/editing_interface.sh "/epics/ethercat-4-7/etc/scripts/expandChain.py" "README"
+      source $ROOT/build_scripts/editing_interface.sh "/epics/ethercat-4-7/etc/scripts/maketemplate.py" "README"
     fi 
     exitstatus=$?
     if [[ $exitstatus = 0 ]]; then
       whiptail --title "update build Makefiles" --msgbox "The build Makefiles need to be updated under as follow
-      TOP Makefile:     /epics/ethercat-4-3
-      App Makefile:     /epics/ethercat-4-3
-      Scanner Makefile: /epics/ethercat-4-3/scannerSrc" 10 74
+      TOP Makefile:     /epics/ethercat-4-7
+      App Makefile:     /epics/ethercat-4-7
+      Scanner Makefile: /epics/ethercat-4-7/scannerSrc" 10 74
       # call interactive scripts
+      source $ROOT/build_scripts/editing_interface.sh "/epics/ethercat-4-7/Makefile" "README"
+      source $ROOT/build_scripts/editing_interface.sh "/epics/ethercat-4-7/ethercatApp/Makefile" "README"
+      source $ROOT/build_scripts/editing_interface.sh "/epics/ethercat-4-7/scannerSrc/Makefile" "README"
     fi
     exitstatus=$?
     if [[ $exitstatus = 0 ]]; then
-      whiptail --title "Patching Sources" --msgbox "EtherCAT-4-3 sources need patching depending on system arch architecture
+      whiptail --title "Patching Sources" --msgbox "EtherCAT-4-7 sources need patching depending on system arch architecture
       Debian 8 user should not require any patching.
       Debian 9 and Ubuntu(from 14.04 at least) would need patching to:\n
-      file 1: /epics/ethercat-4-3/ethercatApp/scannerSrc/scanner.c
-      file 2: /epics/ethercat-4-3/ethercatApp/scannerSrc/parsetest.c" 12 78
+      file 1: /epics/ethercat-4-7/ethercatApp/scannerSrc/scanner.c
+      file 2: /epics/ethercat-4-7/ethercatApp/scannerSrc/parsetest.c" 12 78
       # call interactive scripts
+      source $ROOT/build_scripts/editing_interface.sh "/epics/ethercat-4-7/ethercatApp/scannerSrc/scanner.c" "README"
+      source $ROOT/build_scripts/editing_interface.sh "/epics/ethercat-4-7/ethercatApp/scannerSrc/parsetest.c" "README"
     fi
     update_build_configs "EPICS_ETHERCAT_SET" 'y'
-    update_build_configs "EPICS_ETHERCAT" "/epics/ethercat-4-3"
+    update_build_configs "EPICS_ETHERCAT" "/epics/ethercat-4-7"
   fi
 }
 
 init_install()
 {
   ### check if the user supplied a location for EPICS base ##
-  BASE_SET=$(cat $BUILD_ROOT/CONFIG | grep -e "BASE_SET" | cut -d "=" -f 2)
+  BASE_SET=$(cat $ROOT/CONFIG | grep -e "BASE_SET" | cut -d "=" -f 2)
   # step 1
   while [ $BASE_SET = "n" ]; do
     query_base
-    BASE_SET=$(cat $BUILD_ROOT/CONFIG | grep -e "BASE_SET" | cut -d "=" -f 2)
+    BASE_SET=$(cat $ROOT/CONFIG | grep -e "BASE_SET" | cut -d "=" -f 2)
   done
   # step 2
-  SUPPORT_SET=$(cat $BUILD_ROOT/CONFIG | grep -e "SUPPORT_SET" | cut -d "=" -f 2)
+  SUPPORT_SET=$(cat $ROOT/CONFIG | grep -e "SUPPORT_SET" | cut -d "=" -f 2)
   while [ $SUPPORT_SET = "n" ]; do
     query_support
-    SUPPORT_SET=$(cat $BUILD_ROOT/CONFIG | grep -e "SUPPORT_SET" | cut -d "=" -f 2)
+    SUPPORT_SET=$(cat $ROOT/CONFIG | grep -e "SUPPORT_SET" | cut -d "=" -f 2)
   done
   #step 3
-  DRIVERS_SET=$(cat $BUILD_ROOT/CONFIG | grep -e "DRIVERS_SET" | cut -d "=" -f 2)
-  while [ $DRIVERS_SET = "n" ]; do
+  HOME_SET=$(cat $ROOT/CONFIG | grep -e "HOME_SET" | cut -d "=" -f 2)
+  while [ $HOME_SET = "n" ]; do
     query_drivers
-    DRIVERS_SET=$(cat $BUILD_ROOT/CONFIG | grep -e "DRIVERS_SET" | cut -d "=" -f 2)
+    HOME_SET=$(cat $ROOT/CONFIG | grep -e "HOME_SET" | cut -d "=" -f 2)
   done
   #step 4
-  ETHERCAT_SET=$(cat $BUILD_ROOT/CONFIG | grep -e "ETHERCAT_SET" | cut -d "=" -f 2)
+  ETHERCAT_SET=$(cat $ROOT/CONFIG | grep -e "ETHERCAT_SET" | cut -d "=" -f 2)
   while [ $ETHERCAT_SET = "n" ]; do
     query_epics_ethercat
-    ETHERCAT_SET=$(cat $BUILD_ROOT/CONFIG | grep -e "ETHERCAT_SET" | cut -d "=" -f 2)
+    ETHERCAT_SET=$(cat $ROOT/CONFIG | grep -e "ETHERCAT_SET" | cut -d "=" -f 2)
   done
 }
 

@@ -26,7 +26,10 @@ printf '%b  Main Script %b\n' "$HEADING" "$DEF_OUT"
 	export HEADING="\033[32;1m" # greenoutput
 	export MESSAGE="\033[33;1m" # yellow output
 	export DEF_OUT="\033[0m"    # white output
-	export BUILD_ROOT=$(pwd)
+	# build directory
+	mkdir -p /home/$EPICSECAT_USER/training_builds
+	export BUILD_ROOT=/home/$EPICSECAT_USER/training_builds
+	export ROOT=$PWD
 	
 	## Execution start here
 	cd ./build_scripts
