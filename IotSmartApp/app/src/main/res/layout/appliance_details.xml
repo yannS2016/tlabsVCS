@@ -34,7 +34,8 @@
                 android:id="@+id/loadsChart"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:layout_toRightOf="@+id/athumbnail">
+                android:layout_toRightOf="@+id/athumbnail"
+                >
             </com.github.mikephil.charting.charts.PieChart>
             <TextView
                 android:id="@+id/aname"
@@ -71,8 +72,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="80dp"
                 android:layout_below="@+id/aname"
-                android:layout_marginLeft="50dp"
-                android:layout_marginTop="2dp"
+                android:layout_marginLeft="80dp"
+                android:layout_marginTop="10dp"
                 android:layout_toRightOf="@+id/astate"
                 android:orientation="horizontal">
 
@@ -80,13 +81,9 @@
                     android:id="@+id/priority_hint"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="@dimen/appliance_name_padding"
-                    android:paddingTop="38dp"
-                    android:layout_marginRight="@dimen/appliance_name_padding"
+                    android:layout_marginTop="34dp"
                     android:text="Scheduled priority: "
                     android:textColor="@android:color/black" />
-
-
 
                 <it.beppi.knoblibrary.Knob
                     android:id="@+id/priority"
@@ -105,11 +102,11 @@
                     app:kIndicatorWidth="0dp"
                     app:kKnobDrawable="@drawable/knob2"
                     app:kKnobDrawableRotates="true"
-                    app:kNumberOfStates="5"
+                    app:kNumberOfStates="3"
                     app:kSelectedStateMarkerColor="@color/transparent_500"
                     app:kShowBalloonValues="true"
-                    app:kSwipe="circular"
-                    android:layout_marginTop="4dp"/>
+                    android:layout_marginTop="5dp"
+                    app:kSwipe="circular"/>
 
             </LinearLayout>
 
@@ -119,8 +116,7 @@
                android:layout_below="@+id/holder"
                android:layout_margin="5dp"
                android:id="@+id/loadHistory">
-
-           </com.github.mikephil.charting.charts.LineChart>e
+           </com.github.mikephil.charting.charts.LineChart>
 
         </RelativeLayout>
 

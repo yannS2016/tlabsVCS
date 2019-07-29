@@ -13,13 +13,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -35,6 +35,9 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.example.iotsmartapp.R;
+import com.parse.FindCallback;
+import com.parse.GetCallback;
+import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.livequery.SubscriptionHandling;
@@ -89,7 +92,7 @@ public class LoadFragment extends Fragment {
         aname = (TextView)v.findViewById(R.id.aname);
         athumbnail.setImageResource(load.getThumbnail());
         aState.setChecked(load.getState());
-        float power = load.getPower() / 10000.0f;
+        float power = load.getPower() / 1000.0f;
         apower.setText("Power: " + power + " KW");
         aname.setText(load.getName());
         // listens to priority changed events
@@ -97,9 +100,43 @@ public class LoadFragment extends Fragment {
         apriority.setState(1, true);
         apriority.setOnStateChanged(new Knob.OnStateChanged() {
             @Override
-            public void onState(int i) {
+            public void onState(final int state) {
                 // update local object object
                 // update parse object: use cloud functions
+                Log.i(TAG, "Priority value " + state);
+                // Get appliances from parse
+                ParseQuery<ParseObject> loadQuery = ParseQuery.getQuery("Appliances");
+                loadQuery.whereEqualTo("applianceId", load.getApplianceId());
+                loadQuery.getFirstInBackground(new GetCallback<ParseObject>() {
+                    @Override
+                    public void done(ParseObject object, ParseException e) {
+                        if(e == null) {
+                            object.put("priority", state);
+                            object.saveInBackground();
+                        } else {
+                            Log.e("FindInBackground", e.toString());
+                        }
+                    }
+                });
+            }
+        });
+        aState.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, final boolean isChecked) {
+                // Get appliances from parse
+                ParseQuery<ParseObject> loadQuery = ParseQuery.getQuery("Appliances");
+                loadQuery.whereEqualTo("applianceId", load.getApplianceId());
+                loadQuery.getFirstInBackground(new GetCallback<ParseObject>() {
+                    @Override
+                    public void done(ParseObject object, ParseException e) {
+                        if(e == null) {
+                            object.put("state", isChecked);
+                            object.saveInBackground();
+                        } else {
+                            Log.e("FindInBackground", e.toString());
+                        }
+                    }
+                });
             }
         });
         // handle Pie chart of appliances consumption
@@ -129,7 +166,7 @@ public class LoadFragment extends Fragment {
             }
         });
         // enable description text
-        loadHistory.getDescription().setEnabled(true);
+        loadHistory.getDescription().setEnabled(false);
 
         // enable touch gestures
         loadHistory.setTouchEnabled(true);
@@ -144,13 +181,6 @@ public class LoadFragment extends Fragment {
         // set an alternative background color
         loadHistory.setBackgroundColor(Color.WHITE);
 
-        // get the legend (only possible after setting data)
-        Legend l = loadHistory.getLegend();
-
-        // modify the legend ...
-        l.setForm(Legend.LegendForm.LINE);
-        //l.setTypeface(tfLight);
-        l.setTextColor(Color.WHITE);
 
         XAxis xl = loadHistory.getXAxis();
         {
@@ -159,7 +189,7 @@ public class LoadFragment extends Fragment {
             xl.setTextColor(Color.WHITE);
             xl.setDrawGridLines(true);
             xl.setAvoidFirstLastClipping(true);
-            xl.setEnabled(false);
+            xl.setEnabled(true);
         }
         YAxis leftAxis = loadHistory.getAxisLeft();
         {
@@ -171,7 +201,7 @@ public class LoadFragment extends Fragment {
             // horizontal grid lines
             leftAxis.enableGridDashedLine(10f, 10f, 0f);
             leftAxis.setTextColor(Color.BLACK);
-            leftAxis.setAxisMaximum(100f);
+            leftAxis.setAxisMaximum(5f);
             leftAxis.setAxisMinimum(0f);
             leftAxis.setDrawGridLines(true);
         }
@@ -217,7 +247,7 @@ public class LoadFragment extends Fragment {
     }
     private LineDataSet createSet() {
 
-        LineDataSet set = new LineDataSet(null, "Dynamic Data");
+        LineDataSet set = new LineDataSet(null, load.getName() + " consumption");
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
         set.setColor(ColorTemplate.getHoloBlue());
 
@@ -269,7 +299,7 @@ public class LoadFragment extends Fragment {
         }
         Util.parseLiveQueryClient.unsubscribe(parseQuery);
         // stop history thread
-        Util.histRunning = false;
+        Util.LOADHISTORY = false;
         super.onPause();
     }
 
@@ -277,7 +307,7 @@ public class LoadFragment extends Fragment {
     public void onDestroy() {
         thread.interrupt();
         // stop history thread
-        Util.histRunning = false;
+        Util.LOADHISTORY = false;
         Log.i(TAG, "onDetroy: interrupting thread object");
         super.onDestroy();
     }
@@ -286,7 +316,7 @@ public class LoadFragment extends Fragment {
     public void onStart() {
         super.onStart();
         // stop history thread
-        Util.histRunning = true;
+        Util.LOADHISTORY = true;
         if (Util.parseLiveQueryClient != null) {
             parseQuery = new ParseQuery("Appliances");
             parseQuery.whereEqualTo("applianceId", load.getApplianceId());
@@ -313,8 +343,8 @@ public class LoadFragment extends Fragment {
                             int power = load.getInt("power");
                             String applianceId = load.getString("applianceId");
                             aState.setChecked(state);
-                            apower.setText("Power: " + load.getInt("power") / 10000.0f + " KW");
-                            loadPower = load.getInt("power") / 10000.0f;
+                            apower.setText("Power: " + load.getInt("power") / 1000.0f + " KW");
+                            loadPower = load.getInt("power") / 1000.0f;
 
                             /*for (int i = 0; i < appliances.size(); i++) {
                                 Appliance  appliance = appliances.get(i);
@@ -376,7 +406,7 @@ public class LoadFragment extends Fragment {
                     // Don't generate garbage runnables inside the loop.
 
                     Log.i(TAG, "Running load thread");
-                    if(!Util.histRunning) {
+                    if(!Util.LOADHISTORY) {
                         Log.i(TAG, "Exiting load thread");
                         return;
                     }
