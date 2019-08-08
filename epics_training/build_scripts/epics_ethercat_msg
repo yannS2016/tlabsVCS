@@ -1,3 +1,0 @@
-EPICS EtherCAT module from Diamond will be installed\n\nNote: DLS-ethercat is an EPICS support module to interface an Ethercat
-bus to EPICS. It uses a scanner process that serves as a server to communicate with EPICS iocs as clients info: 
-http://controls.diamond.ac.uk/downloads/support/ethercat/4-7/documentation\nPrerequisites: IgH EtherCAT Master for Linux

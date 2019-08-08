@@ -5,7 +5,7 @@ install_dependancies(){
   echo ----------------------------------------
   cd $BUILD_ROOT
   apt-get update
-  apt-get source  linux-image-$(uname -r)
+  #apt-get source  linux-image-$(uname -r)
   # ./configure fail: no linux source, it actually need haeder to be install( somehow the module.symvers is contained there)
   apt-get install linux-headers-$(uname -r) # module.symvers get build by installing the linux headers
 
@@ -25,7 +25,7 @@ install_dependancies(){
 install_ethercat_driver()
 {
   echo ------------------------------------------------------------------------------------------
-  printf '%b  Installing IgH EtherCAT Maste... %b\n' "$HEADING" "$DEF_OUT"
+  printf '%b  Installing IgH EtherCAT Master... %b\n' "$HEADING" "$DEF_OUT"
   printf '%b  NOTE: A realtime kernel must be installed on a machine before building RT-PREEMPTED driver %b\n' "$HEADING" "$DEF_OUT"
   echo -------------------------------------------------------------------------------------------
   sleep 4

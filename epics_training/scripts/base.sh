@@ -12,16 +12,16 @@ install_dependancies(){
 
 install_epics_base()
 {
-  	echo ----------------------------------------
-  	printf '%b  About to install EPICS base .. %b\n' "$HEADING" "$DEF_OUT"
-  	echo ----------------------------------------
-    sleep 4
-  	cd $1
-  	echo  "export EPICS_HOST_ARCH=linux-$(uname -m)" >>  /home/$EPICSECAT_USER/.bashrc
-  	make clean
-  	make -j4
-    printf "%bEPICS base installation completed%b\n" "$MESSAGE" "$DEF_OUT"
-  	sleep 4
+  echo ----------------------------------------
+  printf '%b  About to install EPICS base .. %b\n' "$HEADING" "$DEF_OUT"
+  echo ----------------------------------------
+  sleep 4
+  cd $1
+  echo  "export EPICS_HOST_ARCH=linux-$(uname -m)" >>  /home/$EPICSECAT_USER/.bashrc
+  make clean
+  make -j4
+  printf "%bEPICS base installation completed%b\n" "$MESSAGE" "$DEF_OUT"
+  sleep 4
 }
 
 get_epics_base()
@@ -30,9 +30,9 @@ get_epics_base()
   	printf '%b  Downloading and Preparing EPICS base .. %b\n' "$HEADING" "$DEF_OUT"
   	echo -----------------------------------------------
   	# create base <top>
-	sudo mkdir /epics
-	sudo chmod -R 777 /epics
-  	RELEASE=$(cat $BUILD_ROOT/CONFIG | grep -e "BASE_RELEASE=" | cut -d "=" -f 2)
+		#sudo mkdir /epics
+		sudo chmod -R 777 /epics
+  	RELEASE=$(cat $ROOT/CONFIG | grep -e "BASE_RELEASE=" | cut -d "=" -f 2)
   	cd  $BUILD_ROOT
   	case "$RELEASE" in
   		EPICS_7.0)
@@ -57,7 +57,7 @@ get_epics_base()
 			wget https://epics.anl.gov/download/base/baseR3.14.12.8.tar.gz
 			sleep 3
 			tar -xzvf baseR3.14.12.8.tar.gz
-			mv baseR3.14.12.8 base
+			mv base-3.14.12.8 base
 			;;
 		Release_3_13)
 			wget https://epics.anl.gov/download/base/baseR3.13.10.tar.gz
@@ -78,7 +78,7 @@ get_epics_base()
 			mv baseR3.12.2.patch7 base
 			;;
 		*)
-			whet https://epics.anl.gov/download/base/baseR3.14.12.8.tar.gz
+			wget https://epics.anl.gov/download/base/baseR3.14.12.8.tar.gz
 			sleep 3
 			tar -xzvf baseR3.14.12.8.tar.gz
 			mv baseR3.14.12.8 base

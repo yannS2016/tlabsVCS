@@ -1,0 +1,174 @@
+############################################################
+	EPICS Support Configurations 
+############################################################
+## Change line 1 to: 
+SUPPORT=/epics/support
+## Change line 2 to:
+EPICS_BASE=/epics/base
+
+## comment out all line from line 8 but these:
+
+ASYN=$(SUPPORT)/asyn-R4-33
+AUTOSAVE=$(SUPPORT)/autosave-R5-9
+BUSY=$(SUPPORT)/busy-R1-7
+CALC=$(SUPPORT)/calc-R3-7-1
+IPAC=$(SUPPORT)/ipac-2-15
+SSCAN=$(SUPPORT)/sscan-R2-11-1
+STD=$(SUPPORT)/std-R3-5
+STREAM=$(SUPPORT)/stream-R2-7-7c
+SNCSEQ=$(SUPPORT)/seq-2-2-5
+
+
+############################################################
+	EtherCAT Master configurations 
+############################################################
+
+##### First add device configuration in ethercat.conf ####
+   cd /epics/driver/ethercat/etherlabmaster-code/sysroot/etc
+   nano ethercat.conf
+
+### Step 1: Add your Network card MAC address for your Master ###
+## Change line 27 as to: 
+## Hint: use intel card for it is known to be stable and performs well.
+## Note: Find out about your network cards: run this in pane C: sudo lshw -class network
+MASTER0_DEVICE="YOUR NETWORK CARD MAC ADDRESS HERE"
+
+### Step 2: Specify what type of network driver EtherCAT Master will use ###
+### Note: if you build for generic drivers enter generic otherwise choose from the list below ###
+## change line 60 as below
+DEVICE_MODULES="my network module"
+## Save the file ethercat.conf: CTRL-x + y (for yes) ##
+
+#### Secondly  add device configuration in file ethercat #### 
+   cd driver/ethercat/etherlabmaster-code/sysroot/etc/sysconfig
+   nano ethercat
+### Step 1: Add your Network card MAC address for your Master ###
+## Change line 27 as to: 
+## Hint: use intel card for it is known to be stable and performs well.
+## Note: Find out about your network cards: run this in pane C: sudo lshw -class network
+MASTER0_DEVICE="YOUR NETWORK CARD MAC ADDRESS HERE"
+
+### Step 2: Specify what type of network driver EtherCAT Master will use ###
+### Note: if you build for generic drivers enter generic otherwise choose from the list below ###
+## change line 60 as below
+DEVICE_MODULES="my network module"
+## Save the file ethercat.conf: CTRL-x + y (for yes) ##
+
+### Create udev rules file
+# cd /etc/udev/rules.d
+# sudo gedit 99-EtherCAT.rules
+# Add to line 1:     KERNEL==\"EtherCAT[0-9]*\", MODE=\"0664\"
+
+# Copy some files
+sudo ln -s /epics/drivers/ethercat/etherlabmaster-code/sysroot/bin/ethercat /bin/ethercat
+sudo mkdir /etc/sysconfig/
+sudo ln -s /epics/drivers/ethercat/etherlabmaster-code/sysroot/etc/sysconfig/ethercat /etc/sysconfig/
+sudo cp /epics/drivers/ethercat/etherlabmaster-code/sysroot/lib/libethercat.* /usr/lib/
+
+######################################################
+#		Configuration for Diamond EPICS EtherCAT module 
+######################################################
+## Update python Script to your system python path ##
+
+### Step 1: Change line 1 in  /epics/ethercat-4-7/etc/scripts/expandChain.py to
+#!/usr/bin/python 
+
+### Step 2: Change line 1 in /epics/ethercat-4-7/etc/scripts/maketemplate.py to
+#!/usr/bin/python
+
+### Step 3: Change line 1 in /epics/ethercat-4-7/etc/scripts/diamond_types.py to
+#!/usr/bin/python
+
+###################################################
+#	   Update the system Makefiles as below 
+###################################################
+
+App Makefile: /epics/ethercat-4-7/ethercatApp/Makefile
+## Change line 8 to: 
+#DIRS := $(DIRS) $(filter-out $(DIRS), $(wildcard protocol))
+
+Scanner Makefile: /epics/ethercat-4-7/scannerSrc" 10 74	 
+## Change line 12 to:
+#VERSION=1-5-2dls5
+
+## Change line 13 to:
+ETHERLAB=/epics/drivers/ethercat/etherlabmaster-code
+
+## Change line 14 to:
+ETHERLABPREFIX=$(ETHERLAB)
+
+## Change line 30 to
+scanner_INCLUDES += -I/epics/drivers/ethercat/etherlabmaster-code/lib
+
+## Change line 37 to:
+serialtool_INCLUDES += -I/epics/drivers/ethercat/etherlabmaster-code/master
+
+## Change line 40 to:
+get-slave-revisions_INCLUDES += -I/epics/drivers/ethercat/etherlabmaster-code/master
+
+src Makefile: ethercat-4-7/ethercatApp/src/Makefile
+
+## change line 10:
+#VERSION=1-5-2dls7
+
+## change line 11 to:
+ETHERLAB=/epics/drivers/ethercat/etherlabmaster-code
+
+## change line 15 to:
+ecAsyn_INCLUDES += -I$(ETHERLAB)/include
+
+## change line 16:
+gadc_INCLUDES += -I$(ETHERLAB)/include
+
+etc Makefile: ethercat-4-7/etc/Makefile
+## change line 3 to: 
+#DIRS := $(DIRS) makeDocumentation
+
+############################################################## 
+#									Update Module configure/RELEASE 
+##############################################################
+## change line 3:
+SUPPORT = /epics/support
+## change line 4:
+ASYN=$(SUPPORT)/asyn-R4-33
+
+## change line 5:
+BUSY=$(SUPPORT)/busy/busy-R1-7
+
+## change line 8 to:
+EPICS_BASE=/epics/base
+
+################################################################################
+#												Update Scanner sources
+# Note: this is only required on Debian 9 
+################################################################################
+Source file: /epics/ethercat-4-7/ethercatApp/scannerSrc/scanner.c
+## Steps
+# replace all instance of FALSE to false 
+# replace all instance of TRUE to true
+# Press Ctrl+\: type the FALSE press Enter;
+# key in  the replacement string; press Enter;
+# press shift+ a ( for all instance replacement)
+repeat the steps above for the next file
+Source file: /epics/ethercat-4-7/ethercatApp/scannerSrc/parsertest.c
+
+
+IMPORTANT: WHEN DONE CONFIGURING BOTH FILES, NAVIGATE TO PANE C
+# close the file: CTRL-x + n(no changes must be save) 
+# enter: exit, this will take you to pane A
+# enter: exit, this will take you to pane B
+#enter : exit, this will close the tmux context
+
+### Navigation under tmux ###
+
+# ---------------------------------------------------------
+#|	   pane A		|       pane B		   |
+#|  Edit your conf files here	| Help is display here     |
+#|  CTRL-b + right --> pane B	| CTRL-b + left --> pane A |
+#|  CTRL-b + down --> pane C	| CTRL-b + down --> pane C |
+#----------------------------------------------------------
+#|	                     Pane C                        |
+#|			Navigation info			   |
+#|               CTRL-B + arrow up --> pane A		   |
+# ---------------------------------------------------------
+

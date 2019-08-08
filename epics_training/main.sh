@@ -30,9 +30,10 @@ printf '%b  Main Script %b\n' "$HEADING" "$DEF_OUT"
 	mkdir -p /home/$EPICSECAT_USER/training_builds
 	export BUILD_ROOT=/home/$EPICSECAT_USER/training_builds
 	export ROOT=$PWD
+	export BUILD_SCRIPTS=$ROOT/scripts
 	
 	## Execution start here
-	cd ./build_scripts
+	cd $BUILD_SCRIPTS
 	source welcome.sh
 	exitstatus=$?
 	if [ $exitstatus = 0 ]; then

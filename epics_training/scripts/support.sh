@@ -6,9 +6,9 @@ install_support()
   	echo --------------------------------------------
     sleep 4
   	cd $1
-  	#make release
-  	#make clean
-  	#make -j4
+  	make release
+  	make clean
+  	make -j4
     printf "%bEPICS support installation completed%b\n" "$MESSAGE" "$DEF_OUT"
   	sleep 4
   	echo "export EPICS_HOST_ARCH=linux-$(uname -m)
@@ -17,7 +17,7 @@ export EPICS_BASE=/epics/base
 export EPICS_BASE_LIB=/epics/base/lib/linux-$(uname -m)
 export EPICS_BASE_BIN=/epics/base/bin/linux-$(uname -m)
 
-if [ "" = "\$LD_LIBRARY_PATH" ]; then
+if [ -z "\$LD_LIBRARY_PATH" ]; then
     export LD_LIBRARY_PATH=\$EPICS_BASE_LIB
 else
         export LD_LIBRARY_PATH=\$EPICS_BASE_LIB:\$LD_LIBRARY_PATH
@@ -33,9 +33,9 @@ get_support()
   echo -----------------------------------------------
   # create base <top>
   cd  $BUILD_ROOT
-	#wget https://epics.anl.gov/bcda/synApps/tar/synApps_6_0.tar.gz
-	#tar -xzvf synApps_6_0.tar.gz
-	#mv synApps/support /epics	
+	wget https://epics.anl.gov/bcda/synApps/tar/synApps_6_0.tar.gz
+	tar -xzvf synApps_6_0.tar.gz
+	mv synApps/support /epics	
 	sudo chmod -R 777 /epics
 }
 
@@ -46,13 +46,15 @@ configure_support()
   	echo -----------------------------------------------
   	# two arguments:
   	# $1: path to file to edit
-  	# $2: README file
-  	cd  $ROOT/build_scripts
-  	source editing_interface.sh "$SUPPORT/configure/RELEASE" "../README"
+  	# $2: README.md file
+  	cd $BUILD_SCRIPTS
+  	source editing_interface.sh "$SUPPORT/configure/RELEASE" "../README.md"
 }
 export SUPPORT="$2"
 if [[ $1 = "y" ]]; then
+	configure_support
 	install_support "$SUPPORT" 
+	sleep 5
 else
 	get_support
 	sleep 5

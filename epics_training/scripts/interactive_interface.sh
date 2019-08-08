@@ -21,7 +21,7 @@ query_base()
   		  update_build_configs "EPICS_BASE" "$EPICS_BASE"
         update_build_configs "EPICS_BASE_RELEASE_SET" "y"
         update_build_configs "EPICS_BASE_RELEASE" "$(cat /epics/base/configure/$ROOT/CONFIG_BASE_VERSION | grep YES | cut -d "=" -f 1 | sed 's/BASE/Release/')"
-        ./base.sh "y" "$EPICS_BASE"
+        source $BUILD_SCRIPTS/base.sh "y" "$EPICS_BASE"
       else
           echo "User selected Cancel."
       fi
@@ -52,7 +52,7 @@ query_base()
       exit
     fi
     whiptail --title "EPICS BASE RELEASE" --msgbox "EPICS base $RELEASE will be installed. press Ok to continue." 8 78    
-    source ./base.sh "n" "/epics/base"
+    source $BUILD_SCRIPTS/base.sh "n" "/epics/base"
   fi
 }
 
@@ -83,15 +83,15 @@ query_support(){
       done
       update_build_configs "EPICS_SUPPORT_SET" 'y'
       update_build_configs "EPICS_SUPPORT" "$EPICS_SUPPORT" 
-      source ./support.sh "y" "$EPICS_SUPPORT"
+      source $BUILD_SCRIPTS/support.sh "y" "$EPICS_SUPPORT"
     fi
   else
     echo "EPICS support from synapps will be installed\n\nNote: synApps is a collection of EPICS software intended to support
       most of the common requirements of an x-ray laboratory or 
       synchrotron-radiation beamline. Because it is EPICS software, 
       synApps is extensible by developers and end users, to support 
-      new devices and experimental techniques\n\nModule needed: asyn, autosave, stream, CALC, std, seq.\n\n#info: https://www.aps.anl.gov/BCDA/synApps\n#info: https://epics.anl.gov/bcda/synApps/synApps.html" > synapps_msg
-    whiptail --textbox  synapps_msg 18 78
+      new devices and experimental techniques\n\nModule needed: asyn, autosave, stream, CALC, std, seq.\n\n#info: https://www.aps.anl.gov/BCDA/synApps\n#info: https://epics.anl.gov/bcda/synApps/synApps.html" > $BUILD_ROOT/synapps_msg
+    whiptail --textbox  $BUILD_ROOT/synapps_msg 18 78
     if [[ $exitstatus = 0 ]]; then
       update_build_configs "EPICS_SUPPORT_SET" 'y'
       update_build_configs "EPICS_SUPPORT" "/epics/support" 
@@ -101,9 +101,9 @@ query_support(){
       # step 3: build support
       #source ./editing_interface.sh
       # display enviroment variable.
-      source ./support.sh "n" "/epics/support"
-      whiptail --title "EPICS enviroment" --msgbox "EPICS Support has been Installed under "/epics/support"
-your enviroment has been update as below:
+      source $BUILD_SCRIPTS/support.sh "n" "/epics/support"
+      whiptail --title "EPICS environment" --msgbox "EPICS Support has been Installed under "/epics/support"
+your environment has been update as below:
       $(tail -n 15 /home/$EPICSECAT_USER/.bashrc)" 22 78
     fi
   fi
@@ -135,7 +135,7 @@ query_drivers(){
       	update_build_configs "NETWORK_DRIVERS" "$DRIVERS" 
       	INSTALLED="y"
       	# call install script
-      	source $ROOT/build_scripts/drivers.sh "$INSTALLED" "$ETHERCAT_HOME" "$DRIVERS"
+      	source $BUILD_SCRIPTS/drivers.sh "$INSTALLED" "$ETHERCAT_HOME" "$DRIVERS"
       	sleep 4
     	fi
   	else 
@@ -180,7 +180,7 @@ query_drivers(){
         		fi  
       		fi
       		# call install script
-      		source $ROOT/build_scripts/drivers.sh "$INSTALLED" "$ETHERCAT_HOME" "$DRIVERS"
+      		source $BUILD_SCRIPTS/drivers.sh "$INSTALLED" "$ETHERCAT_HOME" "$DRIVERS"
       		sleep 4
       		whiptail \
       		--title "Master Module configuration" \
@@ -190,12 +190,11 @@ query_drivers(){
       			3) Add EtherCAT Master startup script to /etc/init.d
       			4) Add EtherCAT Master configs to /etc/sysconfig
       			5) Add EtherCAT Master Libraries to /usr/lib" 12 80
-      		source $ROOT/build_scripts/editing_interface.sh "/etc/udev/rules.d/99-EtherCAT.rules" "README"
+      		source $BUILD_SCRIPTS/editing_interface.sh "/etc/udev/rules.d/99-EtherCAT.rules" "$ROOT/README.md"
     	fi
-		depmod
-  		printf '%bYou have successfully installed Epics and ethercat in your system%b\n' "$HEADING" "$DEF_OUT"
-  		printf '%bRun this command to get started : sudo /bin/ethercat help%b\n' "$HEADING" "$DEF_OUT"
-  		printf '%bRun any of this to start, stop, or get the status of the master: sudo /etc/init.d/ethercat [start|stop|status]%b\n' "$HEADING" "$DEF_OUT"
+			update-rc.d ethercat defaults			
+			depmod	
+			whiptail --title "Igh EtherCAT Master Installation Completed" --msgbox "You have successfully installed IgH EtherCAT Master\nRun this command to get started : sudo /bin/ethercat help\nRun  the following to control your master module sudo /etc/init.d/ethercat [start|stop|status]" 12 100
   		sleep  5
   	fi
 }
@@ -219,11 +218,18 @@ query_epics_ethercat(){
       update_build_configs "EPICS_ETHERCAT_SET" 'y'
       update_build_configs "EPICS_ETHERCAT" "$EPICS_ETHERCAT" 
     fi
+    echo -----------------------------------------------------------------------------
+		printf '%b  Installing Diamond EPICS EtherCAT Master... %b\n' "$HEADING" "$DEF_OUT"
+		echo -----------------------------------------------------------------------------
+		cd $EPICS_ETHERCAT
+		make clean
+		make
+		sleep 4		
   else
     echo "EPICS EtherCAT module from Diamond will be installed\n\nNote: DLS-ethercat is an EPICS support module to interface an Ethercat
 bus to EPICS. It uses a scanner process that serves as a server to communicate with EPICS iocs as clients info: 
-http://controls.diamond.ac.uk/downloads/support/ethercat/4-7/documentation\nPrerequisites: IgH EtherCAT Master for Linux" > epics_ethercat_msg
-    whiptail --textbox  epics_ethercat_msg 12 80
+http://controls.diamond.ac.uk/downloads/support/ethercat/4-7/documentation\nPrerequisites: IgH EtherCAT Master for Linux" > $BUILD_ROOT/epics_ethercat_msg
+    whiptail --textbox  $BUILD_ROOT/epics_ethercat_msg 12 80
     exitstatus=$?
     if [[ $exitstatus = 0 ]]; then
       whiptail --title "Beckhoff xml files" --msgbox "EtherCAT-EPICS modules require device configuration xml files.\n
@@ -234,38 +240,46 @@ These will be downloaded and install under /epics/ethercat-4-7/etc/xml Hint:\nwg
     if [[ $exitstatus = 0 ]]; then
       # Get Diamond EtherCAT EPICS modules
       # Get Beckhoff xml
-      source $ROOT/build_scripts/ethercat_epics.sh
+      source $BUILD_SCRIPTS/ethercat_epics.sh
 
-      whiptail --title "update config scripts" --msgbox "EPICS-EtherCAT module  expand device xml as well create device tempalte for EPICS databases via a collection of python scripts under /epics/ethercat-4-7/scripts
+      whiptail --title "update config scripts" --msgbox "Diamond EPICS EtherCAT module expand device xml as well create device tempalte for EPICS databases via a collection of python scripts under /epics/ethercat-4-7/scripts
 you are require to update those scripts with your python installation details.\nyour system python binary is at: $(which python)
-file 1: /epics/ethercat-4-7/etc/scripts/expandChain.py
-file 2: /epics/ethercat-4-7/etc/scripts/maketemplate.py" 12 90
+Script 1: /epics/ethercat-4-7/etc/scripts/expandChain.py
+Script 2: /epics/ethercat-4-7/etc/scripts/maketemplate.py
+Script 3: /epics/ethercat-4-7/etc/scripts/diamond_types.py" 12 90
       # call interactive scripts
-      source $ROOT/build_scripts/editing_interface.sh "/epics/ethercat-4-7/etc/scripts/expandChain.py" "README"
-      source $ROOT/build_scripts/editing_interface.sh "/epics/ethercat-4-7/etc/scripts/maketemplate.py" "README"
+      source $BUILD_SCRIPTS/editing_interface.sh "/epics/ethercat-4-7/etc/scripts/expandChain.py" "$ROOT/README.md"
     fi 
     exitstatus=$?
     if [[ $exitstatus = 0 ]]; then
-      whiptail --title "update build Makefiles" --msgbox "The build Makefiles need to be updated under as follow
-      TOP Makefile:     /epics/ethercat-4-7
-      App Makefile:     /epics/ethercat-4-7
-      Scanner Makefile: /epics/ethercat-4-7/scannerSrc" 10 74
+      whiptail --title "update build files" --msgbox "The build files need to be updated under as follow\n
+      RELEASE Makefile: /epics/ethercat-4-7/configure/
+			App Makefile:     /epics/ethercat-4-7/ethercatApp
+      Scanner Makefile: /epics/ethercat-4-7/scannerSrc
+			Src Makefile:     /epics/ethercat-4-7/ethercatApp/src
+			etc Makefile:     /epics/ethercat-4-7/etc" 14 74
+			
       # call interactive scripts
-      source $ROOT/build_scripts/editing_interface.sh "/epics/ethercat-4-7/Makefile" "README"
-      source $ROOT/build_scripts/editing_interface.sh "/epics/ethercat-4-7/ethercatApp/Makefile" "README"
-      source $ROOT/build_scripts/editing_interface.sh "/epics/ethercat-4-7/scannerSrc/Makefile" "README"
+      source $BUILD_SCRIPTS/editing_interface.sh "/epics/ethercat-4-7/configure/RELEASE" "$ROOT/README.md"
     fi
     exitstatus=$?
     if [[ $exitstatus = 0 ]]; then
       whiptail --title "Patching Sources" --msgbox "EtherCAT-4-7 sources need patching depending on system arch architecture
       Debian 8 user should not require any patching.
       Debian 9 and Ubuntu(from 14.04 at least) would need patching to:\n
-      file 1: /epics/ethercat-4-7/ethercatApp/scannerSrc/scanner.c
-      file 2: /epics/ethercat-4-7/ethercatApp/scannerSrc/parsetest.c" 12 78
+      Source file: /epics/ethercat-4-7/ethercatApp/scannerSrc/scanner.c
+      Source file: /epics/ethercat-4-7/ethercatApp/scannerSrc/parsertest.c" 12 78
       # call interactive scripts
-      source $ROOT/build_scripts/editing_interface.sh "/epics/ethercat-4-7/ethercatApp/scannerSrc/scanner.c" "README"
-      source $ROOT/build_scripts/editing_interface.sh "/epics/ethercat-4-7/ethercatApp/scannerSrc/parsetest.c" "README"
-    fi
+      source $BUILD_SCRIPTS/editing_interface.sh "/epics/ethercat-4-7/ethercatApp/scannerSrc/scanner.c" "$ROOT/README.md"
+      source $BUILD_SCRIPTS/editing_interface.sh "/epics/ethercat-4-7/ethercatApp/scannerSrc/parsertest.c" "$ROOT/README.md"
+			echo -----------------------------------------------------------------------------
+			printf '%b  Installing Diamond EPICS EtherCAT Master... %b\n' "$HEADING" "$DEF_OUT"
+			echo -----------------------------------------------------------------------------
+			cd /epics/ethercat-4-7
+			make clean
+			make
+			sleep 4	
+		fi
     update_build_configs "EPICS_ETHERCAT_SET" 'y'
     update_build_configs "EPICS_ETHERCAT" "/epics/ethercat-4-7"
   fi
